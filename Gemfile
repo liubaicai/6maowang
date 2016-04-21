@@ -11,7 +11,7 @@ gem 'activerecord', :require => 'active_record'
 gem 'dalli', :require => 'active_support/cache/dalli_store'
 gem 'kgio'
 gem "second_level_cache"
-gem 'sqlite3'
+gem 'pg'
 
 gem 'rake'
 # gem 'pony'   # pony must be after activerecord
