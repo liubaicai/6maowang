@@ -1,6 +1,11 @@
+configure do
+  set :show_exceptions, development?
+  set :raise_errors,    development?
+  set :static,          true
+end
+
 configure :development do
  set :database, 'sqlite:///dev.db'
- set :show_exceptions, true
 end
 
 configure :production do
