@@ -41,6 +41,10 @@ helpers do
   alias_method :h, :escape_html
 end
 
+error do
+  halt 500,env['sinatra.error'].message
+end
+
 # get ALL posts
 get "/" do
   @posts = Post.order("created_at DESC")
