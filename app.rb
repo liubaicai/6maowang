@@ -17,11 +17,11 @@ end
 
 class SiteConfig < ActiveRecord::Base
   def self.login kkk
-    sconfig = SiteConfig.where(:ckey => 'admin_password',:cvalue => kkk).first
+    sconfig = SiteConfig.where(:ckey => "admin_password",:cvalue => kkk).first
     if sconfig.nil?
-      return false
+      return kkk
     else
-      return true
+      return 'true'
     end
   end
 end
@@ -76,7 +76,7 @@ end
 
 get "/posts*" do
   pwd = session['admin_password'].inspect
-  SiteConfig.login(pwd).to_s
+  SiteConfig.login(pwd)
   # if SiteConfig.login(pwd)
   #   pass
   # else
