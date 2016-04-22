@@ -16,7 +16,14 @@ class Post < ActiveRecord::Base
 end
 
 class AppConfig < ActiveRecord::Base
-
+  def self.get kkk
+    config = Config.where(:ckey => kkk)
+    if config.nil?
+      return nil
+    else
+      return config.cvalue
+    end
+  end
 end
 
 helpers do
@@ -24,7 +31,7 @@ helpers do
     if @title
       "#{@title}"
     else
-      "welcome."
+      "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
     end
   end
 end
@@ -37,7 +44,7 @@ end
 # get ALL posts
 get "/" do
   @posts = Post.order("created_at DESC")
-  @title = "welcome."
+  @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
   erb :"posts/index"
 end
 
@@ -49,30 +56,30 @@ get "/posts/:id" do
 end
 
 # check user
-# get "/*" do
-#   begin 
-#   pwd = request.cookies['admin_password']
-#   if Config.get('admin_password') == pwd
-#     pass
-#   else
-#     halt 401.1
-#   end
-#   rescue Exception => e 
-#     e.to_s
-#   end
-# end
-# post "/*" do
-#   begin 
-#   pwd = request.cookies['admin_password']
-#   if Config.get('admin_password') == pwd
-#     pass
-#   else
-#     halt 401.1
-#   end
-#   rescue Exception => e 
-#     e.to_s
-#   end
-# end
+get "/*" do
+  begin 
+    pwd = request.cookies['admin_password']
+    if AppConfig.get('admin_password') == pwd
+      pass
+    else
+      halt 401.1
+    end
+  rescue Exception => e 
+    e.to_s
+  end
+end
+post "/*" do
+  begin 
+    pwd = request.cookies['admin_password']
+    if AppConfig.get('admin_password') == pwd
+      pass
+    else
+      halt 401.1
+    end
+  rescue Exception => e 
+    e.to_s
+  end
+end
 
 # create new post
 get "/posts/create" do
