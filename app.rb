@@ -63,16 +63,18 @@ get "/users/login" do
 end
 post "/users/login" do
 	password = params[:password]
-  if SiteConfig.password == password
-		session['admin_password'] = password
-    redirect to('/')
-	else
-    redirect to('/users/login')
-	end
+  SiteConfig.password+","+password
+  # if SiteConfig.password == password
+	# 	session['admin_password'] = password
+  #   redirect to('/')
+	# else
+  #   redirect to('/users/login')
+	# end
 end
 
 get "/posts*" do
   pwd = session['admin_password']
+  SiteConfig.password+","+password
   if pwd == SiteConfig.password
     pass
   else
