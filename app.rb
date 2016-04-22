@@ -1,3 +1,4 @@
+#encoding : UTF-8
 # app.rb
 
 require 'sinatra'
