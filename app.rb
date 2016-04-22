@@ -85,7 +85,7 @@ get "/posts*" do
   if SiteConfig.login(pwd)
     pass
   else
-    redirect to('/login')
+    redirect to('/users/login')
   end
 end
 post "/posts*" do
@@ -93,7 +93,7 @@ post "/posts*" do
   if SiteConfig.login(pwd)
     pass
   else
-    redirect to('/login')
+    redirect to('/users/login')
   end
 end
 
