@@ -76,11 +76,12 @@ end
 
 get "/posts*" do
   pwd = session['admin_password'].inspect
-  if SiteConfig.login(pwd)
-    pass
-  else
-    redirect to('/users/login')
-  end
+  SiteConfig.login(pwd)
+  # if SiteConfig.login(pwd)
+  #   pass
+  # else
+  #   redirect to('/users/login')
+  # end
 end
 post "/posts*" do
   pwd = session['admin_password'].inspect
