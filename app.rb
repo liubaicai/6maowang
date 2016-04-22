@@ -26,7 +26,7 @@ class SiteConfig < ActiveRecord::Base
       return false
     end
   end
-  def self.password kkk
+  def self.password
     sconfig = SiteConfig.where(:ckey => 'admin_password').first
     return sconfig.cvalue
   end
