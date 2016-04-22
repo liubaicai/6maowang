@@ -31,7 +31,7 @@ helpers do
     if @title
       "#{@title}"
     else
-      "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
+      "welcome."
     end
   end
 end
@@ -44,7 +44,7 @@ end
 # get ALL posts
 get "/" do
   @posts = Post.order("created_at DESC")
-  @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
+  @title = "welcome."
   erb :"posts/index"
 end
 
@@ -62,7 +62,7 @@ get "/*" do
   if Config.get('admin_password') == pwd
     pass
   else
-    halt 401.1, '未授权'
+    halt 401.1
   end
   rescue Exception => e 
     e.to_s
@@ -74,7 +74,7 @@ post "/*" do
   if Config.get('admin_password') == pwd
     pass
   else
-    halt 401.1, '未授权'
+    halt 401.1
   end
   rescue Exception => e 
     e.to_s
