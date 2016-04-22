@@ -56,25 +56,25 @@ get "/posts/:id" do
 end
 
 # check user
-get "/posts*" do
+get "/*" do
   begin 
   pwd = request.cookies['admin_password']
   if Config.get('admin_password') == pwd
     pass
   else
-    halt 401.1 '未授权'
+    halt 401.1, '未授权'
   end
   rescue Exception => e 
     e.to_s
   end
 end
-post "/posts*" do
+post "/*" do
   begin 
   pwd = request.cookies['admin_password']
   if Config.get('admin_password') == pwd
     pass
   else
-    halt 401.1 '未授权'
+    halt 401.1, '未授权'
   end
   rescue Exception => e 
     e.to_s
