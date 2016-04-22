@@ -73,7 +73,7 @@ end
 
 get "/posts*" do
   pwd = session['admin_password']
-  if pwd == password
+  if pwd == SiteConfig.password
     pass
   else
     redirect to('/users/login')
@@ -81,7 +81,7 @@ get "/posts*" do
 end
 post "/posts*" do
   pwd = session['admin_password']
-  if pwd == password
+  if pwd == SiteConfig.password
     pass
   else
     redirect to('/users/login')
