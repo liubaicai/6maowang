@@ -76,7 +76,7 @@ end
 
 get "/posts*" do
   pwd = session['admin_password'].inspect
-  SiteConfig.login(pwd)
+  SiteConfig.login(pwd).to_s
   # if SiteConfig.login(pwd)
   #   pass
   # else
