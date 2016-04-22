@@ -17,18 +17,16 @@ end
 
 class SiteConfig < ActiveRecord::Base
   def self.login kkk
-    sconfig = SiteConfig.where(:ckey => 'admin_password').first
+    sconfig = SiteConfig.where(:ckey => 'admin_password',:cvalue => kkk).first
     if sconfig.nil?
       return false
-    elsif sconfig.cvalue.to_s == kkk
-      return true
     else
-      return false
+      return true
     end
   end
   def self.password
     sconfig = SiteConfig.where(:ckey => 'admin_password').first
-    return sconfig.cvalue.to_s
+    return sconfig.cvalue
   end
 end
 
