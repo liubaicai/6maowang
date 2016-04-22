@@ -17,7 +17,7 @@ end
 
 class SiteConfig < ActiveRecord::Base
 
-  def self.password
+  def self.get_password
     SiteConfig.where(:ckey => "admin_password").first
   end
   
@@ -63,7 +63,7 @@ get "/users/login" do
 end
 post "/users/login" do
 	password = params[:password]
-  SiteConfig.password+","+password
+  SiteConfig.get_password+","+password
   # if SiteConfig.password == password
 	# 	session['admin_password'] = password
   #   redirect to('/')
