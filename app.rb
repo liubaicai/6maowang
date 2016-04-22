@@ -7,7 +7,7 @@ require 'sinatra/flash'
 require 'sinatra/redirect_with_flash'
 require 'sinatra/captcha'
 
-enable :sessions
+use Rack::Session::Pool, :expire_after => 2592000
 
 
 class Post < ActiveRecord::Base
