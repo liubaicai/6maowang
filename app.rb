@@ -18,7 +18,7 @@ end
 class SiteConfig < ActiveRecord::Base
 
   def self.get_password
-    SiteConfig.where(:ckey => "admin_password").first
+    SiteConfig.find(:ckey => "admin_password").first.cvalue
   end
   
 end
