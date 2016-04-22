@@ -17,10 +17,10 @@ end
 
 class SiteConfig < ActiveRecord::Base
   def self.login kkk
-    config = SiteConfig.where(:ckey => 'admin_password')
-    if config.nil?
+    sconfig = SiteConfig.where(:ckey => 'admin_password')
+    if sconfig.nil?
       return false
-    elsif config.cvalue == kkk
+    elsif sconfig.cvalue == kkk
       return true
     else
       return false
