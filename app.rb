@@ -1,5 +1,4 @@
 #encoding : UTF-8
-# app.rb
 
 require 'sinatra'
 require 'sinatra/activerecord'
@@ -57,20 +56,28 @@ get "/posts/:id" do
 end
 
 # check user
-get "/*" do
+get "/posts*" do
+  begin 
   pwd = request.cookies['admin_password']
   if Config.get('admin_password') == pwd
     pass
   else
     halt 401.1 '未授权'
   end
+  rescue Exception => e 
+    e.to_s
+  end
 end
-post "/*" do
+post "/posts*" do
+  begin 
   pwd = request.cookies['admin_password']
   if Config.get('admin_password') == pwd
     pass
   else
     halt 401.1 '未授权'
+  end
+  rescue Exception => e 
+    e.to_s
   end
 end
 
