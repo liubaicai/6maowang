@@ -15,12 +15,23 @@ class Post < ActiveRecord::Base
   validates :body, presence: true
 end
 
+class Config < ActiveRecord::Base
+  def self.get kkk
+    config = Config.where(:ckey => kkk)
+    if config.nil?
+      return nil
+    else
+      return config.cvalue
+    end
+  end
+end
+
 helpers do
   def title
     if @title
       "#{@title}"
     else
-      "Welcome."
+      "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
     end
   end
 end
@@ -33,8 +44,32 @@ end
 # get ALL posts
 get "/" do
   @posts = Post.order("created_at DESC")
-  @title = "Welcome."
   erb :"posts/index"
+end
+
+# view post
+get "/posts/:id" do
+  @post = Post.find(params[:id])
+  @title = @post.title
+  erb :"posts/view"
+end
+
+# check user
+get "/*" do
+  pwd = request.cookies['admin_password']
+  if Config.get(admin_password) == pwd
+    pass
+  else
+    halt 401.1 '未授权'
+  end
+end
+post "/*" do
+  pwd = request.cookies['admin_password']
+  if Config.get(admin_password) == pwd
+    pass
+  else
+    halt 401.1 '未授权'
+  end
 end
 
 # create new post
@@ -51,13 +86,6 @@ post "/posts" do
   else
     redirect "posts/create", :error => 'Something went wrong. Try again. (This message will disappear in 4 seconds.)'
   end
-end
-
-# view post
-get "/posts/:id" do
-  @post = Post.find(params[:id])
-  @title = @post.title
-  erb :"posts/view"
 end
 
 # edit post
