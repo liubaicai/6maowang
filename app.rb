@@ -17,7 +17,7 @@ end
 
 class SiteConfig < ActiveRecord::Base
   def self.login kkk
-    sconfig = SiteConfig.where(:ckey => "admin_password",:cvalue => kkk).first
+    sconfig = where(ckey : "admin_password",cvalue : kkk).first
     if sconfig.nil?
       return kkk
     else
