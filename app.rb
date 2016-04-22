@@ -16,12 +16,14 @@ class Post < ActiveRecord::Base
 end
 
 class AppConfig < ActiveRecord::Base
-  def self.get kkk
-    config = Config.where(:ckey => kkk)
+  def self.login kkk
+    config = Config.where(:ckey => 'admin_password')
     if config.nil?
-      return nil
+      return false
+    elsif config.cvalue == kkk
+      return true
     else
-      return config.cvalue
+      return false
     end
   end
 end
@@ -61,27 +63,19 @@ end
 
 # check user
 get "/*" do
-  begin 
-    pwd = request.cookies['admin_password']
-    unless pwd.nil? || AppConfig.get('admin_password') != pwd
-      pass
-    else
-      halt 401.1
-    end
-  rescue Exception => e 
-    e.to_s
+  pwd = request.cookies['admin_password']
+  if AppConfig.login(pwd)
+    pass
+  else
+    halt 401.1
   end
 end
 post "/*" do
-  begin 
-    pwd = request.cookies['admin_password']
-    unless pwd.nil? || AppConfig.get('admin_password') != pwd
-      pass
-    else
-      halt 401.1
-    end
-  rescue Exception => e 
-    e.to_s
+  pwd = request.cookies['admin_password']
+  if AppConfig.login(pwd)
+    pass
+  else
+    halt 401.1
   end
 end
 
