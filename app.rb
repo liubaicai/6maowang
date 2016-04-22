@@ -15,7 +15,7 @@ class Post < ActiveRecord::Base
   validates :body, presence: true
 end
 
-class Config < ActiveRecord::Base
+class AppConfig < ActiveRecord::Base
   self.table_name = "configs"
 end
 
