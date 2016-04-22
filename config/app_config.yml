@@ -1,8 +1,0 @@
-development: &default
-  sinatra: 'sinatra boiler plate'
-  
-test: 
-  <<: *default
-
-production:
-  <<: *default
