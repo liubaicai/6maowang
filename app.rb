@@ -20,7 +20,7 @@ class SiteConfig < ActiveRecord::Base
     sconfig = SiteConfig.where(:ckey => 'admin_password').first
     if sconfig.nil?
       return false
-    elsif sconfig.cvalue == kkk
+    elsif sconfig.cvalue.to_s == kkk
       return true
     else
       return false
@@ -28,7 +28,7 @@ class SiteConfig < ActiveRecord::Base
   end
   def self.password
     sconfig = SiteConfig.where(:ckey => 'admin_password').first
-    return sconfig.cvalue
+    return sconfig.cvalue.to_s
   end
 end
 
@@ -53,10 +53,9 @@ end
 
 # get ALL posts
 get "/" do
-  SiteConfig.password
-  # @posts = Post.order("created_at DESC")
-  # @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
-  # erb :"posts/index"
+  @posts = Post.order("created_at DESC")
+  @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
+  erb :"posts/index"
 end
 
 # view post
