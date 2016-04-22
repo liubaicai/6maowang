@@ -53,9 +53,10 @@ end
 
 # get ALL posts
 get "/" do
-  @posts = Post.order("created_at DESC")
-  @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
-  erb :"posts/index"
+  SiteConfig.password
+  # @posts = Post.order("created_at DESC")
+  # @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
+  # erb :"posts/index"
 end
 
 # view post
@@ -82,12 +83,11 @@ end
 
 get "/posts*" do
   pwd = session['admin_password'].inspect
-  pwd
-  # if SiteConfig.login(pwd)
-  #   pass
-  # else
-  #   redirect to('/users/login')
-  # end
+  if SiteConfig.login(pwd)
+    pass
+  else
+    redirect to('/users/login')
+  end
 end
 post "/posts*" do
   pwd = session['admin_password'].inspect
