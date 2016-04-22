@@ -67,7 +67,7 @@ get "/*" do
   if SiteConfig.login(pwd)
     pass
   else
-    halt 401.1
+    401
   end
 end
 post "/*" do
@@ -75,7 +75,7 @@ post "/*" do
   if SiteConfig.login(pwd)
     pass
   else
-    halt 401.1
+    401
   end
 end
 
