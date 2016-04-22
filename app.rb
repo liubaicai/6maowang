@@ -81,7 +81,7 @@ post "/users/login" do
 end
 
 get "/posts*" do
-  pwd = request.cookies['admin_password']
+  pwd = session['admin_password'].inspect
   if SiteConfig.login(pwd)
     pass
   else
@@ -89,7 +89,7 @@ get "/posts*" do
   end
 end
 post "/posts*" do
-  pwd = request.cookies['admin_password']
+  pwd = session['admin_password'].inspect
   if SiteConfig.login(pwd)
     pass
   else
