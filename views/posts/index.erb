@@ -2,7 +2,7 @@
 <% @posts.each do |post| %>
  <li>
    <h4><a href="/articles/<%= post.id %>"><%=h post.title %></a></h4>
-   <p><%=h post.text[0,150] %></p>
+   <p><%=h post.body[0,150] %></p>
    <p>Created: <%=h post.created_at %></p>
  </li>
 <% end %>
