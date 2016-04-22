@@ -66,21 +66,21 @@ get "/articles/:id" do
 end
 
 # check user
-get "/login" do
+get "/users/login" do
   @title = "Admin Login"
   erb :"users/login"
 end
-post "/login" do
+post "/users/login" do
 	password = params[:password]
   if SiteConfig.login(password)
 		session['admin_password'] = SiteConfig.password
     redirect to('/')
 	else
-    redirect to('/login')
+    redirect to('/users/login')
 	end
 end
 
-get "/*" do
+get "/posts*" do
   pwd = request.cookies['admin_password']
   if SiteConfig.login(pwd)
     pass
@@ -88,7 +88,7 @@ get "/*" do
     redirect to('/login')
   end
 end
-post "/*" do
+post "/posts*" do
   pwd = request.cookies['admin_password']
   if SiteConfig.login(pwd)
     pass
