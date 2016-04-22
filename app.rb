@@ -59,7 +59,7 @@ end
 get "/*" do
   begin 
     pwd = request.cookies['admin_password']
-    if AppConfig.get('admin_password') == pwd
+    unless pwd.nil? || AppConfig.get('admin_password') != pwd
       pass
     else
       halt 401.1
@@ -71,7 +71,7 @@ end
 post "/*" do
   begin 
     pwd = request.cookies['admin_password']
-    if AppConfig.get('admin_password') == pwd
+    unless pwd.nil? || AppConfig.get('admin_password') != pwd
       pass
     else
       halt 401.1
