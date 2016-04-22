@@ -16,6 +16,8 @@ class Post < ActiveRecord::Base
 end
 
 class SiteConfig < ActiveRecord::Base
+  self.table_name = 'site_configs'
+  
   def self.login kkk
     sconfig = where(ckey : "admin_password",cvalue : kkk).first
     if sconfig.nil?
@@ -24,6 +26,7 @@ class SiteConfig < ActiveRecord::Base
       return true
     end
   end
+  
 end
 
 helpers do
@@ -65,9 +68,7 @@ get "/users/login" do
   erb :"users/login"
 end
 post "/users/login" do
-  postdata = URI.decode_www_form_component(request.body.read)
-	params = URI.decode_www_form(postdata)
-	password = params.assoc("password").last
+	password = params[:password]
   if SiteConfig.login(password)
 		session['admin_password'] = password
     redirect to('/')
