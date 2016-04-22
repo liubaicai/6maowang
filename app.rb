@@ -26,6 +26,10 @@ class SiteConfig < ActiveRecord::Base
       return false
     end
   end
+  def self.password kkk
+    sconfig = SiteConfig.where(:ckey => 'admin_password').first
+    return sconfig.cvalue
+  end
 end
 
 helpers do
@@ -62,12 +66,26 @@ get "/articles/:id" do
 end
 
 # check user
+get "/login" do
+  @title = "Admin Login"
+  erb :"users/login"
+end
+post "/login" do
+	password = params[:password]
+  if SiteConfig.login(password)
+		session['admin_password'] = SiteConfig.password
+    redirect to('/')
+	else
+    redirect to('/login')
+	end
+end
+
 get "/*" do
   pwd = request.cookies['admin_password']
   if SiteConfig.login(pwd)
     pass
   else
-    401
+    redirect to('/login')
   end
 end
 post "/*" do
@@ -75,7 +93,7 @@ post "/*" do
   if SiteConfig.login(pwd)
     pass
   else
-    401
+    redirect to('/login')
   end
 end
 
