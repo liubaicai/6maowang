@@ -16,6 +16,7 @@ class Post < ActiveRecord::Base
 end
 
 class Config < ActiveRecord::Base
+  self.table_name = "configs"
 end
 
 helpers do
