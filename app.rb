@@ -16,15 +16,9 @@ class Post < ActiveRecord::Base
 end
 
 class SiteConfig < ActiveRecord::Base
-  self.table_name = 'site_configs'
-  
-  def self.login kkk
-    sconfig = where(ckey : "admin_password",cvalue : kkk).first
-    if sconfig.nil?
-      return false
-    else
-      return true
-    end
+
+  def self.password
+    SiteConfig.where(:ckey => "admin_password").first
   end
   
 end
@@ -69,7 +63,7 @@ get "/users/login" do
 end
 post "/users/login" do
 	password = params[:password]
-  if SiteConfig.login(password)
+  if SiteConfig.password == password
 		session['admin_password'] = password
     redirect to('/')
 	else
@@ -78,16 +72,16 @@ post "/users/login" do
 end
 
 get "/posts*" do
-  pwd = session['admin_password'].inspect
-  if SiteConfig.login(pwd)
+  pwd = session['admin_password']
+  if pwd == password
     pass
   else
     redirect to('/users/login')
   end
 end
 post "/posts*" do
-  pwd = session['admin_password'].inspect
-  if SiteConfig.login(pwd)
+  pwd = session['admin_password']
+  if pwd == password
     pass
   else
     redirect to('/users/login')
