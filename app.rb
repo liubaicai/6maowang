@@ -24,10 +24,6 @@ class SiteConfig < ActiveRecord::Base
       return true
     end
   end
-  def self.password
-    sconfig = SiteConfig.where(:ckey => 'admin_password').first
-    return sconfig.cvalue
-  end
 end
 
 helpers do
@@ -71,7 +67,7 @@ end
 post "/users/login" do
 	password = params[:password]
   if SiteConfig.login(password)
-		session['admin_password'] = SiteConfig.password
+		session['admin_password'] = password
     redirect to('/')
 	else
     redirect to('/users/login')
