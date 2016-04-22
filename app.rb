@@ -15,9 +15,9 @@ class Post < ActiveRecord::Base
   validates :body, presence: true
 end
 
-class AppConfig < ActiveRecord::Base
+class SiteConfig < ActiveRecord::Base
   def self.login kkk
-    config = Config.where(:ckey => 'admin_password')
+    config = SiteConfig.where(:ckey => 'admin_password')
     if config.nil?
       return false
     elsif config.cvalue == kkk
@@ -64,7 +64,7 @@ end
 # check user
 get "/*" do
   pwd = request.cookies['admin_password']
-  if AppConfig.login(pwd)
+  if SiteConfig.login(pwd)
     pass
   else
     halt 401.1
@@ -72,7 +72,7 @@ get "/*" do
 end
 post "/*" do
   pwd = request.cookies['admin_password']
-  if AppConfig.login(pwd)
+  if SiteConfig.login(pwd)
     pass
   else
     halt 401.1
