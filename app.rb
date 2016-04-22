@@ -70,7 +70,6 @@ post "/users/login" do
     redirect to('/users/login')
 	end
 end
-
 get "/posts*" do
   pwd = session['admin_password']
   if pwd == SiteConfig.get_password
