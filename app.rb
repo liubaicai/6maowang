@@ -44,10 +44,9 @@ end
 
 # get ALL posts
 get "/" do
-  SiteConfig.get_password
-  # @posts = Post.order("created_at DESC")
-  # @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
-  # erb :"posts/index"
+  @posts = Post.order("created_at DESC")
+  @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
+  erb :"posts/index"
 end
 
 # view post
@@ -64,17 +63,17 @@ get "/users/login" do
 end
 post "/users/login" do
 	password = params[:password]
-  # if SiteConfig.password == password
-	# 	session['admin_password'] = password
-  #   redirect to('/')
-	# else
-  #   redirect to('/users/login')
-	# end
+  if SiteConfig.get_password == password
+		session['admin_password'] = password
+    redirect to('/')
+	else
+    redirect to('/users/login')
+	end
 end
 
 get "/posts*" do
   pwd = session['admin_password']
-  if pwd == SiteConfig.password
+  if pwd == SiteConfig.get_password
     pass
   else
     redirect to('/users/login')
@@ -82,7 +81,7 @@ get "/posts*" do
 end
 post "/posts*" do
   pwd = session['admin_password']
-  if pwd == SiteConfig.password
+  if pwd == SiteConfig.get_password
     pass
   else
     redirect to('/users/login')
