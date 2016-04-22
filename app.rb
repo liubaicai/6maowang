@@ -15,16 +15,16 @@ class Post < ActiveRecord::Base
   validates :body, presence: true
 end
 
-class Config < ActiveRecord::Base
-  def self.get kkk
-    config = Config.where(:ckey => kkk).first
-    if config.nil?
-      nil
-    else
-      config.cvalue
-    end
-  end
-end
+# class Config < ActiveRecord::Base
+#   def self.get kkk
+#     config = Config.where(:ckey => kkk).first
+#     if config.nil?
+#       nil
+#     else
+#       config.cvalue
+#     end
+#   end
+# end
 
 helpers do
   def title
