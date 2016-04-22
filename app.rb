@@ -44,6 +44,7 @@ end
 # get ALL posts
 get "/" do
   @posts = Post.order("created_at DESC")
+  @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
   erb :"posts/index"
 end
 
@@ -57,7 +58,7 @@ end
 # check user
 get "/*" do
   pwd = request.cookies['admin_password']
-  if Config.get(admin_password) == pwd
+  if Config.get('admin_password') == pwd
     pass
   else
     halt 401.1 '未授权'
@@ -65,7 +66,7 @@ get "/*" do
 end
 post "/*" do
   pwd = request.cookies['admin_password']
-  if Config.get(admin_password) == pwd
+  if Config.get('admin_password') == pwd
     pass
   else
     halt 401.1 '未授权'
