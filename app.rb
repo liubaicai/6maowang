@@ -17,11 +17,11 @@ end
 
 class Config < ActiveRecord::Base
   def self.get kkk
-    config = Config.where(:ckey => kkk)
+    config = Config.where(:ckey => kkk).first
     if config.nil?
-      return nil
+      nil
     else
-      return config.cvalue
+      config.cvalue
     end
   end
 end
