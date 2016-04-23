@@ -7,8 +7,8 @@
     <meta name="author" content="">
     <title><%= title %></title>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/summernote.css" rel="stylesheet">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <link href="/summernote.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <style>
       body {
         padding-top: 75px;
@@ -67,11 +67,11 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-	<script src="/js/summernote.min.js"></script>
+	<script src="/summernote.min.js"></script>
     <script>
     //** removes alerts after 4 seconds */
     window.setTimeout(function() {
-        $(".alert").fadeTo(4500, 0).slideUp(500, function(){
+        $(".alert").fadeTo(4500, 0).slideUp(400, function(){
             $(this).remove();
         });
     }, 4000);
