@@ -186,7 +186,7 @@ post "/image/upload" do
     #要上传的空间
     bucket = 'www-6mao-wang'
     #上传到七牛后保存的文件名
-    key = 'upload/'+Time.now.to_i.to_s+'.png'
+    key = 'upload/'+Time.now.to_i+'.png'
     #构建上传策略
     put_policy = Qiniu::Auth::PutPolicy.new(
       bucket,      # 存储空间
