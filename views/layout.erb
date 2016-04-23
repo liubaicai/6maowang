@@ -30,11 +30,6 @@
       .passwordbox {
         max-width:200px;
       }
-      .note-alarm {
-        float: right;
-        margin-top: 10px;
-        margin-right: 10px;
-      }
     </style>
   </head>
 
@@ -78,7 +73,7 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-	<script src="/summernote.min.js"></script>
+    <script src="/summernote.min.js"></script>
     <script>
     //** removes alerts after 4 seconds */
     window.setTimeout(function() {
@@ -92,6 +87,12 @@
         height: "200px"
       });
     });
+
+    function delcfm() { 
+      if (!confirm("确认要删除？")) { 
+        window.event.returnValue = false; 
+      } 
+    }
     
     </script>
   </body>

@@ -114,3 +114,10 @@ put "/posts/:id" do
   @post.update(params[:post])
   redirect "/articles/#{@post.id}"
 end
+
+# delete post
+get "/posts/:id/delete" do
+  post = Post.find(params[:id])
+  post.destroy
+  redirect back
+end
