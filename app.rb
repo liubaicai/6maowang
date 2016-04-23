@@ -44,7 +44,6 @@ end
 
 # get posts list
 get "/" do
-  page_no = request["idx"]
   @posts = Post.order("created_at DESC").limit(10)
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
   erb :"posts/index"
