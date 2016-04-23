@@ -20,8 +20,8 @@ class SiteConfig < ActiveRecord::Base
     SiteConfig.where(:ckey => "admin_password").first.cvalue
   end
 
-  def self.get_value ckey
-    SiteConfig.where(:ckey => ckey).first.cvalue
+  def self.get_value ck
+    SiteConfig.where(:ckey => ck).first.cvalue
   end
   
 end
@@ -203,7 +203,7 @@ post "/image/upload" do
         filePath,
         key
     )
-    $base_qiniu_url+result['key']
+    $base_qiniu_url + key
   rescue Exception => e 
     ''
   end
