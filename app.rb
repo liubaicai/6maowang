@@ -196,11 +196,11 @@ post "/image/upload" do
     #生成上传 Token
     uptoken = Qiniu::Auth.generate_uptoken(put_policy)
     #要上传文件的本地路径
-    filePath = tempfile.path
+    #filePath = tempfile.path
     #调用upload_with_token_2方法上传
     code, result, response_headers = Qiniu::Storage.upload_with_token_2(
         uptoken, 
-        filePath,
+        tempfile,
         key
     )
     $base_qiniu_url + key
