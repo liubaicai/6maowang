@@ -44,27 +44,27 @@
             $(this).remove();
         });
     }, 4000);
-    
-    var uploadImages = function (files, editor, $editable) {
-          data = new FormData();
-          data.append("file", files[0]);
-          $.ajax({
-              data: data,
-              type: "POST",
-              url: "/image/upload",
-              cache: false,
-              contentType: false,
-              processData: false,
-              success: function(url) {
-                  editor.insertImage($editable, url);
-              }
-          });
-      }
 
     $(document).ready(function() {
       $('#summernote').summernote({
         height: "200px",
-        onImageUpload: uploadImages
+        callbacks: {
+          onImageUpload: function(files) {
+            var $editor = $(this);
+            var data = new FormData();
+            data.append('fileup', files[0]);
+            $.ajax({
+              url: '/image/upload',
+              method: 'POST',
+              data: data,
+              processData: false,
+              contentType: false,
+              success: function(url) {
+                $editor.summernote('insertImage', url);
+              }
+            });
+          }
+        }
       });
     });
 
