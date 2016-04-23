@@ -49,7 +49,7 @@ get "/" do
   t_count = Post.count
   @pre_no = 1
   @pre_class = "class=\"disabled\""
-  if t_count>10
+  if t_count > 10
     @nxt_no = 2
     @nxt_class = ""
   else
@@ -61,6 +61,28 @@ end
 get %r{/([\d]+)} do |page_no|
   @posts = Post.order("created_at DESC").limit(10).offset(10*(page_no.to_i-1))
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
+  t_count = Post.count
+  if page_no == 1 && t_count > 10
+    @pre_no = 1
+    @pre_class = "class=\"disabled\""
+    @nxt_no = 2
+    @nxt_class = ""
+  elsif page_no == 1 && t_count <= 10
+    @pre_no = 1
+    @pre_class = "class=\"disabled\""
+    @nxt_no = 1
+    @nxt_class = "class=\"disabled\""
+  elsif page_no > 1 && t_count < 10*page_no
+    @pre_no = page_no-1
+    @pre_class = ""
+    @nxt_no = page_no+1
+    @nxt_class = "class=\"disabled\""
+  elsif page_no > 1 && t_count > 10*page_no
+    @pre_no = page_no-1
+    @pre_class = ""
+    @nxt_no = page_no+1
+    @nxt_class = ""
+  end
   erb :"posts/index"
 end
 
