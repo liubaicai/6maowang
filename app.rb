@@ -182,7 +182,7 @@ post "/image/upload" do
   unless params[:file] && (tempfile = params[:file][:tempfile])
     "NULL"
   end
-  params
+  tempfile.methods
   # begin 
   #   #要上传的空间
   #   bucket = "www-6mao-wang"
