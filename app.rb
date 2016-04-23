@@ -49,7 +49,7 @@ get "/" do
   erb :"posts/index"
 end
 get %r{/([\d]+)} do |page_no|
-  @posts = Post.order("created_at DESC").limit(10).offset(10*(page_no.to_i-1)
+  @posts = Post.order("created_at DESC").limit(10).offset(10*(page_no.to_i-1))
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
   erb :"posts/index"
 end
