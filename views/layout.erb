@@ -56,6 +56,11 @@
             $.ajax({
               url: '/image/upload',
               method: 'POST',
+              xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) myXhr.upload.addEventListener('progress',progressHandlingFunction, false);
+                return myXhr;
+              },
               data: data,
               processData: false,
               contentType: false,
@@ -67,6 +72,18 @@
         }
       });
     });
+
+    // update progress bar
+
+    function progressHandlingFunction(e){
+        if(e.lengthComputable){
+            $('progress').attr({value:e.loaded, max:e.total});
+            // reset progress on complete
+            if (e.loaded == e.total) {
+                $('progress').attr('value','0.0');
+            }
+        }
+    }
 
     function delcfm() {
         if (!confirm("确认要删除？")) {
