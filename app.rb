@@ -8,7 +8,7 @@ require 'sinatra/redirect_with_flash'
 require 'sinatra/captcha'
 
 use Rack::Session::Pool, :expire_after => 2592000
-
+$page_size = 8
 
 class Post < ActiveRecord::Base
   validates :title, presence: true, length: { minimum: 5 }
@@ -44,44 +44,44 @@ end
 
 # get posts list
 get "/" do
-  @posts = Post.order("created_at DESC").limit(10)
+  @posts = Post.order("created_at DESC").limit($page_size)
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
   t_count = Post.count
-  @pre_no = 1
+  @pre_no = ""
   @pre_class = "class=\"disabled\""
-  if t_count > 10
-    @nxt_no = 2
+  if t_count > $page_size
+    @nxt_no = "href=\"/2\""
     @nxt_class = ""
   else
-    @nxt_no = 1
+    @nxt_no = ""
     @nxt_class = "class=\"disabled\""
   end
   erb :"posts/index"
 end
 get %r{/([\d]+)} do |page_no|
   page_no = page_no.to_i
-  @posts = Post.order("created_at DESC").limit(10).offset(10*(page_no-1))
+  @posts = Post.order("created_at DESC").limit($page_size).offset($page_size*(page_no-1))
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
   t_count = Post.count
-  if page_no == 1 && t_count > 10
-    @pre_no = 1
+  if page_no == 1 && t_count > $page_size
+    @pre_no = ""
     @pre_class = "class=\"disabled\""
-    @nxt_no = 2
+    @nxt_no = "href=\"/2\""
     @nxt_class = ""
-  elsif page_no == 1 && t_count <= 10
-    @pre_no = 1
+  elsif page_no == 1 && t_count <= $page_size
+    @pre_no = ""
     @pre_class = "class=\"disabled\""
-    @nxt_no = 1
+    @nxt_no = ""
     @nxt_class = "class=\"disabled\""
-  elsif page_no > 1 && t_count < 10*page_no
-    @pre_no = page_no-1
+  elsif page_no > 1 && t_count < $page_size*page_no
+    @pre_no = "href=\"/#{page_no-1}\""
     @pre_class = ""
-    @nxt_no = page_no
+    @nxt_no = ""
     @nxt_class = "class=\"disabled\""
-  elsif page_no > 1 && t_count > 10*page_no
-    @pre_no = page_no-1
+  elsif page_no > 1 && t_count > $page_size*page_no
+    @pre_no = "href=\"/#{page_no-1}\""
     @pre_class = ""
-    @nxt_no = page_no+1
+    @nxt_no = "href=\"/#{page_no+1}\""
     @nxt_class = ""
   end
   erb :"posts/index"
