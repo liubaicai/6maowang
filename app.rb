@@ -46,6 +46,16 @@ end
 get "/" do
   @posts = Post.order("created_at DESC").limit(10)
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
+  t_count = Post.count
+  @pre_no = 1
+  @pre_class = "class=\"disabled\""
+  if t_count>10
+    @nxt_no = 2
+    @nxt_class = ""
+  else
+    @nxt_no = 1
+    @nxt_class = "class=\"disabled\""
+  end
   erb :"posts/index"
 end
 get %r{/([\d]+)} do |page_no|
