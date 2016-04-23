@@ -6,6 +6,7 @@ require './environments'
 require 'sinatra/flash'
 require 'sinatra/redirect_with_flash'
 require 'sinatra/captcha'
+require 'qiniu'
 
 
 class Post < ActiveRecord::Base
