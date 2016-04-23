@@ -44,6 +44,12 @@
             $(this).remove();
         });
     }, 4000);
+    
+    $(document).ready(function() {
+      $('#summernote').summernote({
+        height: "200px"
+      });
+    });
 
     function delcfm() {
         if (!confirm("确认要删除？")) {
@@ -51,31 +57,6 @@
         }
     }
     </script>
-    <script>
-      $(document).ready(function() {
-        $('#summernote').summernote({
-            height: 200,
-            onImageUpload: function(files, editor, welEditable) {
-                sendFile(files[0], editor, welEditable);
-            }
-        });
-        function sendFile(file, editor, welEditable) {
-            data = new FormData();
-            data.append("file", file);
-            $.ajax({
-                data: data,
-                type: "POST",
-                url: "/image/upload",
-                cache: false,
-                contentType: false,
-                processData: false,
-                success: function(url) {
-                    editor.insertImage(welEditable, url);
-                }
-            });
-        }
-      });
-</script>
   </head>
 
   <body>
