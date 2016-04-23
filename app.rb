@@ -179,33 +179,32 @@ end
 
 # upload image
 post "/image/upload" do
-  unless params[:file] && (tempfile = params[:file][:tempfile])
+  unless params[:fileup] && (tempfile = params[:fileup][:tempfile])
     "NULL"
   end
-  params.to_s
-  # begin 
-  #   #要上传的空间
-  #   bucket = "www-6mao-wang"
-  #   #上传到七牛后保存的文件名
-  #   key = "upload/"+Time.now.to_i.to_s+".png"
-  #   #构建上传策略
-  #   put_policy = Qiniu::Auth::PutPolicy.new(
-  #     bucket,      # 存储空间
-  #     key,     # 最终资源名，可省略，即缺省为“创建”语义，设置为nil为普通上传 
-  #     3600    #token过期时间，默认为3600s
-  #   )
-  #   #生成上传 Token
-  #   uptoken = Qiniu::Auth.generate_uptoken(put_policy)
-  #   #要上传文件的本地路径
-  #   #filePath = tempfile.path
-  #   #调用upload_with_token_2方法上传
-  #   code, result, response_headers = Qiniu::Storage.upload_with_token_2(
-  #       uptoken, 
-  #       tempfile,
-  #       key
-  #   )
-  #   $base_qiniu_url + key
-  # rescue Exception => e 
-  #   e.message
-  # end
+  begin 
+    #要上传的空间
+    bucket = "www-6mao-wang"
+    #上传到七牛后保存的文件名
+    key = "upload/"+Time.now.to_i.to_s+".jpg"
+    #构建上传策略
+    put_policy = Qiniu::Auth::PutPolicy.new(
+      bucket,      # 存储空间
+      key,     # 最终资源名，可省略，即缺省为“创建”语义，设置为nil为普通上传 
+      3600    #token过期时间，默认为3600s
+    )
+    #生成上传 Token
+    uptoken = Qiniu::Auth.generate_uptoken(put_policy)
+    #要上传文件的本地路径
+    #filePath = tempfile.path
+    #调用upload_with_token_2方法上传
+    code, result, response_headers = Qiniu::Storage.upload_with_token_2(
+        uptoken, 
+        tempfile,
+        key
+    )
+    $base_qiniu_url + key
+  rescue Exception => e 
+    e.message
+  end
 end
