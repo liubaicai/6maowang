@@ -96,12 +96,11 @@ end
 post "/posts" do
   redirect "posts/create", :error => 'Invalid captcha' unless captcha_pass?
   @post = Post.new(params[:post])
-  @post.body
-  # if @post.save
-  #   redirect "articles/#{@post.id}", :notice => 'Congrats! Love the new post. (This message will disappear in 4 seconds.)'
-  # else
-  #   redirect "posts/create", :error => 'Something went wrong. Try again. (This message will disappear in 4 seconds.)'
-  # end
+  if @post.save
+    redirect "articles/#{@post.id}", :notice => 'Congrats! Love the new post. (This message will disappear in 4 seconds.)'
+  else
+    redirect "posts/create", :error => 'Something went wrong. Try again. (This message will disappear in 4 seconds.)'
+  end
 end
 
 # edit post
