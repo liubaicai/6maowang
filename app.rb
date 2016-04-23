@@ -7,8 +7,6 @@ require 'sinatra/flash'
 require 'sinatra/redirect_with_flash'
 require 'sinatra/captcha'
 
-use Rack::Session::Pool, :expire_after => 2592000
-$page_size = 8
 
 class Post < ActiveRecord::Base
   validates :title, presence: true, length: { minimum: 5 }
@@ -20,8 +18,15 @@ class SiteConfig < ActiveRecord::Base
   def self.get_password
     SiteConfig.where(:ckey => "admin_password").first.cvalue
   end
+
+  def self.get_value ckey
+    SiteConfig.where(:ckey => ckey).first.cvalue
+  end
   
 end
+
+use Rack::Session::Pool, :expire_after => 2592000
+$page_size = 8
 
 helpers do
   def title
@@ -41,6 +46,12 @@ end
 error do
   halt 500,env['sinatra.error'].message
 end
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
 
 # get posts list
 get "/" do
@@ -158,4 +169,9 @@ get "/posts/:id/delete" do
   post = Post.find(params[:id])
   post.destroy
   redirect to('/')
+end
+
+# upload image
+post "/image/upload" do
+  'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
 end
