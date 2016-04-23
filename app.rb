@@ -59,7 +59,8 @@ get "/" do
   erb :"posts/index"
 end
 get %r{/([\d]+)} do |page_no|
-  @posts = Post.order("created_at DESC").limit(10).offset(10*(page_no.to_i-1))
+  page_no = page_no.to_i
+  @posts = Post.order("created_at DESC").limit(10).offset(10*(page_no-1))
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
   t_count = Post.count
   if page_no == 1 && t_count > 10
