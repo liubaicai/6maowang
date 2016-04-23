@@ -76,7 +76,7 @@ get %r{/([\d]+)} do |page_no|
   elsif page_no > 1 && t_count < 10*page_no
     @pre_no = page_no-1
     @pre_class = ""
-    @nxt_no = page_no+1
+    @nxt_no = page_no
     @nxt_class = "class=\"disabled\""
   elsif page_no > 1 && t_count > 10*page_no
     @pre_no = page_no-1
