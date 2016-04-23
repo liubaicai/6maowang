@@ -99,7 +99,7 @@ post "/posts" do
   if @post.save
     redirect "articles/#{@post.id}", :notice => 'Congrats! Love the new post. (This message will disappear in 4 seconds.)'
   else
-    redirect "posts/create", :error => 'Something went wrong. Try again. (This message will disappear in 4 seconds.)'
+    redirect "posts/create", :error => @post.to_s
   end
 end
 
