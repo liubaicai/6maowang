@@ -31,6 +31,33 @@
         max-width:200px;
       }
     </style>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/summernote.min.js"></script>
+    <script>
+    //** removes alerts after 4 seconds */
+    window.setTimeout(function() {
+        $(".alert").fadeTo(4500, 0).slideUp(400, function(){
+            $(this).remove();
+        });
+    }, 4000);
+    
+    $(document).ready(function() {
+      $('#summernote').summernote({
+        height: "200px"
+      });
+    });
+
+    function delcfm() { 
+      if (!confirm("确认要删除？")) { 
+        window.event.returnValue = false; 
+      } 
+    }
+    
+    </script>
   </head>
 
   <body>
@@ -66,34 +93,5 @@
       <%= yield %>
 
     </div><!-- /.container -->
-
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/js/jquery.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/summernote.min.js"></script>
-    <script>
-    //** removes alerts after 4 seconds */
-    window.setTimeout(function() {
-        $(".alert").fadeTo(4500, 0).slideUp(400, function(){
-            $(this).remove();
-        });
-    }, 4000);
-    
-    $(document).ready(function() {
-      $('#summernote').summernote({
-        height: "200px"
-      });
-    });
-
-    function delcfm() { 
-      if (!confirm("确认要删除？")) { 
-        window.event.returnValue = false; 
-      } 
-    }
-    
-    </script>
   </body>
 </html>

@@ -119,5 +119,5 @@ end
 get "/posts/:id/delete" do
   post = Post.find(params[:id])
   post.destroy
-  redirect back
+  redirect to('/')
 end
