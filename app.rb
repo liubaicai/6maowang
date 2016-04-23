@@ -180,13 +180,13 @@ end
 # upload image
 post "/image/upload" do
   unless params[:file] && (tempfile = params[:file][:tempfile])
-    'null'
+    "NULL"
   end
   begin 
     #要上传的空间
-    bucket = 'www-6mao-wang'
+    bucket = "www-6mao-wang"
     #上传到七牛后保存的文件名
-    key = 'upload/'+Time.now+'.png'
+    key = "upload/"+Time.now.to_i.to_s+".png"
     #构建上传策略
     put_policy = Qiniu::Auth::PutPolicy.new(
       bucket,      # 存储空间
@@ -205,6 +205,6 @@ post "/image/upload" do
     )
     $base_qiniu_url + key
   rescue Exception => e 
-    e.to_s
+    e.message
   end
 end
