@@ -76,8 +76,16 @@
         });
     }, 4000);
 
-    $(document).ready(function() {
-      $('.summernote').summernote();
+    $(function() {
+      $('.summernote').summernote({
+        height: 500
+      });
+
+      $('form').on('submit', function (e) {
+        e.preventDefault();
+        alert($('.summernote').summernote('code'));
+        alert($('.summernote').val());
+      });
     });
     </script>
   </body>
