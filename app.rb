@@ -180,7 +180,7 @@ end
 # upload image
 post "/image/upload" do
   unless params[:file] && (tempfile = params[:file][:tempfile])
-    ''
+    'null'
   end
   begin 
     #要上传的空间
@@ -205,6 +205,6 @@ post "/image/upload" do
     )
     $base_qiniu_url + key
   rescue Exception => e 
-    ''
+    e.message
   end
 end
