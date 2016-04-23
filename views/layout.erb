@@ -44,15 +44,22 @@
             $(this).remove();
         });
     }, 4000);
-    
-    $(document).ready(function() {
-      $('#summernote').summernote({
-        height: "200px",
-        onImageUpload: function(files, editor, welEditable) {
+
+    function delcfm() {
+        if (!confirm("确认要删除？")) {
+            window.event.returnValue = false;
+        }
+    }
+    </script>
+    <script>
+      $(document).ready(function() {
+        $('#summernote').summernote({
+            height: 200,
+            onImageUpload: function(files, editor, welEditable) {
                 sendFile(files[0], editor, welEditable);
             }
-      });
-      function sendFile(file, editor, welEditable) {
+        });
+        function sendFile(file, editor, welEditable) {
             data = new FormData();
             data.append("file", file);
             $.ajax({
@@ -67,14 +74,8 @@
                 }
             });
         }
-    });
-
-    function delcfm() {
-        if (!confirm("确认要删除？")) {
-            window.event.returnValue = false;
-        }
-    }
-    </script>
+      });
+</script>
   </head>
 
   <body>
