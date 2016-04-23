@@ -45,9 +45,26 @@
         });
     }, 4000);
     
+    var uploadImages = function (files, editor, $editable) {
+          data = new FormData();
+          data.append("file", files[0]);
+          $.ajax({
+              data: data,
+              type: "POST",
+              url: "/image/upload",
+              cache: false,
+              contentType: false,
+              processData: false,
+              success: function(url) {
+                  editor.insertImage($editable, url);
+              }
+          });
+      }
+
     $(document).ready(function() {
       $('#summernote').summernote({
-        height: "200px"
+        height: "200px",
+        onImageUpload: uploadImages
       });
     });
 
