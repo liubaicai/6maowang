@@ -58,7 +58,7 @@ get "/" do
   end
   erb :"posts/index"
 end
-get %r{/([\d]+)} do |page_no|
+get %r{/([\d])} do |page_no|
   page_no = page_no.to_i
   @posts = Post.order("created_at DESC").limit($page_size).offset($page_size*(page_no-1))
   @title = "遛猫网  啊~啊~啊~遛猫,你比捂猫多一猫,啊~啊~啊~遛猫,你比死猫多两猫."
@@ -132,7 +132,7 @@ get "/posts/create" do
   erb :"posts/create"
 end
 post "/posts" do
-  redirect "posts/create", :error => 'Invalid captcha' unless captcha_pass?
+  # redirect "posts/create", :error => 'Invalid captcha' unless captcha_pass?
   @post = Post.new(params[:post])
   if @post.save
     redirect "articles/#{@post.id}", :notice => 'Congrats! Love the new post. (This message will disappear in 4 seconds.)'
