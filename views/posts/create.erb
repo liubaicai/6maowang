@@ -9,7 +9,7 @@
  <div class="form-group">
    <label for="post_body">Body:</label>
    <br>
-   <div id="summernote" name="post[body]" class="form-control"><%= @post.body %></div>
+   <textarea id="post_body" name="post[body]" class="form-control" rows="10"><%= @post.body %></textarea>
    <br>
    <div><%= captcha_image_tag %></div>
    <br>

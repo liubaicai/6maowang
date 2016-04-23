@@ -10,7 +10,7 @@
  <div class="form-group">
   <label for="post_body">Body:</label>
   <br>
-  <textarea id="post_body" name="post[body]" class="form-control" rows="5"><%=h @post.body %></textarea>
+  <div id="summernote" name="post[body]"><%= @post.body %></div>
  </div>
   <button type="submit" class="btn btn-success">Submit</button>
 </form>
