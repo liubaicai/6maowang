@@ -30,11 +30,6 @@
       .passwordbox {
         max-width:200px;
       }
-      .note-alarm {
-        float: right;
-        margin-top: 10px;
-        margin-right: 10px;
-      }
     </style>
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -52,10 +47,7 @@
     
     $(document).ready(function() {
       $('#summernote').summernote({
-        height: "200px",
-        onImageUpload: function(files, editor, $editable) {
-          alert("暂未实现")
-        }
+        height: "200px"
       });
     });
 
