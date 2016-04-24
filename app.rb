@@ -7,6 +7,7 @@ require 'sinatra/flash'
 require 'sinatra/redirect_with_flash'
 require 'sinatra/captcha'
 require 'qiniu'
+require 'open-uri'
 
 
 class Post < ActiveRecord::Base
@@ -117,14 +118,14 @@ end
 
 # check user
 get "/users/login" do
-  @title = "Admin Login"
+  @title = "admin login"
   erb :"users/login"
 end
 post "/users/login" do
 	password = params[:password]
   if SiteConfig.get_password == password
 		session['admin_password'] = password
-    redirect to(request.referrer)
+    redirect to('/')
 	else
     redirect to('/users/login')
 	end
@@ -134,7 +135,7 @@ get "/posts*" do
   if pwd == SiteConfig.get_password
     pass
   else
-    redirect to('/users/login')
+    redirect to('/users/login?refer='+URI::encode(request.path_info))
   end
 end
 post "/posts*" do
@@ -142,7 +143,7 @@ post "/posts*" do
   if pwd == SiteConfig.get_password
     pass
   else
-    redirect to('/users/login')
+    redirect to('/users/login?refer='+URI::encode(request.path_info))
   end
 end
 
