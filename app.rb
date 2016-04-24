@@ -7,11 +7,18 @@ require 'sinatra/flash'
 require 'sinatra/redirect_with_flash'
 require 'sinatra/captcha'
 require 'qiniu'
+require 'nokogiri'
 
 
 class Post < ActiveRecord::Base
   validates :title, presence: true, length: { minimum: 5 }
   validates :body, presence: true
+
+  def imgs
+    doc = Nokogiri::HTML(body)
+    img_srcs = doc.css('img').map{ |i| i['src'] }
+    img_srcs
+  end
 end
 
 class SiteConfig < ActiveRecord::Base

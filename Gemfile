@@ -11,6 +11,7 @@ gem 'sinatra-flash'
 gem 'sinatra-redirect-with-flash'
 gem 'sinatra-captcha'
 gem 'qiniu'
+gem 'nokogiri'
  
 #group :development do
 #  gem 'sqlite3'

@@ -1,12 +1,151 @@
-<ul>
+<style>
+      .image_list_item, .SearchPost {
+        border: 0px solid;
+        margin: 0px;
+      }
+      .gallery_description_hover, .home_description_hover {
+        height: 39.2px;
+        -webkit-line-clamp:2;
+      }
+      .gallery-post-info h4, .image_list_item h4,.SearchPost h4 {
+        height: 24px;
+        -webkit-line-clamp:1;
+      }
+      /*706.56 250 ttttt */          @media screen and (min-width: 1024px) {
+            .image_list_item, .SearchPost{
+            /*2*/
+              width:calc(50% - 0px);
+              padding-bottom:calc(44% - 0px);
+            }
+            .GalleryPost{
+              width:50%;
+              padding-bottom:44%;
+            } 
+          }
+                  @media screen and (min-width: 1274px) {
+            .image_list_item, .SearchPost{
+            /*3*/
+              width:calc(33.333333333333% - 0px);
+              padding-bottom:calc(29.333333333333% - 0px);
+            }
+            .GalleryPost{
+              width:33.333333333333%;
+              padding-bottom:29.333333333333%;
+            } 
+          }
+                  @media screen and (min-width: 1524px) {
+            .image_list_item, .SearchPost{
+            /*4*/
+              width:calc(25% - 0px);
+              padding-bottom:calc(22% - 0px);
+            }
+            .GalleryPost{
+              width:25%;
+              padding-bottom:22%;
+            } 
+          }
+                  @media screen and (min-width: 1774px) {
+            .image_list_item, .SearchPost{
+            /*5*/
+              width:calc(20% - 0px);
+              padding-bottom:calc(17.6% - 0px);
+            }
+            .GalleryPost{
+              width:20%;
+              padding-bottom:17.6%;
+            } 
+          }
+                  @media screen and (min-width: 2024px) {
+            .image_list_item, .SearchPost{
+            /*6*/
+              width:calc(16.666666666667% - 0px);
+              padding-bottom:calc(14.666666666667% - 0px);
+            }
+            .GalleryPost{
+              width:16.666666666667%;
+              padding-bottom:14.666666666667%;
+            } 
+          }
+                  @media screen and (min-width: 2274px) {
+            .image_list_item, .SearchPost{
+            /*7*/
+              width:calc(14.285714285714% - 0px);
+              padding-bottom:calc(12.571428571429% - 0px);
+            }
+            .GalleryPost{
+              width:14.285714285714%;
+              padding-bottom:12.571428571429%;
+            } 
+          }
+                 @media screen and (max-width: 1024px)  {
+          .image_list_item, .SearchPost{
+            /* 4*/
+            width:calc(25% - 0px);
+            padding-bottom:calc(22% - 0px);
+          } 
+          .GalleryPost{
+            width:25%;
+            padding-bottom:22%;
+          }  
+        }
+
+              @media screen and (max-width: 1000px) {
+          .image_list_item, .SearchPost{
+            /* 3*/
+            width:calc(33.333333333333% - 0px);
+            padding-bottom:calc(29.333333333333% - 0px);
+          } 
+          .GalleryPost{
+            width:33.333333333333%;
+            padding-bottom:29.333333333333%;
+          }  
+        }
+            @media screen and (max-width: 750px) {
+          .image_list_item, .SearchPost{
+            /* 3*/
+            width:calc(50% - 0px);
+            padding-bottom:calc(44% - 0px);
+          } 
+          .GalleryPost{
+            width:50%;
+            padding-bottom:44%;
+          }  
+        }
+            @media screen and (max-width: 500px) {
+          .image_list_item, .SearchPost{
+            /* 3*/
+            width:calc(100% - 0px);
+            padding-bottom:calc(88% - 0px);
+          }  
+        }
+            
+    </style>
+<style>
+    .image_list_item{
+        border: 0px solid;
+        margin: 0px;
+        max-height:300px;
+        border-color: #dd9933 !important;
+        list-style:none;
+        float:left;
+        position:relative;
+        z-index: 1;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+}
+</style>
+
+<div>
 <% @posts.each do |post| %>
- <li>
-   <h4><a href="/articles/<%= post.id %>"><%=h post.title %></a></h4>
-   <p class="text-muted"><%= post.body.gsub(/<\/?.*?>/,"")[0,80] %></p>
-   <p>Created: <%=h post.created_at %></p>
- </li>
+    <% post.imgs.each do |img| %>
+        <a href="/articles/<%= post.id %>">
+            <div class="image_list_item " style="background-image:url(<%= img %>);"></div>
+        </a>
+    <% end %>    
 <% end %>
-</ul>
+</div>
+
 <nav>
   <ul class="pager">
     <li <%= @pre_class %> ><a <%= @pre_no %> >Previous</a></li>
