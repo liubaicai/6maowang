@@ -122,12 +122,13 @@ get "/users/login" do
 end
 post "/users/login" do
 	password = params[:password]
+  refer = request["refer"]
   if SiteConfig.get_password == password
 		session['admin_password'] = password
-    if request["refer"].nil?
+    if refer.nil?
       redirect to('/')
     else
-      redirect to(request["refer"])
+      redirect to(refer)
     end
 	else
     redirect to('/users/login')
