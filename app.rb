@@ -34,7 +34,7 @@ class SiteConfig < ActiveRecord::Base
 end
 
 use Rack::Session::Pool, :expire_after => 2592000
-$page_size = 8
+$page_size = 12
 
 helpers do
   def title
