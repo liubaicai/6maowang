@@ -137,15 +137,14 @@
 </style>
 
 <div>
+
 <% @posts.each do |post| %>
-    <% post.imgs.each do |img| %>
-        <a href="/articles/<%= post.id %>">
-            <div class="image_list_item " style="background-image:url(<%= img %>?imageView/1/h/200/w/200);"></div>
-        </a>
-    <% end %>    
+    <a href="/articles/<%= post.id %>">
+        <div class="image_list_item " style="background-image:url(<%= post.img %>?imageView/1/h/200/w/200);"></div>
+    </a>   
 <% end %>
 </div>
-<div style="width: 100%;height:100px;margin-top:10px;margin-bottom:10px;">
+<div>
 <nav>
   <ul class="pager">
     <li <%= @pre_class %> ><a <%= @pre_no %> >Previous</a></li>

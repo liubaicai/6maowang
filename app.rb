@@ -19,6 +19,10 @@ class Post < ActiveRecord::Base
     img_srcs = doc.css('img').map{ |i| i['src'] }
     img_srcs
   end
+
+  def img
+    body[/img.*?src="(.*?)"/i,1]
+  end
 end
 
 class SiteConfig < ActiveRecord::Base
