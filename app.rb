@@ -118,7 +118,11 @@ end
 # check user
 get "/users/login" do
   @title = "admin login"
-  @query_string = '?refer='+ERB::Util.url_encode(request.referrer)
+  if request["refer"].nil?
+    @query_string = '?refer='+ERB::Util.url_encode(request.referrer)
+  else
+    @query_string = '?refer='+request["refer"]
+  end
   erb :"users/login"
 end
 post "/users/login" do
@@ -140,7 +144,7 @@ get "/posts*" do
   if pwd == SiteConfig.get_password
     pass
   else
-    redirect to('/users/login')
+    redirect to('/users/login?refer='+ERB::Util.url_encode(request.url))
   end
 end
 post "/posts*" do
@@ -148,7 +152,7 @@ post "/posts*" do
   if pwd == SiteConfig.get_password
     pass
   else
-    redirect to('/users/login')
+    redirect to('/users/login?refer='+ERB::Util.url_encode(request.url))
   end
 end
 
