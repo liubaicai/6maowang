@@ -139,7 +139,7 @@ get "/posts*" do
   if pwd == SiteConfig.get_password
     pass
   else
-    redirect to('/users/login?refer='+ERB::Util.url_encode(request.path_info))
+    redirect to('/users/login?refer='+ERB::Util.url_encode(request.url))
   end
 end
 post "/posts*" do
@@ -147,7 +147,7 @@ post "/posts*" do
   if pwd == SiteConfig.get_password
     pass
   else
-    redirect to('/users/login?refer='+ERB::Util.url_encode(request.path_info))
+    redirect to('/users/login?refer='+ERB::Util.url_encode(request.url))
   end
 end
 
