@@ -140,7 +140,11 @@
 
 <% @posts.each do |post| %>
     <a href="/articles/<%= post.id %>">
-        <div class="image_list_item " style="background-image:url(<%= post.img %>?imageView/1/h/200/w/200);"></div>
+        <div class="image_list_item " style="background-image:url(<%= post.img %>?imageView/1/h/200/w/200);">
+            <article style="display: block;">
+                <h4>悄悄地进村打枪的不要</h4>
+            </article>
+        </div>
     </a>   
 <% end %>
 </div>

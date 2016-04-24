@@ -53,6 +53,29 @@
       {
         display:inline-block;
       }
+      .da-animate {
+        -webkit-transition: all 0.2s ease;
+        -moz-transition: all 0.2s ease-in-out;
+        -o-transition: all 0.2s ease-in-out;
+        -ms-transition: all 0.2s ease-in-out;
+        transition: all 0.2s ease-in-out;
+      }
+      .da-slideFromTop {
+        left: 0px;
+        top: -100%;
+      }
+      .da-slideFromBottom {
+        left: 0px;
+        top: 100%;
+      }
+      .da-slideFromLeft {
+        top: 0px; 
+        left: -100%;
+      }
+      .da-slideFromRight {
+        top: 0px;
+        left: 100%;
+      }
     </style>
   </head>
 
@@ -112,6 +135,7 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/jquery-hover-effect.js"></script>
     <script src="/summernote.min.js"></script>
     <script>
     //** removes alerts after 4 seconds */
