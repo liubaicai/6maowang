@@ -48,6 +48,10 @@ error do
   halt 500,env['sinatra.error'].message
 end
 
+after do
+    ActiveRecord::Base.connection.close
+end
+
 $base_qiniu_url = "http://7xov7e.com1.z0.glb.clouddn.com/"
 # 构建鉴权对象
 Qiniu.establish_connection! :access_key => SiteConfig.get_value('qiniu_ak'),
