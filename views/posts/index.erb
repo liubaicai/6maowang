@@ -140,7 +140,7 @@
 <% @posts.each do |post| %>
     <% post.imgs.each do |img| %>
         <a href="/articles/<%= post.id %>">
-            <div class="image_list_item " style="background-image:url(<%= img %>);"></div>
+            <div class="image_list_item " style="background-image:url(<%= img %>?imageView/1/h/200/w/200);"></div>
         </a>
     <% end %>    
 <% end %>
