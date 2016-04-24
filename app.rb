@@ -154,7 +154,9 @@ get "/posts/create" do
 end
 post "/posts" do
   # redirect "posts/create", :error => 'Invalid captcha' unless captcha_pass?
-  @post = Post.new(params[:post])
+  @post = Post.new
+  @post.title = params[:post]['title']
+  @post.body = params[:post]['body']
   if @post.save
     redirect "articles/#{@post.id}", :notice => 'Congrats! Love the new post. (This message will disappear in 4 seconds.)'
   else
