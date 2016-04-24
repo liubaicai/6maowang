@@ -136,7 +136,7 @@
 }
 </style>
 
-<div>
+<div class="row">
 
 <% @posts.each do |post| %>
     <a href="/articles/<%= post.id %>">
@@ -144,7 +144,7 @@
     </a>   
 <% end %>
 </div>
-<div>
+<div class="row">
 <nav>
   <ul class="pager">
     <li <%= @pre_class %> ><a <%= @pre_no %> >Previous</a></li>
