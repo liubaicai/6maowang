@@ -133,7 +133,23 @@
         background-position: center;
         background-size: cover;
         background-repeat: no-repeat;
-}
+    }
+
+    article h4 {
+        color: #333;
+        height: 20px;
+        -webkit-line-clamp: 1;
+        display: -webkit-box;
+        font-size: 14px;
+        line-height: 1.2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 6px;
+        margin-left: 6px;
+        text-align: center;
+        list-style: none;
+    }
 </style>
 
 <div class="row">
@@ -141,11 +157,11 @@
 <% @posts.each do |post| %>
     <a href="/articles/<%= post.id %>">
         <div class="image_list_item " style="background-image:url(<%= post.img %>?imageView/1/h/200/w/200);">
-            <article class="da-animate" style="display: block;">
-                <h4><%= post.title %></h4>
-            </article>
         </div>
-    </a>   
+    </a>  
+    <article style="display: block;">
+        <h4><%= post.title %></h4>
+    </article> 
 <% end %>
 </div>
 <div class="row">
