@@ -21,7 +21,12 @@ class Post < ActiveRecord::Base
   end
 
   def img
-    body[/img.*?src="(.*?)"/i,1]
+    i = body[/img.*?src="(.*?)"/i,1]
+    if i.nil?
+      '/image/img_default.png'
+    else
+      i
+    end
   end
 end
 
