@@ -118,6 +118,7 @@ end
 # check user
 get "/users/login" do
   @title = "admin login"
+  @query_string = request.query_string
   erb :"users/login"
 end
 post "/users/login" do
