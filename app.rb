@@ -124,7 +124,7 @@ post "/users/login" do
 	password = params[:password]
   if SiteConfig.get_password == password
 		session['admin_password'] = password
-    redirect to('/')
+    redirect to(request.referrer)
 	else
     redirect to('/users/login')
 	end
