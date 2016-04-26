@@ -1,54 +1,54 @@
 <style>
-      .image_list_item, .SearchPost {
-        border: 0px solid;
-        margin: 0px;
-      }
-      .gallery_description_hover, .home_description_hover {
-        height: 39.2px;
-        -webkit-line-clamp:2;
-      }
-      .gallery-post-info h4, .image_list_item h4,.SearchPost h4 {
-        height: 24px;
-        -webkit-line-clamp:1;
-      }
-      @media screen and (min-width: 1200px)  {
-        .image_list_item{
-          /* 4*/
-          width:calc(25% - 0px);
-          padding-bottom:calc(22% - 0px);
-        }
-      }
-      @media screen and (max-width: 1300px)  {
-        .image_list_item{
-          /* 4*/
-          width:calc(25% - 0px);
-          padding-bottom:calc(22% - 0px);
-        }
-      }
+  .image_list_item, .SearchPost {
+    border: 0px solid;
+    margin: 0px;
+  }
+  .gallery_description_hover, .home_description_hover {
+    height: 39.2px;
+    -webkit-line-clamp:2;
+  }
+  .gallery-post-info h4, .image_list_item h4,.SearchPost h4 {
+    height: 24px;
+    -webkit-line-clamp:1;
+  }
+  @media screen and (min-width: 1200px)  {
+    .image_list_item{
+      /* 4*/
+      width:calc(25% - 0px);
+      padding-bottom:calc(22% - 0px);
+    }
+  }
+  @media screen and (max-width: 1300px)  {
+    .image_list_item{
+      /* 4*/
+      width:calc(25% - 0px);
+      padding-bottom:calc(22% - 0px);
+    }
+  }
 
-      @media screen and (max-width: 1000px) {
-        .image_list_item{
-          /* 3*/
-          width:calc(33.333333333333% - 0px);
-          padding-bottom:calc(29.333333333333% - 0px);
-        } 
-      }
-      @media screen and (max-width: 700px) {
-        .image_list_item{
-          /* 3*/
-          width:calc(50% - 0px);
-          padding-bottom:calc(44% - 0px);
-        }
-      }
-      @media screen and (max-width: 400px) {
-        .image_list_item{
-          /* 3*/
-          width:calc(100% - 0px);
-          padding-bottom:calc(88% - 0px);
-        }  
-      }
-            
-    </style>
+  @media screen and (max-width: 1000px) {
+    .image_list_item{
+      /* 3*/
+      width:calc(33.333333333333% - 0px);
+      padding-bottom:calc(29.333333333333% - 0px);
+    } 
+  }
+  @media screen and (max-width: 700px) {
+    .image_list_item{
+      /* 3*/
+      width:calc(50% - 0px);
+      padding-bottom:calc(44% - 0px);
+    }
+  }
+  @media screen and (max-width: 400px) {
+    .image_list_item{
+      /* 3*/
+      width:calc(100% - 0px);
+      padding-bottom:calc(88% - 0px);
+    }  
+  }
+        
+</style>
 <style>
     .image_list_item{
         border: 0px solid;
@@ -63,13 +63,37 @@
         background-size: cover;
         background-repeat: no-repeat;
     }
+    #image_list_item_bg{ 
+      display: none;  
+      position: absolute;  
+      top: 0%;  
+      left: 0%;  
+      width: 100%;  
+      height: 100%;  
+      background-color: black;  
+      z-index:1001;  
+      -moz-opacity: 0.7;  
+      opacity:.70;  
+      filter: alpha(opacity=70);
+    }
 </style>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $(".image_list_item").mouseenter(function(){
+      $("image_list_item_bg").style.display ="block";
+    });
+    $(".image_list_item").mouseout(function(){
+      $("image_list_item_bg").style.display ="none";
+    });
+  });
+</script>
 
 <div class="row">
 
 <% @posts.each do |post| %>
     <a href="/articles/<%= post.id %>">
-        <div class="image_list_item " style="background-image:url(<%= post.img %>?imageView/1/h/200/w/200);">
+        <div id="image_list_item"  class="image_list_item" style="background-image:url(<%= post.img %>?imageView/1/h/200/w/200);">
+          <div id="image_list_item_bg"></div>
         </div>
     </a>
 <% end %>
