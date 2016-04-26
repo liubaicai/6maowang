@@ -78,18 +78,23 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-md-9 col-md-push-3">
+        <img src="/image/sitelogo.png">
+      </div>
 
-    <div class="container">
+      <div class="container col-md-3 col-md-pull-9">
 
-      <% if flash[:notice] %>
-        <p class="alert alert-success"><%= flash[:notice] %>
-      <% end %>
-      <% if flash[:error] %>
-        <p class="alert alert-warning"><%= flash[:error] %>
-      <% end %>
-      <%= yield %>
+        <% if flash[:notice] %>
+          <p class="alert alert-success"><%= flash[:notice] %>
+        <% end %>
+        <% if flash[:error] %>
+          <p class="alert alert-warning"><%= flash[:error] %>
+        <% end %>
+        <%= yield %>
 
-    </div><!-- /.container -->
+      </div><!-- /.container -->
+    </div>
 
     <footer class="bc-footer" role="contentinfo">
       <div class="container">
