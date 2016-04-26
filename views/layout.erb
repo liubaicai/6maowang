@@ -78,23 +78,18 @@
       </div>
     </div>
 
-    <div class="container row">
-      <div class="col-md-3 col-md-pull-9">
-        <img src="http://www.6mao.wang/wp-content/uploads/2015/12/P1000949.narrow.jpg">
-      </div>
 
-      <div class="col-md-9 col-md-push-3">
+    <div class="container">
 
-        <% if flash[:notice] %>
-          <p class="alert alert-success"><%= flash[:notice] %>
-        <% end %>
-        <% if flash[:error] %>
-          <p class="alert alert-warning"><%= flash[:error] %>
-        <% end %>
-        <%= yield %>
+      <% if flash[:notice] %>
+        <p class="alert alert-success"><%= flash[:notice] %>
+      <% end %>
+      <% if flash[:error] %>
+        <p class="alert alert-warning"><%= flash[:error] %>
+      <% end %>
+      <%= yield %>
 
-      </div><!-- /.container -->
-    </div>
+    </div><!-- /.container -->
 
     <footer class="bc-footer" role="contentinfo">
       <div class="container">
