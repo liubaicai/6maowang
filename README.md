@@ -1,3 +1,3 @@
-## yo!
+## 韭菜的个人主页
 
-This is just a simple blog, which uses Sinatra + PostgreSQL + Heroku + ActiveRecord + Tux + Bootstrap: [http://sixmaowang.herokuapp.com/](http://sixmaowang.herokuapp.com/)
+一个用 Sinatra + PostgreSQL + Heroku + ActiveRecord + Bootstrap等技术实现的网站: [http://sixmaowang.herokuapp.com/](http://sixmaowang.herokuapp.com/)
