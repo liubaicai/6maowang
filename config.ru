@@ -1,4 +1,4 @@
 # config.ru
 
-require './app'
+require './setup'
 run Sinatra::Application
