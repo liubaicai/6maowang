@@ -9,5 +9,6 @@ class Photo < ActiveRecord::Base
 end
 
 get '/' do
-  'galleries :'+Gallery.count.to_s+',photos :'+Photo.count.to_s
+  @test = 'galleries :'+Gallery.count.to_s+',photos :'+Photo.count.to_s
+  erb :'index'
 end
