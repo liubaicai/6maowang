@@ -1,0 +1,1 @@
+Gallery.create(title: '其他')
