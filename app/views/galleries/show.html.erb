@@ -6,12 +6,12 @@
   </div>
 
   <div class="container-fluid" id="fh5co-image-grid">
-    <div class="grid" style="position: relative;">
+    <div class="grid">
       <div class="grid-sizer"></div>
 
       <% unless @gallery.photos.nil? %>
           <% @gallery.photos.each do |photo| %>
-              <div class="grid-item item animate-box" data-animate-effect="fadeIn" style="position: absolute; left: 0%; top: 0px;">
+              <div class="grid-item item animate-box" data-animate-effect="fadeIn">
                 <a href="<%= photo.url %>" class="image-popup"
                    title="<%= photo.title %>"
                    exif="<%= photo.exif %>"
