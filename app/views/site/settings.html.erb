@@ -1,0 +1,36 @@
+
+<div>
+  <h1>网站设置</h1>
+</div>
+
+<%= form_tag('/manager/edit_settings', method: 'post', class: 'form-horizontal') do |f| %>
+    <div class="form-group">
+      <label for="input" class="col-sm-3 control-label">管理员密码</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="password" value="<%= Settings.get('admin','password') %>"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="input" class="col-sm-3 control-label">阿里云id</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="access_key_id" value="<%= Settings.get('aliyun','access_key_id') %>"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="input" class="col-sm-3 control-label">阿里云secret</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="access_key_secret" value="<%= Settings.get('aliyun','access_key_secret') %>"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="input" class="col-sm-3 control-label">阿里云endpoint</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="endpoint" value="<%= Settings.get('aliyun','endpoint') %>"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-3 col-sm-6">
+        <button type="submit" class="btn btn-primary btn-block">保存</button>
+      </div>
+    </div>
+<% end %>

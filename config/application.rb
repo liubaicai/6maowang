@@ -33,3 +33,39 @@ module Maowang
     config.active_record.raise_in_transactional_callbacks = true
   end
 end
+
+$APP_CONFIG_FILE_PATH = 'config/app_config.yml'
+$APP_CONFIG = YAML.load_file($APP_CONFIG_FILE_PATH)
+
+class Settings
+  def self.get(mod,key)
+    $APP_CONFIG[mod][key]
+  end
+  def self.set(mod,key,value,autosave=true)
+    $APP_CONFIG[mod][key] = value
+    if autosave
+      save_config
+    end
+  end
+  def self.save_config
+    result = true
+    begin
+      File.open($APP_CONFIG_FILE_PATH, 'w') { |f|
+        f.puts $APP_CONFIG.ya2yaml
+      }
+    rescue => err
+      logger = Logger.new('log/config_err.log')
+      logger.error err
+      result = false
+    end
+    result
+  end
+end
+
+require 'aliyun/oss'
+$OSS_Client = Aliyun::OSS::Client.new(
+    :endpoint => Settings.get('aliyun','endpoint'),
+    :access_key_id => Settings.get('aliyun','access_key_id'),
+    :access_key_secret => Settings.get('aliyun','access_key_secret'))
+
+$CACHE_CACHE = ActiveSupport::Cache::MemoryStore.new

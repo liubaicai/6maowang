@@ -1,72 +1,31 @@
+<p id="notice"><%= notice %></p>
 
-<div id="fh5co-page">
+<h1>Listing Galleries</h1>
 
-  <div class="aside-toggle btn-circle">
-    <a href="/index.html#"><span>More</span><em>More</em></a>
-  </div>
+<table>
+  <thead>
+  <tr>
+    <th>Title</th>
+    <th>Cover</th>
+    <th>Description</th>
+    <th colspan="3"></th>
+  </tr>
+  </thead>
 
-  <div id="fh5co-aside">
-    <div class="image-bg"></div>
-    <div class="overlay"></div>
-    <div class="row">
-      <div class="col-md-12">
-        <div id="fh5co-aside-inner">
-          <div class="row" id="fh5co-bio">
-            <div class="col-md-12">
-              <h2>About Me</h2>
-            </div>
-            <div class="col-md-12">
-              <p><a href="http://weibo.com/liubaicai" target="_blank">@刘白菜</a>,
-                程序员, 铲屎官, ACG爱好者, 业余摄影。 存放一些自己拍的照片, 留作纪念。</p>
-            </div>
-            <!--<div class="col-md-6">-->
-            <!---->
-            <!--</div>-->
-            <!--<div class="col-md-12 fh5co-social">-->
-            <!--<a href="/index.html#"><i class="icon-envelope"></i></a>-->
-            <!--<a href="/index.html#"><i class="icon-twitter"></i></a>-->
-            <!--<a href="/index.html#"><i class="icon-linkedin"></i></a>-->
-            <!--<a href="/index.html#"><i class="icon-instagram"></i></a>-->
-            <!--<a href="/index.html#"><i class="icon-google-plus"></i></a>-->
-            <!--</div>-->
-            <div class="col-md-12" style="margin-top: 40px;">
-              <p>京ICP备14022168号. Power by <a href="http://www.liubaicai.net/"
-                                             target="_blank">刘白菜</a>,
-                项目源码托管于<a href="https://github.com/liubaicai/6maowang" target="_blank">GitHub</a>。</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <tbody>
+  <% @galleries.each do |gallery| %>
+      <tr>
+        <td><%= gallery.title %></td>
+        <td><%= gallery.cover %></td>
+        <td><%= gallery.description %></td>
+        <td><%= link_to 'Show', gallery %></td>
+        <td><%= link_to 'Edit', edit_gallery_path(gallery) %></td>
+        <td><%= link_to 'Destroy', gallery, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
 
-  <div class="container-fluid" id="fh5co-image-grid">
+<br>
 
-
-    <div class="grid">
-      <div class="grid-sizer"></div>
-
-      <% @galleries.each do |gallery| %>
-          <div class="grid-item item animate-box" data-animate-effect="fadeIn">
-            <a href="<%= gallery_url(gallery) %>">
-              <div class="img-wrap">
-                <img src="<%= gallery.cover %>" alt="" class="img-responsive">
-              </div>
-              <div class="text-wrap">
-                <div class="text-inner">
-                  <div>
-                    <h2><%= gallery.title %></h2>
-                    <span><%= gallery.photos.size %> photos</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-      <% end %>
-
-    </div>
-
-
-  </div>
-
-</div>
+<%= link_to 'New Gallery', new_gallery_path %>

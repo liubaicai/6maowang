@@ -1,37 +1,19 @@
+<p id="notice"><%= notice %></p>
 
-<div id="fh5co-page">
+<p>
+  <strong>Title:</strong>
+  <%= @gallery.title %>
+</p>
 
-  <div class="back-to-home btn-circle">
-    <a href="/index.html"><span>Back</span><em>Back</em></a>
-  </div>
+<p>
+  <strong>Cover:</strong>
+  <%= @gallery.cover %>
+</p>
 
-  <div class="container-fluid" id="fh5co-image-grid">
-    <div class="grid">
-      <div class="grid-sizer"></div>
+<p>
+  <strong>Description:</strong>
+  <%= @gallery.description %>
+</p>
 
-      <% unless @gallery.photos.nil? %>
-          <% @gallery.photos.each do |photo| %>
-              <div class="grid-item item animate-box" data-animate-effect="fadeIn">
-                <a href="<%= photo.url %>" class="image-popup"
-                   title="<%= photo.title %>"
-                   exif="<%= photo.exif %>"
-                   description="<%= photo.description %>">
-                  <div class="img-wrap">
-                    <img src="<%= photo.url %>" alt="" class="img-responsive">
-                  </div>
-                  <div class="text-wrap">
-                    <div class="text-inner popup">
-                      <div>
-                        <h2><%= photo.title %></h2>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </div>
-          <% end %>
-      <% end %>
-
-    </div>
-  </div>
-
-</div>
+<%= link_to 'Edit', edit_gallery_path(@gallery) %> |
+<%= link_to 'Back', galleries_path %>

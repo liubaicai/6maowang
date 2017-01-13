@@ -1,0 +1,72 @@
+
+<div id="fh5co-page">
+
+  <div class="aside-toggle btn-circle">
+    <a href="/index.html#"><span>More</span><em>More</em></a>
+  </div>
+
+  <div id="fh5co-aside">
+    <div class="image-bg"></div>
+    <div class="overlay"></div>
+    <div class="row">
+      <div class="col-md-12">
+        <div id="fh5co-aside-inner">
+          <div class="row" id="fh5co-bio">
+            <div class="col-md-12">
+              <h2>About Me</h2>
+            </div>
+            <div class="col-md-12">
+              <p><a href="http://weibo.com/liubaicai" target="_blank">@刘白菜</a>,
+                程序员, 铲屎官, ACG爱好者, 业余摄影。 存放一些自己拍的照片, 留作纪念。</p>
+            </div>
+            <div class="col-md-6">
+              <ul>
+                <% if has_auth %>
+                    <li><a href="/manager">管理</a></li>
+                    <li><a href="/user/logout">注销</a></li>
+                <% else %>
+                    <li><a href="/user/login">登录</a></li>
+                <% end %>
+              </ul>
+            </div>
+            <div class="col-md-12" style="margin-top: 40px;">
+              <p>京ICP备14022168号. Power by <a href="http://www.liubaicai.net/"
+                                             target="_blank">刘白菜</a>,
+                项目源码托管于<a href="https://github.com/liubaicai/6maowang" target="_blank">GitHub</a>。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid" id="fh5co-image-grid">
+
+
+    <div class="grid">
+      <div class="grid-sizer"></div>
+
+      <% @galleries.each do |gallery| %>
+          <div class="grid-item item animate-box" data-animate-effect="fadeIn">
+            <a href="/detail/<%= gallery.id %>">
+              <div class="img-wrap">
+                <img src="<%= gallery.cover %>" alt="" class="img-responsive">
+              </div>
+              <div class="text-wrap">
+                <div class="text-inner">
+                  <div>
+                    <h2><%= gallery.title %></h2>
+                    <span><%= gallery.photos.size %> photos</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+      <% end %>
+
+    </div>
+
+
+  </div>
+
+</div>

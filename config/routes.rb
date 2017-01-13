@@ -1,8 +1,16 @@
 Rails.application.routes.draw do
 
-  root 'galleries#index'
+  root 'site#index'
 
-  get 'index' => 'galleries#index'
+  get 'index' => 'site#index'
+  get 'detail/:id' => 'site#detail'
+  get 'manager' => 'site#manager'
+  get 'manager/settings' => 'site#settings'
+  post 'manager/edit_settings' => 'site#edit_settings'
+
+  get 'user/login'
+  post 'user/login' => 'user#post_login'
+  get 'user/logout'
 
   resources :photos
   resources :galleries
