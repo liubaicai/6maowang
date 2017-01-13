@@ -19,3 +19,4 @@
 
 # Ignore ide config.
 /.idea/*
+/Gemfile.lock
