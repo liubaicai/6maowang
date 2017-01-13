@@ -49,7 +49,7 @@
       <div class="grid-sizer"></div>
 
       <% @galleries.each do |gallery| %>
-          <div class="grid-item item animate-box fadeIn animated-fast" data-animate-effect="fadeIn" style="position: absolute; left: 0%; top: 0px;">
+          <div class="grid-item item animate-box" data-animate-effect="fadeIn" style="position: absolute; left: 0%; top: 0px;">
             <a href="<%= gallery_url(gallery) %>">
               <div class="img-wrap">
                 <img src="<%= gallery.cover %>" alt="" class="img-responsive">
