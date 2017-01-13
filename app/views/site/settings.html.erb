@@ -11,6 +11,18 @@
       </div>
     </div>
     <div class="form-group">
+      <label for="input" class="col-sm-3 control-label">七牛access_key</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="qn_access_key" value="<%= Settings.get('qiniu','access_key') %>"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="input" class="col-sm-3 control-label">七牛secret_key</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="qn_secret_key" value="<%= Settings.get('qiniu','secret_key') %>"/>
+      </div>
+    </div>
+    <div class="form-group">
       <label for="input" class="col-sm-3 control-label">阿里云id</label>
       <div class="col-sm-8">
         <input class="form-control" name="access_key_id" value="<%= Settings.get('aliyun','access_key_id') %>"/>

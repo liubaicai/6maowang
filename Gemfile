@@ -27,6 +27,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # 阿里云
 gem 'aliyun-sdk'
 
+# 七牛云存储
+gem 'qiniu'
+
 # 设置保存插件
 gem 'ya2yaml'
 
