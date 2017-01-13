@@ -11,23 +11,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161116134200) do
+ActiveRecord::Schema.define(version: 20170113061318) do
 
   create_table "galleries", force: :cascade do |t|
     t.string   "title",                    null: false
-    t.text     "description", default: ""
+    t.string   "cover",                    null: false
+    t.string   "description", default: ""
     t.datetime "created_at",               null: false
     t.datetime "updated_at",               null: false
   end
 
   create_table "photos", force: :cascade do |t|
     t.string   "title",                    null: false
-    t.text     "description", default: ""
     t.string   "url",                      null: false
+    t.string   "description", default: ""
     t.string   "exif",        default: ""
     t.datetime "created_at",               null: false
     t.datetime "updated_at",               null: false
     t.integer  "gallery_id"
   end
+
+  add_index "photos", ["gallery_id"], name: "index_photos_on_gallery_id"
 
 end
