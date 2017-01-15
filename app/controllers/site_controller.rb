@@ -60,11 +60,7 @@ class SiteController < ApplicationController
         #要上传文件的本地路径
         #filePath = tempfile.path
         #调用upload_with_token_2方法上传
-        code, result, response_headers = Qiniu::Storage.upload_with_token_2(
-            uptoken,
-            tempfile,
-            key
-        )
+        Qiniu.upload_file uptoken: uptoken, file: tempfile.path, bucket: bucket, key: key
         file_url = "#{$base_qiniu_url}#{key}"
 
         # bucket = $OSS_Client.get_bucket('6mao')
