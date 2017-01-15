@@ -2,7 +2,7 @@ class SiteController < ApplicationController
   skip_before_action :check_auth, only: [:index, :detail]
 
   def index
-    @galleries = Gallery.all
+    @galleries = Gallery.all.order('created_at DESC')
   end
 
   def detail
