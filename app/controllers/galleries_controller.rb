@@ -14,7 +14,7 @@ class GalleriesController < ApplicationController
 
   # GET /galleries/new
   def new
-    @gallery =  Gallery.create(title: '新相册',cover: '',description: '')
+    @gallery =  Gallery.create(title: '新相册',cover: '/image/default.jpg',description: '')
   end
 
   # GET /galleries/1/edit
