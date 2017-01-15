@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   get 'manager' => 'site#manager'
   get 'manager/settings' => 'site#settings'
   post 'manager/edit_settings' => 'site#edit_settings'
+  post 'file/upload' => 'site#upload'
 
   get 'user/login'
   post 'user/login' => 'user#post_login'

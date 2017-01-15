@@ -11,6 +11,12 @@
       </div>
     </div>
     <div class="form-group">
+      <label for="input" class="col-sm-3 control-label">七牛base_urly</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="qn_base_url" value="<%= Settings.get('qiniu','base_url') %>"/>
+      </div>
+    </div>
+    <div class="form-group">
       <label for="input" class="col-sm-3 control-label">七牛access_key</label>
       <div class="col-sm-8">
         <input class="form-control" name="qn_access_key" value="<%= Settings.get('qiniu','access_key') %>"/>

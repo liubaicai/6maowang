@@ -19,6 +19,7 @@ class SiteController < ApplicationController
 
   def edit_settings
     Settings.set('admin','password',params[:password])
+    Settings.set('qiniu','base_url',params[:qn_base_url])
     Settings.set('qiniu','access_key',params[:qn_access_key])
     Settings.set('qiniu','secret_key',params[:qn_secret_key])
     Settings.set('aliyun','access_key_id',params[:access_key_id])
@@ -29,38 +30,40 @@ class SiteController < ApplicationController
   end
 
   def upload
-    unless params[:fileup] && (tempfile = params[:fileup].tempfile)
-      render plain: 'null'
+    unless params[:file] && (tempfile = params[:file].tempfile)
+      raise Exception
     else
       begin
-        Qiniu.establish_connection!(
-            :access_key => Config.getValue('qn_ak'),
-            :secret_key => Config.getValue('qn_sk'))
-        base_qiniu_url = 'http://7xpagu.com1.z0.glb.clouddn.com/'
-        #要上传的空间
-        bucket = 'www-liubaicai-net'
-        #上传到七牛后保存的文件名
-        key = "images/"+Time.now.to_i.to_s+".jpg"
-        #构建上传策略
-        put_policy = Qiniu::Auth::PutPolicy.new(
-            bucket,      # 存储空间
-            key,     # 最终资源名，可省略，即缺省为“创建”语义，设置为nil为普通上传
-            3600    #token过期时间，默认为3600s
-        )
-        #生成上传 Token
-        uptoken = Qiniu::Auth.generate_uptoken(put_policy)
-        #要上传文件的本地路径
-        #filePath = tempfile.path
-        #调用upload_with_token_2方法上传
-        code, result, response_headers = Qiniu::Storage.upload_with_token_2(
-            uptoken,
-            tempfile,
-            key
-        )
-        render plain: base_qiniu_url + key
+        # bucket = $OSS_Client.get_bucket('6mao')
+        # filename = "attachments/#{SecureRandom.uuid}.jpg"
+        # bucket.put_object(filename, :file => tempfile)
+        # file_url = URI.decode(bucket.object_url(filename, false))
+        file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
+        exif_obj = EXIFR::JPEG.new(params[:file].tempfile)
+        if exif_obj.exif?
+          exif_hash = exif_obj.exif.to_hash
+          exif = "#{exif_hash[:make]} #{exif_hash[:model]} #{exif_hash[:focal_length_in_35mm_film]}mm f#{exif_hash[:f_number].to_f} #{exif_hash[:exposure_time]}s iso#{exif_hash[:iso_speed_ratings]}"
+        end
+
+        photo = Photo.create(title: params[:name],
+                     url: file_url,
+                     description: '',
+                     exif: exif,
+                     gallery_id: params[:gallery_id])
+        result = '
+            <tr>
+              <td>'+photo.title.to_s+'</td>
+              <td>'+photo.url.to_s+'</td>
+              <td>'+photo.description.to_s+'</td>
+              <td>'+photo.exif.to_s+'</td>
+              <td><a data-confirm="Are you sure?" rel="nofollow" data-method="delete" href="/photos/'+photo.id.to_s+'">Destroy</a></td>
+            </tr>
+'
+        render plain: result
       rescue Exception => e
-        render plain: e.message
+        raise e
       end
     end
   end
 end
+

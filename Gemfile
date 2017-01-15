@@ -36,6 +36,9 @@ gem 'ya2yaml'
 # windows时区插件
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
 
+# exif获取
+gem 'exifr'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
