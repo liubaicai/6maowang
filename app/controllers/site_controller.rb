@@ -34,11 +34,11 @@ class SiteController < ApplicationController
       raise Exception
     else
       begin
-        # bucket = $OSS_Client.get_bucket('6mao')
-        # filename = "attachments/#{SecureRandom.uuid}.jpg"
-        # bucket.put_object(filename, :file => tempfile)
-        # file_url = URI.decode(bucket.object_url(filename, false))
-        file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
+        bucket = $OSS_Client.get_bucket('6mao')
+        filename = "photos/#{SecureRandom.uuid}.jpg"
+        bucket.put_object(filename, :file => tempfile)
+        file_url = URI.decode(bucket.object_url(filename, false))
+        #file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
         exif_obj = EXIFR::JPEG.new(params[:file].tempfile)
         if exif_obj.exif?
           exif_hash = exif_obj.exif.to_hash
