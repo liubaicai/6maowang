@@ -34,11 +34,38 @@ class SiteController < ApplicationController
       raise Exception
     else
       begin
+        $base_qiniu_url = Settings.get('qiniu','base_url')
+        # 构建鉴权对象
+        Qiniu.establish_connection! :access_key => Settings.get('qiniu','access_key'),
+                                    :secret_key => Settings.get('qiniu','secret_key')
+
         exif_obj = EXIFR::JPEG.new(params[:file].tempfile)
         if exif_obj.exif?
           exif_hash = exif_obj.exif.to_hash
           exif = "#{exif_hash[:make]} #{exif_hash[:model]} #{exif_hash[:focal_length_in_35mm_film]}mm f#{exif_hash[:f_number].to_f} #{exif_hash[:exposure_time]}s iso#{exif_hash[:iso_speed_ratings]}"
         end
+
+        #要上传的空间
+        bucket = 'www-6mao-wang'
+        #上传到七牛后保存的文件名
+        key = "photos/#{params[:name]}-#{Time.now.to_i}.jpg"
+        #构建上传策略
+        put_policy = Qiniu::Auth::PutPolicy.new(
+            bucket,      # 存储空间
+            key,     # 最终资源名，可省略，即缺省为“创建”语义，设置为nil为普通上传
+            3600    #token过期时间，默认为3600s
+        )
+        #生成上传 Token
+        uptoken = Qiniu::Auth.generate_uptoken(put_policy)
+        #要上传文件的本地路径
+        #filePath = tempfile.path
+        #调用upload_with_token_2方法上传
+        code, result, response_headers = Qiniu::Storage.upload_with_token_2(
+            uptoken,
+            tempfile,
+            key
+        )
+        file_url = "#{$base_qiniu_url}#{key}"
 
         # bucket = $OSS_Client.get_bucket('6mao')
         # filename = "photos/#{params[:name]}-#{Time.now.to_i}.jpg"
@@ -46,8 +73,8 @@ class SiteController < ApplicationController
         # file_url = URI.decode(bucket.object_url(filename, false))
         #file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
 
-        FileUtils.cp tempfile.path, "/datadisk/6maowang/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
-        file_url = "/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
+        # FileUtils.cp tempfile.path, "/datadisk/6maowang/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
+        # file_url = "/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
 
         photo = Photo.create(title: params[:name],
                      url: "#{file_url}",
