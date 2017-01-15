@@ -139,6 +139,7 @@
 
         // 实例化
         uploader = WebUploader.create({
+            threads: 1,
             pick: {
                 id: '#filePicker',
                 label: '点击选择图片'
