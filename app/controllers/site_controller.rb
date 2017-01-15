@@ -35,9 +35,8 @@ class SiteController < ApplicationController
     else
       begin
         bucket = $OSS_Client.get_bucket('6mao')
-        filename = "photos/#{SecureRandom.uuid}.jpg"
-        bucket.put_object(filename, :file => tempfile)
-        file_url = URI.decode(bucket.object_url(filename, false))
+        bucket.put_object(params[:name], :file => tempfile)
+        file_url = URI.decode(bucket.object_url(params[:name], false))
         #file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
         exif_obj = EXIFR::JPEG.new(params[:file].tempfile)
         if exif_obj.exif?
