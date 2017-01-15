@@ -46,7 +46,7 @@ class SiteController < ApplicationController
         # file_url = URI.decode(bucket.object_url(filename, false))
         #file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
 
-        File.open("/datadisk/6mao/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg", "wb") { |f| f.write(tempfile.read) }
+        File.open("/datadisk/6maowang/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg", "wb") { |f| f.write(tempfile.read) }
         file_url = "/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
 
         photo = Photo.create(title: params[:name],
