@@ -12,12 +12,12 @@
       <% unless @gallery.photos.nil? %>
           <% @gallery.photos.each do |photo| %>
               <div class="grid-item item animate-box" data-animate-effect="fadeIn">
-                <a href="<%= photo.url %>" class="image-popup"
+                <a href="<%= photo.url %>?imageMogr2/auto-orient" class="image-popup"
                    title="<%= photo.title %>"
                    exif="<%= photo.exif %>"
                    description="<%= photo.description %>">
                   <div class="img-wrap">
-                    <img src="<%= photo.url %>" alt="" class="img-responsive">
+                    <img src="<%= photo.url %>?imageMogr2/auto-orient" alt="" class="img-responsive">
                   </div>
                   <div class="text-wrap">
                     <div class="text-inner popup">
