@@ -11,8 +11,8 @@ $(document).ready(function() {
 			image: {
 				titleSrc: function(item) {
 					return item.el.attr('title')
-						+ '<small style="display:inline;">   '+item.el.attr('exif')+'</small>'
-						+ '<small>'+item.el.attr('description')+'</small>';
+						+ '<small style="display:inline;">   '+item.el.attr('description')+'</small>'
+						+ '<small>'+item.el.attr('exif')+'</small>';
 				}
 			},
 			zoom: {
