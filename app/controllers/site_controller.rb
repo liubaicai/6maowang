@@ -48,7 +48,7 @@ class SiteController < ApplicationController
         #要上传的空间
         bucket = 'www-6mao-wang'
         #上传到七牛后保存的文件名
-        key = "photos/#{params[:name]}-#{Time.now.to_i}.jpg"
+        key = "photos/#{Time.now.to_i}-#{params[:name]}"
         #构建上传策略
         put_policy = Qiniu::Auth::PutPolicy.new(
             bucket,      # 存储空间
