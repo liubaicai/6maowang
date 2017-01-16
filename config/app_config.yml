@@ -5,7 +5,7 @@ aliyun:
   access_key_id: ""
   access_key_secret: ""
   endpoint: ""
-qiniu:
-  base_url: ""
+qiniu: 
   access_key: ""
+  base_url: ""
   secret_key: ""

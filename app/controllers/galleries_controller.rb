@@ -4,7 +4,7 @@ class GalleriesController < ApplicationController
   # GET /galleries
   # GET /galleries.json
   def index
-    @galleries = Gallery.all
+    @galleries = Gallery.all.order('created_at DESC')
   end
 
   # GET /galleries/1
@@ -15,6 +15,7 @@ class GalleriesController < ApplicationController
   # GET /galleries/new
   def new
     @gallery =  Gallery.create(title: '新相册',cover: '/image/default.jpg',description: '')
+    render 'edit'
   end
 
   # GET /galleries/1/edit
@@ -42,7 +43,7 @@ class GalleriesController < ApplicationController
   def update
     respond_to do |format|
       if @gallery.update(gallery_params)
-        format.html { redirect_to @gallery, notice: 'Gallery was successfully updated.' }
+        format.html { redirect_to galleries_url, notice: 'Gallery was successfully updated.' }
         format.json { render :show, status: :ok, location: @gallery }
       else
         format.html { render :edit }

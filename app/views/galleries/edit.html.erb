@@ -1,6 +1,98 @@
-<h1>Editing Gallery</h1>
+<div class="container-fluid">
+  <p id="notice"><%= notice %></p>
 
-<%= render 'form' %>
+  <h1>相册编辑</h1>
 
-<%= link_to 'Show', @gallery %> |
-<%= link_to 'Back', galleries_path %>
+  <%= form_for(@gallery) do |f| %>
+      <% if @gallery.errors.any? %>
+          <div id="error_explanation">
+            <h2><%= pluralize(@gallery.errors.count, "error") %> prohibited this gallery from being saved:</h2>
+
+            <ul>
+              <% @gallery.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+      <% end %>
+
+      <div class="field form-group">
+        <%= f.label :title %><br>
+        <%= f.text_field :title,:class=>'form-control' %>
+      </div>
+      <div class="field form-group">
+        <%= f.label :cover %><br>
+        <%= f.text_field :cover,:class=>'form-control' %>
+      </div>
+      <div class="field form-group">
+        <%= f.label :description %><br>
+        <%= f.text_field :description,:class=>'form-control' %>
+      </div>
+
+      <div>
+        <link rel="stylesheet" href="/css/webuploader.css">
+        <link rel="stylesheet" href="/css/upload.style.css">
+
+        <div id="wrapper">
+          <div id="container">
+            <!--头部，相册选择和格式选择-->
+
+            <div id="uploader" tag="<%= @gallery.id %>">
+              <div class="queueList">
+                <div id="dndArea" class="placeholder">
+                  <div id="filePicker"></div>
+                  <p>或将照片拖到这里，单次最多可选300张</p>
+                </div>
+              </div>
+              <div class="statusBar" style="display:none;">
+                <div class="progress">
+                  <span class="text">0%</span>
+                  <span class="percentage"></span>
+                </div><div class="info"></div>
+                <div class="btns">
+                  <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script type="text/javascript" src="/js/jquery.js"></script>
+        <script type="text/javascript" src="/js/webuploader.js"></script>
+        <script type="text/javascript" src="/js/upload.js"></script>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">相册图片</div>
+
+        <table class="table table-bordered">
+          <thead>
+          <tr class="active">
+            <th>Title</th>
+            <th>Url</th>
+            <th>Description</th>
+            <th>Exif</th>
+            <th colspan="1"></th>
+          </tr>
+          </thead>
+
+          <tbody id="photos">
+          <% @gallery.photos.each do |photo| %>
+              <tr>
+                <td><%= photo.title %></td>
+                <td><%= photo.url %></td>
+                <td><%= photo.description %></td>
+                <td><%= photo.exif %></td>
+                <td><%= link_to 'Destroy', photo, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+              </tr>
+          <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <input type="submit" name="commit" value="Update Gallery" class="btn btn-primary"> |
+        <%= link_to 'Back', galleries_path, :class => 'btn btn-default btn-xs',:role => 'button' %>
+      </div>
+  <% end %>
+</div>

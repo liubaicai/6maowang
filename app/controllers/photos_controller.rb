@@ -55,11 +55,10 @@ class PhotosController < ApplicationController
   # DELETE /photos/1.json
   def destroy
     @photo.destroy
-    redirect_to :back
-    # respond_to do |format|
-    #   format.html { redirect_to photos_url, notice: 'Photo was successfully destroyed.' }
-    #   format.json { head :no_content }
-    # end
+    respond_to do |format|
+      format.html { redirect_to :back, notice: 'Photo was successfully destroyed.' }
+      format.json { head :no_content }
+    end
   end
 
   private
