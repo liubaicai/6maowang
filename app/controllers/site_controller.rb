@@ -6,7 +6,10 @@ class SiteController < ApplicationController
   end
 
   def detail
-    @gallery = Gallery.find(params[:id])
+    @gallery = Gallery.where(:id => params[:id]).first
+    if @gallery.nil?
+      redirect_to '/'
+    end
   end
 
   def manager
