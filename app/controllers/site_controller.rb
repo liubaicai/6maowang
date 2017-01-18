@@ -8,7 +8,8 @@ class SiteController < ApplicationController
   def detail
     @gallery = Gallery.where(:id => params[:id]).first
     if @gallery.nil?
-      redirect_to '/'
+      render_404
+      # redirect_to '/'
     end
   end
 
