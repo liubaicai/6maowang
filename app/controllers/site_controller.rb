@@ -2,7 +2,7 @@ class SiteController < ApplicationController
   skip_before_action :check_auth, only: [:index, :detail]
 
   def index
-    @galleries = Gallery.all.order('created_at DESC')
+    @galleries = Gallery.all.order('updated_at desc')
   end
 
   def detail
@@ -81,6 +81,8 @@ class SiteController < ApplicationController
                      description: '',
                      exif: exif,
                      gallery_id: params[:gallery_id])
+        photo.gallery.updated_at = Time.now
+        photo.gallery.save
         result = '
             <tr>
               <td>'+photo.title.to_s+'</td>
