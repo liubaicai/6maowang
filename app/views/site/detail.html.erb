@@ -30,7 +30,7 @@
       <div class="grid-sizer"></div>
 
       <% unless @gallery.photos.nil? %>
-          <% @gallery.photos.each do |photo| %>
+          <% @gallery.photos.order('created_at desc').each do |photo| %>
                 <div class="grid-item item">
                   <!--<div class="grid-item item animate-box" data-animate-effect="fadeIn">-->
                 <a href="<%= photo.url %>-view2" class="image-popup"
