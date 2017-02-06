@@ -2,11 +2,6 @@ class SiteController < ApplicationController
   skip_before_action :check_auth, only: [:index, :detail]
 
   def index
-    galleries = Gallery.all
-    galleries.each do |gallery|
-      gallery.updated_at = gallery.created_at
-      gallery.save
-    end
     @galleries = Gallery.all.order('updated_at desc')
   end
 
