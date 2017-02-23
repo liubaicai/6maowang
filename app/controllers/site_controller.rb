@@ -46,7 +46,7 @@ class SiteController < ApplicationController
         exif_obj = EXIFR::JPEG.new(params[:file].tempfile)
         if exif_obj.exif?
           exif_hash = exif_obj.exif.to_hash
-          exif = "#{exif_hash[:make]} #{exif_hash[:model]} #{exif_hash[:focal_length]}mm f#{exif_hash[:f_number].to_f} #{exif_hash[:exposure_time]}s iso#{exif_hash[:iso_speed_ratings]}"
+          exif = "#{exif_hash[:make]} #{exif_hash[:model]} #{exif_hash[:focal_length].to_f}mm f#{exif_hash[:f_number].to_f} #{exif_hash[:exposure_time]}s iso#{exif_hash[:iso_speed_ratings]}"
         end
 
         #要上传的空间
