@@ -33,6 +33,19 @@ class SiteController < ApplicationController
     redirect_to :back
   end
 
+  def update_description
+    begin
+      id = params[:'id']
+      description = params[:'description']
+      photo = Photo.find(id)
+      photo.description = description
+      photo.save
+      render plain: 'Success'
+    rescue Exception => e
+      render plain: e
+    end
+  end
+
   def upload
     unless params[:file] && (tempfile = params[:file].tempfile)
       raise Exception

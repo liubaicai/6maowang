@@ -77,11 +77,19 @@
           </thead>
 
           <tbody id="photos">
-          <% @gallery.photos.each do |photo| %>
+          <% @gallery.photos.order('created_at desc').each do |photo| %>
               <tr>
                 <td><%= photo.title %></td>
-                <td><%= photo.url %></td>
-                <td><%= photo.description %></td>
+                <td>
+                  <div>
+                    <img height="100" src="<%= photo.url %>-view"/>
+                  </div>
+                </td>
+                <td>
+                  <div id="alert-<%= photo.id %>" class="alert alert-info hidden" role="alert"></div>
+                  <textarea class="form-control" rows="3" id="description-<%= photo.id %>"><%= photo.description %></textarea>
+                  <button class="btn btn-default btn-xs btn-block" type="button" onclick="saveDescription(<%= photo.id %>);">Save</button>
+                </td>
                 <td><%= photo.exif %></td>
                 <td><%= link_to 'Destroy', photo, method: :delete, data: { confirm: 'Are you sure?' } %></td>
               </tr>
@@ -96,3 +104,24 @@
       </div>
   <% end %>
 </div>
+<script>
+  function saveDescription(id) {
+    $.ajax({
+      url: '/photo/update_description',
+      method: 'POST',
+      data: "id="+id+"&description="+$("#description-"+id).val(),
+      processData: false,
+      contentType: 'application/x-www-form-urlencoded',
+      headers: {
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+      },
+      success: function(result) {
+        $("#alert-"+id).html(result);
+        $("#alert-"+id).removeClass("hidden");
+        setTimeout(function(){
+          $("#alert-"+id).addClass("hidden");
+        },1000);
+      }
+    });
+  }
+</script>
