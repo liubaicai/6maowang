@@ -84,7 +84,7 @@ class SiteController < ApplicationController
         # filename = "photos/#{params[:name]}-#{Time.now.to_i}.jpg"
         # bucket.put_object(filename, :file => tempfile)
         # file_url = URI.decode(bucket.object_url(filename, false))
-        #file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
+        # file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
 
         # FileUtils.cp tempfile.path, "/datadisk/6maowang/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
         # file_url = "/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
@@ -105,8 +105,8 @@ class SiteController < ApplicationController
               </div>
             </td>
             <td>
-              <div id="alert-'+photo.id+'" class="alert alert-info hidden" role="alert"></div>
-              <textarea class="form-control" rows="3" id="description-'+photo.id+'">'+photo.description.to_s+'</textarea>
+              <div id="alert-'+photo.id.to_s+'" class="alert alert-info hidden" role="alert"></div>
+              <textarea class="form-control" rows="3" id="description-'+photo.id.to_s+'">'+photo.description.to_s+'</textarea>
               <button class="btn btn-default btn-xs btn-block" type="button" onclick="saveDescription('+photo.id+');">Save</button>
             </td>
             <td>'+photo.exif.to_s+'</td>
