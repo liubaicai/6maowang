@@ -107,7 +107,7 @@ class SiteController < ApplicationController
             <td>
               <div id="alert-'+photo.id.to_s+'" class="alert alert-info hidden" role="alert"></div>
               <textarea class="form-control" rows="3" id="description-'+photo.id.to_s+'">'+photo.description.to_s+'</textarea>
-              <button class="btn btn-default btn-xs btn-block" type="button" onclick="saveDescription('+photo.id+');">Save</button>
+              <button class="btn btn-default btn-xs btn-block" type="button" onclick="saveDescription('+photo.id.to_s+');">Save</button>
             </td>
             <td>'+photo.exif.to_s+'</td>
             <td><a data-confirm="Are you sure?" rel="nofollow" data-method="delete" href="/photos/'+photo.id.to_s+'">Destroy</a></td>
