@@ -97,13 +97,21 @@ class SiteController < ApplicationController
         photo.gallery.updated_at = Time.now
         photo.gallery.save
         result = '
-            <tr>
-              <td>'+photo.title.to_s+'</td>
-              <td>'+photo.url.to_s+'</td>
-              <td>'+photo.description.to_s+'</td>
-              <td>'+photo.exif.to_s+'</td>
-              <td><a data-confirm="Are you sure?" rel="nofollow" data-method="delete" href="/photos/'+photo.id.to_s+'">Destroy</a></td>
-            </tr>
+          <tr>
+            <td>'+photo.title.to_s+'</td>
+            <td>
+              <div>
+                <img height="100" src="'+photo.url.to_s+'-view"/>
+              </div>
+            </td>
+            <td>
+              <div id="alert-'+photo.id+'" class="alert alert-info hidden" role="alert"></div>
+              <textarea class="form-control" rows="3" id="description-'+photo.id+'">'+photo.description.to_s+'</textarea>
+              <button class="btn btn-default btn-xs btn-block" type="button" onclick="saveDescription('+photo.id+');">Save</button>
+            </td>
+            <td>'+photo.exif.to_s+'</td>
+            <td><a data-confirm="Are you sure?" rel="nofollow" data-method="delete" href="/photos/'+photo.id.to_s+'">Destroy</a></td>
+          </tr>
 '
         render plain: result
       rescue Exception => e
