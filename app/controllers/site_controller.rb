@@ -2,11 +2,15 @@ class SiteController < ApplicationController
   skip_before_action :check_auth, only: [:index, :detail]
 
   def index
-    @galleries = Gallery.all.order('created_at DESC')
+    @galleries = Gallery.all.order('updated_at desc')
   end
 
   def detail
-    @gallery = Gallery.find(params[:id])
+    @gallery = Gallery.where(:id => params[:id]).first
+    if @gallery.nil?
+      render_404
+      # redirect_to '/'
+    end
   end
 
   def manager
@@ -29,6 +33,19 @@ class SiteController < ApplicationController
     redirect_to :back
   end
 
+  def update_description
+    begin
+      id = params[:'id']
+      description = params[:'description']
+      photo = Photo.find(id)
+      photo.description = description
+      photo.save
+      render plain: 'Success'
+    rescue Exception => e
+      render plain: e
+    end
+  end
+
   def upload
     unless params[:file] && (tempfile = params[:file].tempfile)
       raise Exception
@@ -42,7 +59,7 @@ class SiteController < ApplicationController
         exif_obj = EXIFR::JPEG.new(params[:file].tempfile)
         if exif_obj.exif?
           exif_hash = exif_obj.exif.to_hash
-          exif = "#{exif_hash[:make]} #{exif_hash[:model]} #{exif_hash[:focal_length_in_35mm_film]}mm f#{exif_hash[:f_number].to_f} #{exif_hash[:exposure_time]}s iso#{exif_hash[:iso_speed_ratings]}"
+          exif = "#{exif_hash[:make]} #{exif_hash[:model]} #{exif_hash[:focal_length].to_f}mm f#{exif_hash[:f_number].to_f} #{exif_hash[:exposure_time]}s iso#{exif_hash[:iso_speed_ratings]}"
         end
 
         #要上传的空间
@@ -67,7 +84,7 @@ class SiteController < ApplicationController
         # filename = "photos/#{params[:name]}-#{Time.now.to_i}.jpg"
         # bucket.put_object(filename, :file => tempfile)
         # file_url = URI.decode(bucket.object_url(filename, false))
-        #file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
+        # file_url = 'https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png'
 
         # FileUtils.cp tempfile.path, "/datadisk/6maowang/public/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
         # file_url = "/photos/#{params[:name]}-#{Time.now.to_i}.jpg"
@@ -77,14 +94,24 @@ class SiteController < ApplicationController
                      description: '',
                      exif: exif,
                      gallery_id: params[:gallery_id])
+        photo.gallery.updated_at = Time.now
+        photo.gallery.save
         result = '
-            <tr>
-              <td>'+photo.title.to_s+'</td>
-              <td>'+photo.url.to_s+'</td>
-              <td>'+photo.description.to_s+'</td>
-              <td>'+photo.exif.to_s+'</td>
-              <td><a data-confirm="Are you sure?" rel="nofollow" data-method="delete" href="/photos/'+photo.id.to_s+'">Destroy</a></td>
-            </tr>
+          <tr>
+            <td>'+photo.title.to_s+'</td>
+            <td>
+              <div>
+                <img height="100" src="'+photo.url.to_s+'-view"/>
+              </div>
+            </td>
+            <td>
+              <div id="alert-'+photo.id.to_s+'" class="alert alert-info hidden" role="alert"></div>
+              <textarea class="form-control" rows="3" id="description-'+photo.id.to_s+'">'+photo.description.to_s+'</textarea>
+              <button class="btn btn-default btn-xs btn-block" type="button" onclick="saveDescription('+photo.id.to_s+');">Save</button>
+            </td>
+            <td>'+photo.exif.to_s+'</td>
+            <td><a data-confirm="Are you sure?" rel="nofollow" data-method="delete" href="/photos/'+photo.id.to_s+'">Destroy</a></td>
+          </tr>
 '
         render plain: result
       rescue Exception => e

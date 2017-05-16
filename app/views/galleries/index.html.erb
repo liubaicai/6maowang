@@ -18,7 +18,11 @@
     <% @galleries.each do |gallery| %>
         <tr>
           <td><%= gallery.title %></td>
-          <td><%= gallery.cover %></td>
+          <td>
+            <div>
+              <img height="100" src="<%= gallery.cover %>-view"/>
+            </div>
+          </td>
           <td><%= gallery.description %></td>
           <!--<td><%= link_to 'Show', gallery %></td>-->
           <td><%= link_to 'Edit', edit_gallery_path(gallery) %></td>

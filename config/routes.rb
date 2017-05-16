@@ -4,10 +4,12 @@ Rails.application.routes.draw do
 
   get 'index' => 'site#index'
   get 'detail/:id' => 'site#detail'
+  get 'articles/:id' => 'site#detail'
   get 'manager' => 'site#manager'
   get 'manager/settings' => 'site#settings'
   post 'manager/edit_settings' => 'site#edit_settings'
   post 'file/upload' => 'site#upload'
+  post 'photo/update_description' => 'site#update_description'
 
   get 'user/login'
   post 'user/login' => 'user#post_login'

@@ -30,9 +30,9 @@
       <div class="grid-sizer"></div>
 
       <% unless @gallery.photos.nil? %>
-          <% @gallery.photos.each do |photo| %>
-                <div class="grid-item item">
-                  <!--<div class="grid-item item animate-box" data-animate-effect="fadeIn">-->
+          <% @gallery.photos.order('created_at desc').each do |photo| %>
+              <div class="grid-item item">
+                <!--<div class="grid-item item animate-box" data-animate-effect="fadeIn">-->
                 <a href="<%= photo.url %>-view2" class="image-popup"
                    title="<%= photo.title %>"
                    exif="<%= photo.exif %>"
@@ -43,7 +43,7 @@
                   <div class="text-wrap">
                     <div class="text-inner popup">
                       <div>
-                        <h2><%= photo.title %></h2>
+                        <h2><%= photo.description %></h2>
                       </div>
                     </div>
                   </div>

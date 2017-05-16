@@ -165,11 +165,11 @@
             },
 
             compress :{
-                width: 1500,
-                height: 1500,
+                width: 3000,
+                height: 3000,
 
                 // 图片质量，只有type为`image/jpeg`的时候才有效。
-                quality: 80,
+                quality: 100,
 
                 // 是否允许放大，如果想要生成小图的时候不失真，此选项应该设置为false.
                 allowMagnify: false,
@@ -185,7 +185,7 @@
                 noCompressIfLarger: false,
 
                 // 单位字节，如果图片大小小于此值，不会采用压缩。
-                compressSize: 102400
+                compressSize: 1024000
             },
 
             // 禁掉全局的拖拽功能。这样不会出现图片拖进页面的时候，把图片打开。
