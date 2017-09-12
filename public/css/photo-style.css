@@ -298,7 +298,7 @@ h1, h2, h3, h4, h5, h6, figure {
   transition: 0.5s;
 }
 #fh5co-image-grid .item a .text-wrap {
-  position: absolute;
+  position: relative;
   top: 0;
   bottom: 0;
   right: 0;
@@ -306,24 +306,23 @@ h1, h2, h3, h4, h5, h6, figure {
   width: 100%;
   z-index: 2;
   vertical-align: middle;
-  background: rgba(211, 56, 123, 0.67);
-  background: -moz-linear-gradient(left, rgba(211, 56, 123, 0.77) 0%, rgba(134, 40, 205, 0.77) 100%);
-  background: -webkit-gradient(left top, right top, color-stop(0%, rgba(211, 56, 123, 0.77)), color-stop(100%, rgba(134, 40, 205, 0.77)));
-  background: -webkit-linear-gradient(left, rgba(211, 56, 123, 0.77) 0%, rgba(134, 40, 205, 0.77) 100%);
-  background: -o-linear-gradient(left, rgba(211, 56, 123, 0.77) 0%, rgba(134, 40, 205, 0.77) 100%);
-  background: -ms-linear-gradient(left, rgba(211, 56, 123, 0.77) 0%, rgba(134, 40, 205, 0.77) 100%);
-  background: linear-gradient(to right, rgba(211, 56, 123, 0.77) 0%, rgba(134, 40, 205, 0.77) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d3387b', endColorstr='#8628cd', GradientType=1 );
   opacity: 0;
   visibility: hidden;
+  opacity: 1;
+  visibility: visible;
   -webkit-transition: 0.5s;
   -o-transition: 0.5s;
   transition: 0.5s;
 }
 #fh5co-image-grid .item a .text-wrap .text-inner {
   width: 100%;
-  height: 100%;
+  /*height: 100%;*/
   display: table;
+  position:absolute;
+  bottom:0;
+  background: rgba(51, 51, 51, 0.33);
+  background: -webkit-gradient(linear, 0 0, 0 bottom, from(rgba(33, 33, 33, 0)), to(rgba(33, 33, 33, 33)));
 }
 #fh5co-image-grid .item a .text-wrap .text-inner:before {
   content: "";
