@@ -21,3 +21,4 @@
 /.idea/*
 /Gemfile.lock
 *.iml
+/config/app_config.yml
