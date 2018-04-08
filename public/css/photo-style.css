@@ -339,7 +339,7 @@ h1, h2, h3, h4, h5, h6, figure {
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /*content: "\f064";*/
+  content: "\f064";
   font-size: 20px;
   color: #fff;
 }
@@ -358,7 +358,7 @@ h1, h2, h3, h4, h5, h6, figure {
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  content: "\f002";
+  /*content: "\f002";*/
   font-size: 20px;
   color: #fff;
 }
