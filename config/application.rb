@@ -10,7 +10,7 @@ require "action_mailer/railtie"
 require "action_view/railtie"
 require "sprockets/railtie"
 
-require 'exifr'
+require "exifr/jpeg"
 
 # require "rails/test_unit/railtie"
 
