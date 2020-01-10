@@ -10,15 +10,37 @@
 # Ignore the default SQLite database.
 /db/*.sqlite3
 /db/*.sqlite3-journal
+/db/*.sqlite3-*
 
 # Ignore all logfiles and tempfiles.
 /log/*
 !/log/.keep
+
 /tmp/*
+!/tmp/.keep
+
+/tmp/pids/*
+!/tmp/pids
+!/tmp/pids/.keep
+
+/tmp/storage/*
+!/tmp/storage
+!/tmp/storage/.keep
+
+/tmp/sockets/*
+!/tmp/sockets
+!/tmp/sockets/.keep
+
+/tmp/cache/*
+!/tmp/cache
+!/tmp/cache/.keep
+
 !/tmp/restart.txt
 
-# Ignore ide config.
-/.idea/*
-/Gemfile.lock
-*.iml
-/config/app_config.yml
+# Ignore uploaded files in development.
+/storage/*
+!/storage/.keep
+.byebug_history
+
+# Ignore master key for decrypting credentials and more.
+# /config/master.key
