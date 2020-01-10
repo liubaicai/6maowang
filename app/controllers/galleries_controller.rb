@@ -2,12 +2,15 @@ class GalleriesController < ApplicationController
   before_action :set_gallery, only: [:show, :edit, :update, :destroy]
 
   def index
-    galleries = Gallery.all.order('updated_at DESC')
-    render json:galleries
+    galleries = Gallery.order("updated_at DESC").page(params[:page]).per(params[:per_page])
+    page = Page.new(galleries, params[:page], params[:per_page], galleries.total_count)
+    result = Result.new(0, nil, page)
+    render json: result
   end
 
   def show
-    render json:@gallery
+    result = Result.new(0, nil, @gallery)
+    render json: result
   end
 
   def new
@@ -17,21 +20,34 @@ class GalleriesController < ApplicationController
   end
 
   def create
+    @gallery = Gallery.new(gallery_params)
+    if @gallery.save
+      render json: Result.new(0, nil, @gallery)
+    else
+      render json: Result.new(1000, @gallery.errors, nil), status: :unprocessable_entity
+    end
   end
 
   def update
+    if @gallery.update(gallery_params)
+      render json: Result.new(0, nil, @gallery)
+    else
+      render json: Result.new(1000, @gallery.errors, nil), status: :unprocessable_entity
+    end
   end
 
   def destroy
+    @gallery.destroy
+    render json: Result.new(0, nil, nil)
   end
 
   private
 
-    def set_gallery
-      @gallery = Gallery.find(params[:id])
-    end
+  def set_gallery
+    @gallery = Gallery.find(params[:id])
+  end
 
-    def gallery_params
-      params.require(:gallery).permit(:title, :cover, :description)
-    end
+  def gallery_params
+    params.require(:gallery).permit(:title, :cover, :description)
+  end
 end
