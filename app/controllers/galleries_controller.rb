@@ -1,5 +1,6 @@
 class GalleriesController < ApplicationController
   before_action :set_gallery, only: [:show, :edit, :update, :destroy]
+  skip_before_action :check_token, only: [:index, :show]
 
   def index
     galleries = Gallery.order("updated_at DESC").page(params[:page]).per(params[:per_page])
@@ -24,7 +25,7 @@ class GalleriesController < ApplicationController
     if @gallery.save
       render json: Result.new(0, nil, @gallery)
     else
-      render json: Result.new(1000, @gallery.errors, nil), status: :unprocessable_entity
+      render json: Result.new(422, @gallery.errors, nil)
     end
   end
 
@@ -32,7 +33,7 @@ class GalleriesController < ApplicationController
     if @gallery.update(gallery_params)
       render json: Result.new(0, nil, @gallery)
     else
-      render json: Result.new(1000, @gallery.errors, nil), status: :unprocessable_entity
+      render json: Result.new(422, @gallery.errors, nil)
     end
   end
 
