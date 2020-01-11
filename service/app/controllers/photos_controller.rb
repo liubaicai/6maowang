@@ -1,4 +1,5 @@
 class PhotosController < ApplicationController
+  before_action :check_page, only: [:index]
   before_action :set_photo, only: [:show, :edit, :update, :destroy]
   before_action :get_gallery, only: [:index, :create]
   skip_before_action :check_token, only: [:index, :show]
