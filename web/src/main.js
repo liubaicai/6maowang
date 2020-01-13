@@ -12,6 +12,22 @@ Vue.use(waterfall)
 
 Vue.config.productionTip = false
 
+Vue.mixin({
+  data() {
+    return {
+      pageLoading: true,
+      saveLoading: false,
+    }
+  },
+  methods: {
+    isMobile() {
+      // eslint-disable-next-line max-len
+      const flag = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)
+      return flag
+    },
+  },
+})
+
 new Vue({
   router,
   render: (h) => h(App),

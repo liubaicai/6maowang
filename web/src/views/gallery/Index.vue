@@ -11,9 +11,12 @@
           <div class="cell-item">
             <img v-if="item.cover" :lazy-src="item.cover+'-view'" alt="加载错误" />
             <div class="item-body">
-              <div class="item-desc">{{item.title}}</div>
+              <div class="item-title">{{item.title}}</div>
               <div class="flex1"></div>
-              <div class="item-link">more</div>
+              <div class="item-desc">
+                <i class="el-icon-picture-outline"></i>
+                {{item.photos_count}}
+              </div>
             </div>
           </div>
         </div>
@@ -29,7 +32,7 @@ export default {
   data() {
     return {
       galleries: [],
-      col: 3,
+      col: this.isMobile() ? 1 : 3,
       pager: {
         total: 0,
         per_page: 10,

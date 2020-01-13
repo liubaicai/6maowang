@@ -7,7 +7,7 @@ class GalleriesController < ApplicationController
     galleries = Gallery.order("updated_at DESC").page(params[:page]).per(params[:per_page])
     page = Page.new(galleries, params[:page], params[:per_page], galleries.total_count)
     result = Result.new(0, nil, page)
-    render json: result
+    render json: result.to_json(methods: :photos_count)
   end
 
   def show

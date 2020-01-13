@@ -6,7 +6,16 @@
           <div class="cell-item">
             <img v-if="item.url" :lazy-src="item.url+'-view8'" alt="加载错误" />
             <div class="item-body">
-              <div class="item-link">{{item.exif}}</div>
+              <div class="item-desc">{{item.title}}</div>
+            </div>
+            <div class="item-body">
+              <div class="item-exif">{{item.exif}}</div>
+              <div class="flex1"></div>
+              <div class="item-download">
+                <el-button type="text" @click="download(item.url,item.title)">
+                  <i class="el-icon-download"></i>
+                </el-button>
+              </div>
             </div>
           </div>
         </div>
@@ -17,13 +26,14 @@
 
 <script>
 import photoApi from '@/api/photo'
+import downloader from '@/api/core/downloader'
 
 export default {
   data() {
     return {
       gallery_id: null,
       photos: [],
-      col: 3,
+      col: this.isMobile() ? 1 : 3,
       pager: {
         total: 0,
         per_page: 10,
@@ -58,6 +68,13 @@ export default {
         pager.page += 1
         this.getData()
       }
+    },
+    async download(url, filename) {
+      const config = {
+        url,
+        method: 'get',
+      }
+      await downloader(config, filename)
     },
   },
 }
