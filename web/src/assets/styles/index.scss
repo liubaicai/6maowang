@@ -1,0 +1,16 @@
+@import './element/index';
+@import './manager/index';
+@import './scrollbar/index';
+@import './waterfall/index';
+
+body {
+    margin: 0;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex1 {
+    flex: 1;
+}

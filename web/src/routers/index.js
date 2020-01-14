@@ -19,7 +19,6 @@ const router = new Router({
       name: 'home',
       component: () => import('@/views/gallery/Index.vue'),
       meta: {
-        name: '',
         requiresAuth: false,
       },
     },
@@ -28,9 +27,31 @@ const router = new Router({
       name: 'gallery',
       component: () => import('@/views/photo/Index.vue'),
       meta: {
-        name: '',
         requiresAuth: false,
       },
+    },
+    {
+      path: '/manager',
+      component: () => import('@/views/manager/Index.vue'),
+      meta: {
+        requiresAuth: true,
+      },
+      children: [
+        {
+          path: 'gallery',
+          name: 'manager-gallery',
+          component: () => import('@/views/manager/gallery/Index.vue'),
+        },
+        {
+          path: 'settings',
+          name: 'manager-settings',
+          component: () => import('@/views/manager/settings/Index.vue'),
+        },
+        {
+          path: '',
+          redirect: 'gallery',
+        },
+      ],
     },
   ],
 })

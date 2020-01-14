@@ -1,6 +1,20 @@
 <template>
   <el-container>
-    <el-main>
+    <el-header height="48px">
+      <div class="header flex">
+        <div class="logo" @click="onLogoClick">
+          <img src="@/assets/images/logo.png" />
+        </div>
+        <div class="title">遛猫网</div>
+        <div class="flex1"></div>
+        <div class="user" @click="onAvatarClick">
+          <el-avatar size="small">
+            <img src="@/assets/images/user.png" />
+          </el-avatar>
+        </div>
+      </div>
+    </el-header>
+    <el-main style="margin-top:48px;">
       <router-view></router-view>
     </el-main>
   </el-container>
@@ -9,75 +23,46 @@
 <script>
 export default {
   name: 'app',
+  methods: {
+    onLogoClick() {
+      this.$router.push({ path: '/' })
+    },
+    onAvatarClick() {
+      this.$router.push({ path: '/manager' })
+    },
+  },
 }
 </script>
 
-<style lang="scss">
-.flex {
-  display: flex;
+<style lang="scss" scoped>
+.el-header {
+  width: 100%;
+  padding: 0;
+  position: fixed;
+  z-index: 999;
 }
-.flex1 {
-  flex: 1;
-}
-</style>
+.header {
+  width: 100%;
+  height: 100%;
+  background-color: rgb(84, 92, 100);
 
-<style lang="scss">
-.container-water-fall {
-  /* padding: 0 28px; */
-  //   width: 100vw;
-  box-sizing: border-box;
+  .logo {
+    height: 60px;
+    padding: 10px 10px 10px 20px;
 
-  .cell-item-base {
-    padding: 0 6px 6px 6px;
+    img {
+      height: 28px;
+    }
   }
 
-  .cell-item {
-    width: 100%;
-    /* margin-bottom: 18px; */
-    background: #ffffff;
-    border: 2px solid #f0f0f0;
-    border-radius: 6px;
-    overflow: hidden;
-    box-sizing: border-box;
-    font-size: 1rem;
-    line-height: 1.2rem;
-    img {
-      /* border-radius: 12px 12px 0 0; */
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .item-body {
-      /* border: 1px solid #F0F0F0; */
-      padding: 3px 12px;
-      display: flex;
+  .title {
+    font-size: 1.1rem;
+    line-height: 48px;
+    color: #eeeeee;
+  }
 
-      .item-title {
-        color: #333333;
-        font-weight: bold;
-      }
-      .item-desc {
-        color: #666666;
-        font-weight: normal;
-      }
-      .item-exif {
-        color: #999999;
-        font-weight: normal;
-        font-size: 0.8rem;
-      }
-      .item-download {
-        color: #666666;
-        font-weight: normal;
-        font-size: 1rem;
-        align-self: flex-end;
-      }
-    }
-    .item-body:first-of-type {
-      padding-top: 12px;
-    }
-    .item-body:last-of-type {
-      padding-bottom: 12px;
-    }
+  .user {
+    padding: 10px;
   }
 }
 </style>

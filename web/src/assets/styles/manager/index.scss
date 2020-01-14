@@ -1,0 +1,25 @@
+.manager-container {
+    min-height: calc(100vh - 72px);
+    background-color: #f2f2f2;
+    padding: 12px;
+
+    .manager-body {
+        min-height: calc(100vh - 152px);
+        background-color: #ffffff;
+        padding: 40px 60px;
+
+        .header-area {
+            display: flex;
+        }
+
+        .body-area {
+            margin-top: 20px;
+        }
+
+        .footer-area {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+    }
+}

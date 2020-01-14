@@ -1,0 +1,11 @@
+.el-main {
+    padding: 0;
+}
+
+.el-menu {
+    border-right: none;
+}
+
+.el-menu-item.is-active {
+    border-right: solid 4px rgb(255, 208, 75);
+}

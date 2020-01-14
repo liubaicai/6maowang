@@ -6,7 +6,7 @@ class PhotosController < ApplicationController
 
   def index
     photos= Photo.where(gallery_id:@gallery_id).order("updated_at DESC").page(params[:page]).per(params[:per_page])
-    page = Page.new(photos, params[:page], params[:per_page], photos.total_count)
+    page = Page.new(photos, params[:page].to_i, params[:per_page].to_i, photos.total_count)
     result = Result.new(0, nil, page)
     render json: result
   end

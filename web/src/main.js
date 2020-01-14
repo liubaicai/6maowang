@@ -1,13 +1,16 @@
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 import waterfall from 'vue-waterfall2'
+import dayjs from 'dayjs'
 
 import 'element-ui/lib/theme-chalk/index.css'
 
 import App from './App.vue'
 import router from '@/routers'
 
-Vue.use(ElementUI)
+import '@/assets/styles/index.scss'
+
+Vue.use(ElementUI, { size: 'small', zIndex: 3000 })
 Vue.use(waterfall)
 
 Vue.config.productionTip = false
@@ -27,6 +30,8 @@ Vue.mixin({
     },
   },
 })
+
+Vue.prototype.$dayjs = dayjs
 
 new Vue({
   router,
