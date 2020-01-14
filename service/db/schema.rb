@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_10_084703) do
+ActiveRecord::Schema.define(version: 2020_01_14_103734) do
 
   create_table "galleries", force: :cascade do |t|
     t.string "title", null: false
-    t.string "cover", null: false
+    t.string "cover"
     t.string "description", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

@@ -2,6 +2,10 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import NProgress from 'nprogress'
 
+import {
+  getToken, checkToken, removeToken,
+} from '@/services/auth'
+
 // 修正router组件bug，隐藏导航到自身时会报错信息
 const originalPush = Router.prototype.push
 Router.prototype.push = function push(location) {
@@ -18,6 +22,14 @@ const router = new Router({
       path: '/',
       name: 'home',
       component: () => import('@/views/gallery/Index.vue'),
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/login/Index.vue'),
       meta: {
         requiresAuth: false,
       },
@@ -58,7 +70,20 @@ const router = new Router({
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
-  next()
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    const token = getToken()
+    if (token && checkToken(token)) {
+      next()
+    } else {
+      removeToken()
+      next({
+        path: '/login',
+        query: to.fullPath.indexOf('redirect') < 0 ? { redirect: to.fullPath } : {},
+      })
+    }
+  } else {
+    next()
+  }
 })
 
 router.afterEach(() => {

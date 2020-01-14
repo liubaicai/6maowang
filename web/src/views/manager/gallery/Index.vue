@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="header-area">
-      <el-button icon="el-icon-plus">新建</el-button>
+      <el-button icon="el-icon-plus" @click="onNewGallery">新建</el-button>
     </div>
     <div class="body-area">
-      <el-table :data="galleries" border stripe style="width: 100%">
+      <el-table :data="galleries" v-loading="pageLoading" border stripe style="width: 100%">
         <el-table-column prop="title" label="标题"></el-table-column>
         <el-table-column label="封面" width="85">
           <template slot-scope="scope">
-            <el-popover placement="top-start" trigger="hover">
+            <el-popover v-if="scope.row.cover" placement="top-start" trigger="hover">
               <img :src="scope.row.cover+'-view'" style="max-height:200px;max-width:200px;" />
               <i slot="reference" class="el-icon-picture-outline"></i>
             </el-popover>
@@ -28,7 +28,7 @@
         <el-table-column fixed="right" label="操作" width="85">
           <template slot-scope="scope">
             <el-button @click="handleClick(scope.row)" type="text" size="small">管理</el-button>
-            <el-button type="text" size="small">删除</el-button>
+            <el-button @click="onDeleteGallery(scope.row)" type="text" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -73,6 +73,36 @@ export default {
       galleryApi.list(this.pager).then((result) => {
         this.galleries = result.data?.content
         this.pager.total = result.data?.total
+        this.pageLoading = false
+      })
+    },
+    onNewGallery() {
+      this.$prompt('请输入标题', '新建', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+      }).then(({ value }) => {
+        if (value) {
+          galleryApi
+            .create({
+              title: value,
+            })
+            .then((result) => {
+              this.galleries.unshift(result.data)
+              this.galleries.pop()
+            })
+        }
+      })
+    },
+    onDeleteGallery(e) {
+      console.log(e)
+      this.$confirm('确定要删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        galleryApi.delete(e.id).then(() => {
+          this.getData()
+        })
       })
     },
     handleCurrentChange(val) {

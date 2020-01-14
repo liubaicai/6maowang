@@ -6,17 +6,17 @@ class ApplicationController < ActionController::API
   def check_token
     token = request.headers['Authorization']
     if !token
-      render json: Result.new(403, 'authorization is null', nil)
+      render json: Result.new(1001, 'authorization is null', nil)
       return
     end
     decoded_token = JWT.decode token, @@hmac_secret, true, { algorithm: 'HS256' }
     token_data = decoded_token[0]
     if token_data['user']!='admin'
-      render json: Result.new(403, 'authorization error', nil)
+      render json: Result.new(1001, 'authorization error', nil)
       return
     end
     if token_data['expires_at'] < DateTime.now.to_i
-      render json: Result.new(401, 'authorization expires', nil)
+      render json: Result.new(1001, 'authorization expires', nil)
       return
     end
   end

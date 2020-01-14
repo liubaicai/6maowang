@@ -26,7 +26,7 @@ class GalleriesController < ApplicationController
     if @gallery.save
       render json: Result.new(0, nil, @gallery)
     else
-      render json: Result.new(422, @gallery.errors, nil)
+      render json: Result.new(2000, @gallery.errors, nil)
     end
   end
 
@@ -34,7 +34,7 @@ class GalleriesController < ApplicationController
     if @gallery.update(gallery_params)
       render json: Result.new(0, nil, @gallery)
     else
-      render json: Result.new(422, @gallery.errors, nil)
+      render json: Result.new(2000, @gallery.errors, nil)
     end
   end
 
