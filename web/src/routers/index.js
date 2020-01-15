@@ -55,6 +55,11 @@ const router = new Router({
           component: () => import('@/views/manager/gallery/Index.vue'),
         },
         {
+          path: 'gallery/:id',
+          name: 'manager-gallery-detail',
+          component: () => import('@/views/manager/gallery/Detail.vue'),
+        },
+        {
           path: 'settings',
           name: 'manager-settings',
           component: () => import('@/views/manager/settings/Index.vue'),

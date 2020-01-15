@@ -33,6 +33,12 @@ export default {
   computed: {
     defaultActive() {
       const r = this.$route.path
+      if (r.startsWith('/manager/gallery')) {
+        return '/manager/gallery'
+      }
+      if (r.startsWith('/manager/settings')) {
+        return '/manager/settings'
+      }
       return r
     },
   },

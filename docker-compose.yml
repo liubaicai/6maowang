@@ -9,6 +9,4 @@ services:
     build: ./service
     volumes:
       - ./service:/myapp
-    # ports:
-    #   - "9014:3000"
     restart: always

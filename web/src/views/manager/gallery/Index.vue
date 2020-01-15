@@ -27,7 +27,7 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="85">
           <template slot-scope="scope">
-            <el-button @click="handleClick(scope.row)" type="text" size="small">管理</el-button>
+            <el-button @click="onManageGallery(scope.row)" type="text" size="small">管理</el-button>
             <el-button @click="onDeleteGallery(scope.row)" type="text" size="small">删除</el-button>
           </template>
         </el-table-column>
@@ -94,7 +94,6 @@ export default {
       })
     },
     onDeleteGallery(e) {
-      console.log(e)
       this.$confirm('确定要删除?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -103,6 +102,12 @@ export default {
         galleryApi.delete(e.id).then(() => {
           this.getData()
         })
+      })
+    },
+    onManageGallery(e) {
+      this.$router.push({
+        name: 'manager-gallery-detail',
+        params: { id: e.id },
       })
     },
     handleCurrentChange(val) {
