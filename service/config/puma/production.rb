@@ -16,6 +16,6 @@ workers ENV.fetch("WEB_CONCURRENCY") { 1 }
 
 # preload_app!
 
-bind "tcp://0.0.0.0:#{ENV.fetch('PORT') { 8360 }}"
+bind "tcp://0.0.0.0:#{ENV.fetch('PORT') { 3000 }}"
 
 plugin :tmp_restart

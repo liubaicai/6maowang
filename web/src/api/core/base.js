@@ -5,7 +5,7 @@ import downloader from '@/api/core/downloader'
 class Base {
   constructor(rootPoint) {
     this.rootPoint = rootPoint
-    this.baseUrl = '/api'
+    this.baseUrl = process.env.VUE_APP_BASE_API
     this.request = request
     this.downloader = downloader
   }
