@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   root 'home#index'
   
   post 'user/login'
+  post 'photos/upload'
   
   resources :photos
   resources :galleries

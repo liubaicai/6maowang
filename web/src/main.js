@@ -2,6 +2,8 @@ import Vue from 'vue'
 import ElementUI from 'element-ui'
 import waterfall from 'vue-waterfall2'
 import dayjs from 'dayjs'
+import deepcopy from 'deepcopy'
+import VueClipboard from 'vue2-clipboard'
 
 import 'element-ui/lib/theme-chalk/index.css'
 
@@ -12,6 +14,7 @@ import '@/assets/styles/index.scss'
 
 Vue.use(ElementUI, { size: 'small', zIndex: 3000 })
 Vue.use(waterfall)
+Vue.use(VueClipboard)
 
 Vue.config.productionTip = false
 
@@ -32,6 +35,7 @@ Vue.mixin({
 })
 
 Vue.prototype.$dayjs = dayjs
+Vue.prototype.$dcopy = deepcopy
 
 new Vue({
   router,

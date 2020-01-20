@@ -16,6 +16,11 @@ class PhotosController < ApplicationController
     render json: result
   end
 
+  def upload
+    result = Result.new(0, nil, nil)
+    render json: result
+  end
+
   def new
   end
 
@@ -26,9 +31,16 @@ class PhotosController < ApplicationController
   end
 
   def update
+    if @photo.update(photo_params)
+      render json: Result.new(0, nil, @photo)
+    else
+      render json: Result.new(2000, @photo.errors, nil)
+    end
   end
 
   def destroy
+    @photo.destroy
+    render json: Result.new(0, nil, nil)
   end
 
   private

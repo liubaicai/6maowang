@@ -26,7 +26,7 @@ const HandleServerError = (data) => {
 const HTTPFailedFn = (err) => {
   console.error(err)
   Message({
-    message: err,
+    message: err.error || err.message || err,
   })
   return Promise.reject(err)
 }
