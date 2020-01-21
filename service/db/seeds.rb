@@ -6,6 +6,6 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-if (!Setting.first) 
+if (!Setting.find(1)) 
     Setting.create(password: 'password')
 end

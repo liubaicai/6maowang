@@ -4,7 +4,7 @@ class UserController < ApplicationController
   def login
     begin
       password = params[:password]
-      if !password || password != Setting.first.password
+      if !password || password != Setting.find(1).password
         render json: Result.new(1000, 'password error', nil)
         return
       end

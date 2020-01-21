@@ -102,13 +102,12 @@
         <el-upload
           class="photo-uploader"
           ref="upload"
-          :action="uploadUrl"
+          action="#"
           list-type="picture-card"
           drag
           multiple
           :auto-upload="false"
-          :headers="uploadHeaders"
-          :on-success="onUploadPhotoSuccess"
+          :http-request="uploadRequest"
         >
           <i class="el-icon-plus"></i>
         </el-upload>
@@ -122,9 +121,9 @@
 </template>
 
 <script>
+import * as qiniu from 'qiniu-js'
 import galleryApi from '@/api/gallery'
 import photoApi from '@/api/photo'
-import { getToken } from '@/services/auth'
 
 export default {
   data() {
@@ -141,10 +140,6 @@ export default {
         per_page: 10,
         page: 1,
       },
-      uploadHeaders: {
-        Authorization: `${getToken()}`,
-      },
-      uploadUrl: photoApi.uploadUrl(),
     }
   },
   created() {
@@ -159,17 +154,22 @@ export default {
   },
   methods: {
     getData(page) {
+      this.pageLoading = true
       if (page) {
         this.pager.page = page
       }
       const body = Object.assign(this.pager, {
         gallery_id: this.gallery_id,
       })
-      photoApi.list(body).then((result) => {
-        this.photos = result.data?.content
-        this.pager.total = result.data?.total
-        this.pageLoading = false
-      })
+      photoApi
+        .list(body)
+        .then((result) => {
+          this.photos = result.data?.content
+          this.pager.total = result.data?.total
+        })
+        .finally(() => {
+          this.pageLoading = false
+        })
     },
     handleCurrentChange(val) {
       this.getData(val)
@@ -249,8 +249,66 @@ export default {
     onUploadPhotoSave() {
       this.$refs.upload.submit()
     },
-    onUploadPhotoSuccess(response) {
-      console.log(response)
+    async uploadRequest(e) {
+      const that = this
+      const tokenResult = (
+        await photoApi.uploadToken({
+          name: e.file.name,
+        })
+      ).data
+      const putExtra = {
+        fname: e.file.name,
+        params: {},
+        mimeType: null,
+      }
+      const config = {
+        useCdnDomain: true,
+      }
+      const { key } = tokenResult
+      const { token } = tokenResult
+      const { base_url } = tokenResult
+      const observable = qiniu.upload(e.file, key, token, putExtra, config)
+      const promise = new Promise((resolve, reject) => {
+        observable.subscribe({
+          next(res) {
+            e.file.percent = res.total.percent
+            e.onProgress(e.file)
+          },
+          error(err) {
+            reject(err)
+            e.onError(err)
+            this.$message({
+              message: err.message || err,
+              type: 'error',
+            })
+          },
+          complete(res) {
+            const objKey = res.key
+            const body = {
+              title: e.file.name,
+              url: `${base_url}${objKey}`,
+              description: '',
+              exif: '',
+              gallery_id: that.gallery_id,
+            }
+            photoApi
+              .create(body)
+              .then((result) => {
+                that.photos.unshift(result.data)
+                if (that.photos.length > that.pager.per_page) {
+                  that.photos.pop()
+                }
+                resolve(e.file)
+                e.onSuccess(e.file)
+              })
+              .catch((err) => {
+                reject(err)
+                e.onError(err)
+              })
+          },
+        })
+      })
+      await promise
     },
   },
 }

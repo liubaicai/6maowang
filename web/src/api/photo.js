@@ -1,7 +1,7 @@
 import Base from '@/api/core/base'
 
 class Photo extends Base {
-    uploadUrl = () => `${this.baseUrl}/photos/upload`
+    uploadToken = (data) => this.post('/photos/upload', data)
 }
 
 const photo = new Photo('/photos')

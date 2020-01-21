@@ -67,14 +67,19 @@ export default {
   },
   methods: {
     getData(page) {
+      this.pageLoading = true
       if (page) {
         this.pager.page = page
       }
-      galleryApi.list(this.pager).then((result) => {
-        this.galleries = result.data?.content
-        this.pager.total = result.data?.total
-        this.pageLoading = false
-      })
+      galleryApi
+        .list(this.pager)
+        .then((result) => {
+          this.galleries = result.data?.content
+          this.pager.total = result.data?.total
+        })
+        .finally(() => {
+          this.pageLoading = false
+        })
     },
     onNewGallery() {
       this.$prompt('请输入标题', '新建', {
@@ -88,7 +93,9 @@ export default {
             })
             .then((result) => {
               this.galleries.unshift(result.data)
-              this.galleries.pop()
+              if (this.galleries.length > this.pager.per_page) {
+                this.galleries.pop()
+              }
             })
         }
       })

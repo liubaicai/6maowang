@@ -47,3 +47,5 @@
 
 # ide
 /.idea
+
+.env

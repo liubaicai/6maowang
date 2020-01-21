@@ -17,7 +17,22 @@ class PhotosController < ApplicationController
   end
 
   def upload
-    result = Result.new(0, nil, nil)
+    base_url = Setting.find(1).qiniu_base_url
+    access_key = Setting.find(1).qiniu_access_key
+    secret_key = Setting.find(1).qiniu_secret_key
+    Qiniu.establish_connection! :access_key => access_key,
+                                :secret_key => secret_key
+    bucket = 'www-6mao-wang'
+    key = "photos/#{Time.now.to_i}-#{params[:name]}"
+    put_policy = Qiniu::Auth::PutPolicy.new(
+        bucket,
+        key,
+        3600
+    )
+    uptoken = Qiniu::Auth.generate_uptoken(put_policy)
+
+    data = Hash[:token => uptoken, :key => key, :base_url => base_url]
+    result = Result.new(0, nil, data)
     render json: result
   end
 
@@ -28,6 +43,12 @@ class PhotosController < ApplicationController
   end
 
   def create
+    @photo = Photo.new(photo_params)
+    if @photo.save
+      render json: Result.new(0, nil, @photo)
+    else
+      render json: Result.new(2000, @photo.errors, nil)
+    end
   end
 
   def update
@@ -54,6 +75,6 @@ class PhotosController < ApplicationController
   end
 
   def photo_params
-    params.require(:photo).permit(:title, :url, :description, :exif)
+    params.require(:photo).permit(:title, :url, :description, :exif, :gallery_id)
   end
 end
