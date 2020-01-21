@@ -33,10 +33,10 @@ export default {
     return {
       gallery_id: null,
       photos: [],
-      col: this.isMobile() ? 1 : 3,
+      col: this.isMobile() ? 1 : 5,
       pager: {
         total: 0,
-        per_page: 10,
+        per_page: 20,
         page: 1,
       },
     }
