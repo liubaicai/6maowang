@@ -33,7 +33,7 @@ class SettingsController < ApplicationController
             setting = content['setting']
             Gallery.import galleries, on_duplicate_key_update: :all
             Photo.import photos, on_duplicate_key_update: :all
-            if(ENV['RAILS_ENV'] === "production") {
+            if(ENV['RAILS_ENV'] == "production") {
                 sql1 = "SELECT pg_catalog.setval(pg_get_serial_sequence('galleries', 'id'), (SELECT MAX(id) FROM galleries)+1);"
                 ActiveRecord::Base.connection.execute(sql1)
                 sql2 = "SELECT pg_catalog.setval(pg_get_serial_sequence('photos', 'id'), (SELECT MAX(id) FROM photos)+1);"
