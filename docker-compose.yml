@@ -2,6 +2,8 @@ version: '3'
 services:
   db:
     image: postgres:12.1-alpine
+    volumes:
+      - ./db:/var/lib/postgresql/data
     restart: always
   service:
     build: ./service
