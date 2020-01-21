@@ -121,6 +121,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import * as qiniu from 'qiniu-js'
 import galleryApi from '@/api/gallery'
 import photoApi from '@/api/photo'
@@ -282,13 +283,22 @@ export default {
               type: 'error',
             })
           },
-          complete(res) {
+          async complete(res) {
             const objKey = res.key
+            const url = `${base_url}${objKey}`
+            const exifObj = (await axios.get(`${url}?exif`)).data
+            const make = exifObj?.Make?.val || ''
+            const model = exifObj?.Model?.val || ''
+            const flength = exifObj?.FocalLength?.val || ''
+            const fnumber = exifObj?.FNumber?.val || ''
+            const etime = exifObj?.ExposureTime?.val || ''
+            const iso = exifObj?.ISOSpeedRatings?.val || ''
+            const exif = `${make} ${model}; ${flength}; ${fnumber}; ${etime}; iso${iso};`
             const body = {
               title: e.file.name,
-              url: `${base_url}${objKey}`,
+              url,
               description: '',
-              exif: '',
+              exif,
               gallery_id: that.gallery_id,
             }
             photoApi
