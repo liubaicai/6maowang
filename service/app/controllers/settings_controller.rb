@@ -14,6 +14,30 @@ class SettingsController < ApplicationController
         end
     end
 
+    def backup
+        galleries = Gallery.order("updated_at ASC")
+        photos = Photo.order("updated_at ASC")
+        setting = Setting.find(1)
+        result = Result.new(0, nil, Hash[
+            :galleries => galleries,
+            :photos => photos,
+            :setting => setting])
+        render json: result
+    end
+
+    def restore
+        if params[:file] && (tempfile = params[:file].tempfile)
+            content = JSON.parse(File.read(tempfile))
+            galleries = content['galleries']
+            photos = content['photos']
+            setting = content['setting']
+            Gallery.import galleries, on_duplicate_key_update: :all
+            Photo.import photos, on_duplicate_key_update: :all
+            Setting.update(setting)
+            render json: Result.new(0, nil, nil)
+        end
+    end
+
     private
 
     def set_setting

@@ -2,8 +2,16 @@
   <div>
     <h3>数据备份和还原</h3>
     <div class="header-area">
-      <el-button icon="el-icon-upload2">还原</el-button>
-      <el-button icon="el-icon-download">备份</el-button>
+      <el-upload
+        class="header-input"
+        :action="restoreUrl"
+        :headers="restoreHeaders"
+        :on-success="onRestoreSuccess"
+        :show-file-list="false"
+      >
+        <el-button icon="el-icon-upload2">还原</el-button>
+      </el-upload>
+      <el-button icon="el-icon-download" @click="onBackup">备份</el-button>
     </div>
     <el-divider></el-divider>
     <h3>七牛云密钥管理</h3>
@@ -28,7 +36,7 @@
 
 <script>
 import settingApi from '@/api/setting'
-import { removeToken } from '@/services/auth'
+import { getToken, removeToken } from '@/services/auth'
 
 export default {
   data() {
@@ -39,6 +47,10 @@ export default {
         secret_key: '',
       },
       password: '',
+      restoreHeaders: {
+        Authorization: `${getToken()}`,
+      },
+      restoreUrl: settingApi.restoreUrl(),
     }
   },
   created() {
@@ -84,6 +96,45 @@ export default {
             this.onLogout()
           }, 1000)
         })
+    },
+    onRestoreSuccess() {
+      this.$message({
+        message: '还原成功！',
+        type: 'success',
+      })
+    },
+    onBackup() {
+      const time = this.$dayjs().format('YYYYMMDDHHmmss')
+      settingApi.backup().then((result) => {
+        this.saveFile(result.data, `backup-${time}.json`)
+      })
+    },
+    saveFile(json, filename) {
+      const data = JSON.stringify(json)
+      const blob = new Blob([data], { type: 'text/plain' })
+      const e = document.createEvent('MouseEvents')
+      const a = document.createElement('a')
+      a.download = filename
+      a.href = window.URL.createObjectURL(blob)
+      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+      e.initEvent(
+        'click',
+        true,
+        false,
+        window,
+        0,
+        0,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        false,
+        0,
+        null // eslint-disable-line
+      )
+      a.dispatchEvent(e)
     },
   },
 }

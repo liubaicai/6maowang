@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   
   post 'user/login'
   post 'photos/upload'
+  get 'settings/backup'
+  post 'settings/backup', to: 'settings#restore'
   
   resources :photos
   resources :galleries

@@ -45,6 +45,8 @@ GEM
     activerecord (6.0.2.1)
       activemodel (= 6.0.2.1)
       activesupport (= 6.0.2.1)
+    activerecord-import (1.0.4)
+      activerecord (>= 3.2)
     activestorage (6.0.2.1)
       actionpack (= 6.0.2.1)
       activejob (= 6.0.2.1)
@@ -240,6 +242,7 @@ PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
+  activerecord-import
   bootsnap (>= 1.4.2)
   byebug
   dotenv-rails
