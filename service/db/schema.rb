@@ -25,9 +25,9 @@ ActiveRecord::Schema.define(version: 2020_01_14_103734) do
     t.string "url", null: false
     t.string "description", default: ""
     t.string "exif", default: ""
+    t.integer "gallery_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "gallery_id"
     t.index ["gallery_id"], name: "index_photos_on_gallery_id"
   end
 

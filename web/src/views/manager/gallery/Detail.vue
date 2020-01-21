@@ -113,7 +113,7 @@
         </el-upload>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="onUploadPhotoCancel">取消</el-button>
+        <el-button @click="onUploadPhotoCancel">关闭</el-button>
         <el-button type="primary" @click="onUploadPhotoSave">开始上传</el-button>
       </div>
     </el-dialog>

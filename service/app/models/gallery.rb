@@ -1,5 +1,5 @@
 class Gallery < ApplicationRecord
-  has_many :photos
+  has_many :photos, dependent: :destroy
 
   def photos_count
     Photo.where(gallery_id: id).count

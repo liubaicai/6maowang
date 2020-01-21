@@ -1,12 +1,16 @@
 version: '3'
 services:
+  db:
+    image: postgres:12.1-alpine
+    restart: always
+  service:
+    build: ./service
+    restart: always
+    depends_on:
+      - db
+    entrypoint: ["/myapp/bin/entrypoint.sh"]
   web:
     build: ./web
     ports:
       - "9013:80"
-    restart: always
-  service:
-    build: ./service
-    volumes:
-      - ./service:/myapp
     restart: always

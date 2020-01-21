@@ -21,7 +21,7 @@ COPY Gemfile.lock /myapp/Gemfile.lock
 RUN bundle install --quiet
 COPY . /myapp
 
-RUN bundle exec rails db:migrate RAILS_ENV=production && bundle exec rails db:seed RAILS_ENV=production
+# RUN bundle exec rails db:migrate RAILS_ENV=production && bundle exec rails db:seed RAILS_ENV=production
 
 EXPOSE 3000
 
