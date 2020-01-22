@@ -34,6 +34,9 @@ Vue.mixin({
 
 Vue.prototype.$dayjs = dayjs
 Vue.prototype.$dcopy = deepcopy
+Vue.prototype.$setTitle = (e) => {
+  document.title = e
+}
 
 new Vue({
   router,

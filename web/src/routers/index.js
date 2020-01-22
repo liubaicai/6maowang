@@ -75,6 +75,7 @@ const router = new Router({
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
+  document.title = '遛猫网'
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     const token = getToken()
     if (token && checkToken(token)) {

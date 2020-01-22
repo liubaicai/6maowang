@@ -26,12 +26,14 @@
 
 <script>
 import photoApi from '@/api/photo'
+import galleryApi from '@/api/gallery'
 import downloader from '@/api/core/downloader'
 
 export default {
   data() {
     return {
       gallery_id: null,
+      gallery: null,
       photos: [],
       col: this.isMobile() ? 1 : 5,
       pager: {
@@ -47,6 +49,10 @@ export default {
   mounted() {
     this.photos = []
     this.getData(1)
+    galleryApi.detail(this.gallery_id).then((result) => {
+      this.gallery = result.data
+      this.$setTitle(result.data?.title)
+    })
   },
   methods: {
     getData(page) {
