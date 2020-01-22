@@ -288,14 +288,7 @@ export default {
           async complete(res) {
             const objKey = res.key
             const url = `${base_url}${objKey}`
-            const exifObj = (await axios.get(`${url}?exif`)).data
-            const make = exifObj?.Make?.val || ''
-            const model = exifObj?.Model?.val || ''
-            const flength = exifObj?.FocalLength?.val || ''
-            const fnumber = exifObj?.FNumber?.val || ''
-            const etime = exifObj?.ExposureTime?.val || ''
-            const iso = exifObj?.ISOSpeedRatings?.val || ''
-            const exif = `${make} ${model}; ${flength}; ${fnumber}; ${etime}; iso${iso};`
+            const exif = await that.getExif()
             const body = {
               title: e.file.name,
               url,
@@ -321,6 +314,27 @@ export default {
         })
       })
       await promise
+    },
+    async getExif(url) {
+      const promise = new Promise((resolve) => {
+        axios
+          .get(`${url}?exif`)
+          .then((result) => {
+            const exifObj = result.data
+            const make = exifObj?.Make?.val || ''
+            const model = exifObj?.Model?.val || ''
+            const flength = exifObj?.FocalLength?.val || ''
+            const fnumber = exifObj?.FNumber?.val || ''
+            const etime = exifObj?.ExposureTime?.val || ''
+            const iso = exifObj?.ISOSpeedRatings?.val || ''
+            const exif = `${make} ${model}; ${flength}; ${fnumber}; ${etime}; iso${iso};`
+            resolve(exif)
+          })
+          .catch(() => {
+            resolve('')
+          })
+      })
+      return promise
     },
   },
 }
