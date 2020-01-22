@@ -8,10 +8,11 @@
         <el-table-column prop="title" label="标题"></el-table-column>
         <el-table-column label="封面" width="85">
           <template slot-scope="scope">
-            <el-popover v-if="scope.row.cover" placement="top-start" trigger="hover">
+            <div class="cover-view" :style="{'background-image': `url(${scope.row.cover}-view)`}"></div>
+            <!-- <el-popover v-if="scope.row.cover" placement="top-start" trigger="hover">
               <img :src="scope.row.cover+'-view'" style="max-height:200px;max-width:200px;" />
               <i slot="reference" class="el-icon-picture-outline"></i>
-            </el-popover>
+            </el-popover>-->
           </template>
         </el-table-column>
         <el-table-column prop="photos_count" label="图片数" width="85"></el-table-column>
@@ -123,6 +124,3 @@ export default {
   },
 }
 </script>
-
-<style>
-</style>

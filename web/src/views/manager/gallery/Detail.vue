@@ -28,17 +28,20 @@
             <template v-else>{{scope.row.description}}</template>
           </template>
         </el-table-column>
-        <el-table-column label="地址" width="65">
+        <el-table-column label="地址" width="85">
           <template slot-scope="scope">
-            <el-popover v-if="scope.row.url" placement="right-start" trigger="hover">
-              <img :src="scope.row.url+'-view'" style="max-height:200px;max-width:200px;" />
-              <el-button
-                type="text"
-                slot="reference"
-                icon="el-icon-picture-outline"
-                @click="windowOpen(scope.row.url)"
-              >预览</el-button>
-            </el-popover>
+            <div class="cover-view" :style="{'background-image': `url(${scope.row.url}-view)`}">
+              <el-popover v-if="scope.row.url" placement="right-start" trigger="hover">
+                <img :src="scope.row.url+'-view'" style="max-height:200px;max-width:200px;" />
+                <el-button
+                  type="text"
+                  slot="reference"
+                  icon="el-icon-picture-outline"
+                  class="cover-button"
+                  @click="windowOpen(scope.row.url)"
+                >预览</el-button>
+              </el-popover>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="创建时间">
