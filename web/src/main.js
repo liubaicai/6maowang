@@ -3,18 +3,16 @@ import ElementUI from 'element-ui'
 import waterfall from 'vue-waterfall2'
 import dayjs from 'dayjs'
 import deepcopy from 'deepcopy'
-import VueClipboard from 'vue2-clipboard'
 
 import 'element-ui/lib/theme-chalk/index.css'
 
 import App from './App.vue'
 import router from '@/routers'
 
-import '@/assets/styles/index.scss'
+import '@/assets/styles/index.less'
 
 Vue.use(ElementUI, { size: 'small', zIndex: 3000 })
 Vue.use(waterfall)
-Vue.use(VueClipboard)
 
 Vue.config.productionTip = false
 

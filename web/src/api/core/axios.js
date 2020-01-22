@@ -1,12 +1,7 @@
 import axios from 'axios'
-import qs from 'qs'
 
 import router from '@/routers'
 import { getToken, removeToken, checkToken } from '@/services/auth'
-
-axios.defaults.paramsSerializer = (params) => qs.stringify(params, {
-  indices: false,
-})
 
 // create an axios instance
 const service = axios.create({

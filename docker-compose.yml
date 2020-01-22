@@ -11,6 +11,10 @@ services:
     depends_on:
       - db
     entrypoint: ["/myapp/bin/entrypoint.sh"]
+    environment:
+      - WEB_CONCURRENCY=1
+      - RAILS_MIN_THREADS=1
+      - RAILS_MAX_THREADS=5
   web:
     build: ./web
     ports:

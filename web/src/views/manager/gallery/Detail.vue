@@ -35,10 +35,9 @@
               <el-button
                 type="text"
                 slot="reference"
-                v-clipboard="scope.row.url"
-                v-clipboard:success="onCopyUrlSuccess"
                 icon="el-icon-picture-outline"
-              >拷贝</el-button>
+                @click="windowOpen(scope.row.url)"
+              >预览</el-button>
             </el-popover>
           </template>
         </el-table-column>
@@ -174,6 +173,9 @@ export default {
     },
     handleCurrentChange(val) {
       this.getData(val)
+    },
+    windowOpen(url) {
+      window.open(url, '_blank')
     },
     onCopyUrlSuccess() {
       this.$message({
@@ -324,7 +326,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .page-header {
   display: flex;
 

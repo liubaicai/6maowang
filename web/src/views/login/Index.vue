@@ -141,17 +141,17 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="less">
 /* 修复input 背景不协调 和光标变色 */
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
 
-$bg: #283443;
-$light_gray: #fff;
-$cursor: #fff;
+@bg: #283443;
+@light_gray: #fff;
+@cursor: #fff;
 
-@supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
+@supports (-webkit-mask: none) and (not (cater-color: @cursor)) {
   .login-container .el-input input {
-    color: $cursor;
+    color: @cursor;
   }
 }
 
@@ -168,13 +168,13 @@ $cursor: #fff;
       -webkit-appearance: none;
       border-radius: 0px;
       padding: 12px 5px 12px 15px;
-      color: $light_gray;
+      color: @light_gray;
       height: 47px;
-      caret-color: $cursor;
+      caret-color: @cursor;
 
       &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-text-fill-color: $cursor !important;
+        box-shadow: 0 0 0px 1000px @bg inset !important;
+        -webkit-text-fill-color: @cursor !important;
       }
     }
   }
@@ -188,15 +188,15 @@ $cursor: #fff;
 }
 </style>
 
-<style lang="scss" scoped>
-$bg: #2d3a4b;
-$dark_gray: #889aa4;
-$light_gray: #eee;
+<style lang="less" scoped>
+@bg: #2d3a4b;
+@dark_gray: #889aa4;
+@light_gray: #eee;
 
 .login-container {
   height: calc(100vh - 48px);
   width: 100%;
-  background-color: $bg;
+  background-color: @bg;
   overflow: hidden;
 
   .login-form {
@@ -222,7 +222,7 @@ $light_gray: #eee;
 
   .svg-container {
     padding: 6px 5px 6px 15px;
-    color: $dark_gray;
+    color: @dark_gray;
     vertical-align: middle;
     width: 20px;
     display: inline-block;
@@ -233,7 +233,7 @@ $light_gray: #eee;
 
     .title {
       font-size: 26px;
-      color: $light_gray;
+      color: @light_gray;
       margin: 0px auto 40px auto;
       text-align: center;
       font-weight: bold;
@@ -245,7 +245,7 @@ $light_gray: #eee;
     right: 10px;
     top: 7px;
     font-size: 16px;
-    color: $dark_gray;
+    color: @dark_gray;
     cursor: pointer;
     user-select: none;
   }
