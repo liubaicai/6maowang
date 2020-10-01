@@ -291,7 +291,7 @@ export default {
           async complete(res) {
             const objKey = res.key
             const url = `${base_url}${objKey}`
-            const exif = await that.getExif()
+            const exif = await that.getExif(url)
             const body = {
               title: e.file.name,
               url,
