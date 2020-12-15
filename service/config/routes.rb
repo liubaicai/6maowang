@@ -7,6 +7,8 @@ Rails.application.routes.draw do
   get 'settings/backup'
   post 'settings/backup', to: 'settings#restore'
   
+  get 'photos/hot'
+  
   resources :photos
   resources :galleries
   resources :settings

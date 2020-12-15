@@ -1,8 +1,15 @@
 class PhotosController < ApplicationController
-  before_action :check_page, only: [:index]
+  before_action :check_page, only: [:index, :hot]
   before_action :set_photo, only: [:show, :edit, :update, :destroy]
   before_action :get_gallery, only: [:index, :create]
-  skip_before_action :check_token, only: [:index, :show]
+  skip_before_action :check_token, only: [:index, :show, :hot]
+
+  def hot 
+    photos= Photo.all().order("updated_at DESC").page(params[:page]).per(params[:per_page])
+    page = Page.new(photos, params[:page].to_i, params[:per_page].to_i, photos.total_count)
+    result = Result.new(0, nil, page)
+    render json: result
+  end
 
   def index
     photos= Photo.where(gallery_id:@gallery_id).order("updated_at DESC").page(params[:page]).per(params[:per_page])
