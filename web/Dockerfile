@@ -6,9 +6,13 @@ RUN mkdir /app
 
 WORKDIR /app
 
+COPY package*.json ./
+
+RUN npm ci
+
 COPY . .
 
-RUN npm config set registry https://registry.npm.taobao.org && npm install && npm run build
+RUN npm run build
 
 FROM nginx:1.13.9-alpine
 
