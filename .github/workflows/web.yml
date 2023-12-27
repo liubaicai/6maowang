@@ -3,7 +3,7 @@ name: build 6mao-web
 on:
   push:
     branches:
-      - 'master'
+      - 'build'
     paths:
       - 'web/**'
   workflow_dispatch:

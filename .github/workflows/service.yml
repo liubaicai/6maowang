@@ -3,7 +3,7 @@ name: build 6mao-server
 on:
   push:
     branches:
-      - 'master'
+      - 'build'
     paths:
       - 'service/**'
   workflow_dispatch:
