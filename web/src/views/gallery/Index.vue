@@ -28,11 +28,31 @@
 <script>
 import galleryApi from '@/api/gallery'
 
+function getWidth() {
+  // eslint-disable-next-line max-len
+  if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
+    return 1
+  }
+  if (window.innerWidth > 1600) {
+    return 5
+  }
+  if (window.innerWidth > 1200) {
+    return 4
+  }
+  if (window.innerWidth > 800) {
+    return 3
+  }
+  if (window.innerWidth > 400) {
+    return 2
+  }
+  return 1
+}
+
 export default {
   data() {
     return {
       galleries: [],
-      col: this.isMobile() ? 1 : 5,
+      col: getWidth(),
       pager: {
         total: 0,
         per_page: 20,
