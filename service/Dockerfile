@@ -1,6 +1,6 @@
 FROM ruby:2.7-alpine
 
-# RUN echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.11/main/" > /etc/apk/repositories
+RUN echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.16/main/" > /etc/apk/repositories
 
 ENV BUILD_PACKAGES="curl-dev ruby-dev build-base bash" \
     DEV_PACKAGES="zlib-dev libxml2-dev libxslt-dev tzdata yaml-dev sqlite-dev postgresql-dev mysql-dev" \
