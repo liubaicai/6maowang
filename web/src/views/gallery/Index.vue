@@ -16,6 +16,7 @@
               <div class="item-desc">
                 <i class="el-icon-picture-outline"></i>
                 {{item.photos_count}}
+                <span style="font-size: 12px; color: #999;margin-left: 5px;">MORE</span>
               </div>
             </div>
           </div>
@@ -34,15 +35,12 @@ function getWidth() {
     return 1
   }
   if (window.innerWidth > 1600) {
-    return 5
-  }
-  if (window.innerWidth > 1200) {
     return 4
   }
-  if (window.innerWidth > 800) {
+  if (window.innerWidth > 1000) {
     return 3
   }
-  if (window.innerWidth > 400) {
+  if (window.innerWidth > 500) {
     return 2
   }
   return 1
@@ -63,6 +61,14 @@ export default {
   mounted() {
     this.galleries = []
     this.getData(1)
+    window.addEventListener('resize', () => {
+      this.col = getWidth()
+    })
+  },
+  unmounted() {
+    window.removeEventListener('resize', () => {
+      this.col = getWidth()
+    })
   },
   methods: {
     getData(page) {

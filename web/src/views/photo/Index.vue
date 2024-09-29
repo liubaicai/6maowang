@@ -35,15 +35,12 @@ function getWidth() {
     return 1
   }
   if (window.innerWidth > 1600) {
-    return 5
-  }
-  if (window.innerWidth > 1200) {
     return 4
   }
-  if (window.innerWidth > 800) {
+  if (window.innerWidth > 1000) {
     return 3
   }
-  if (window.innerWidth > 400) {
+  if (window.innerWidth > 500) {
     return 2
   }
   return 1
@@ -72,6 +69,14 @@ export default {
     galleryApi.detail(this.gallery_id).then((result) => {
       this.gallery = result.data
       this.$setTitle(result.data?.title)
+    })
+    window.addEventListener('resize', () => {
+      this.col = getWidth()
+    })
+  },
+  unmounted() {
+    window.removeEventListener('resize', () => {
+      this.col = getWidth()
     })
   },
   methods: {
