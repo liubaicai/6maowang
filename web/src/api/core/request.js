@@ -7,7 +7,7 @@ const headers = {
   Accept: 'application/json',
 }
 
-const HTTPSuccessFn = (res) => res.data
+const HTTPSuccessFn = (res) => JSON.parse(JSON.stringify(res.data).replaceAll('http://cdn.6mao.wang', 'https://images.6mao.wang'))
 
 const HandleServerError = (data) => {
   if (data.code !== 0) {
