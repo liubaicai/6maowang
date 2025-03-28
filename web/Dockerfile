@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm config set registry https://registry.npm.taobao.org && npm ci
+RUN npm config set registry https://registry.npmmirror.com && npm i
 
 COPY . .
 
