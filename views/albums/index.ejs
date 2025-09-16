@@ -1,0 +1,37 @@
+<section id="albumsApp">
+	<h1>相册</h1>
+	<div v-if="error" class="alert error">{{ error }}</div>
+	<div class="masonry">
+		<a class="album-card" v-for="a in albums" :key="a.id" :href="`/photos/album/${a.id}`">
+			<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" alt="cover" />
+			<div class="meta">
+				<div class="name">{{ a.name }}</div>
+				<div class="desc">{{ a.description }}</div>
+			</div>
+		</a>
+	</div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+	const { createApp, ref, onMounted } = Vue;
+	createApp({
+		setup() {
+			const albums = ref([]);
+			const error = ref('');
+			const load = async () => {
+				try {
+					const r = await fetch('/albums/api');
+					albums.value = await r.json();
+				} catch (e) {
+					error.value = '加载失败';
+				}
+			};
+			onMounted(load);
+			return { albums, error };
+		}
+	}).mount('#albumsApp');
+});
+</script>
+
+

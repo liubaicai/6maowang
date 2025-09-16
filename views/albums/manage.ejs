@@ -1,0 +1,61 @@
+<section id="manageApp">
+	<h1>管理相册</h1>
+	<div class="grid">
+		<div class="card">
+			<h3>新建相册</h3>
+			<form @submit.prevent="create">
+				<label>名称<input v-model="name" required placeholder="如：2025年夏天" /></label>
+				<label>描述<textarea v-model="description" placeholder="一句话描述"></textarea></label>
+				<button>创建</button>
+			</form>
+		</div>
+		<div class="card">
+			<h3>相册列表</h3>
+			<div v-for="a in albums" :key="a.id" class="album-row" style="display:flex;align-items:center;gap:8px;margin:8px 0">
+				<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" class="cover-mini"/>
+				<input v-model="a.name" placeholder="相册名称" />
+				<input v-model="a.description" placeholder="描述" />
+				<button @click="save(a)" style="min-width:72px">保存</button>
+				<a :href="`/photos/album/${a.id}`" style="white-space:nowrap">进入</a>
+				<button class="danger" @click="remove(a)">删除</button>
+			</div>
+		</div>
+	</div>
+	<div v-if="msg" class="alert">{{ msg }}</div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+	const { createApp, ref, onMounted } = Vue;
+	createApp({
+		setup() {
+			const name = ref('');
+			const description = ref('');
+			const albums = ref([]);
+			const msg = ref('');
+			const load = async () => {
+				const r = await fetch('/albums/api');
+				albums.value = await r.json();
+			};
+			const create = async () => {
+				const r = await fetch('/albums/api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.value, description: description.value }) });
+				if (r.ok) { msg.value = '已创建'; name.value=''; description.value=''; load(); }
+			};
+			const save = async (a) => {
+				await fetch(`/albums/api/${a.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: a.name, description: a.description }) });
+				msg.value = '已保存';
+			};
+			const remove = async (a) => {
+				if (!confirm('确定删除该相册及其所有照片？')) return;
+				await fetch(`/albums/api/${a.id}`, { method: 'DELETE' });
+				msg.value = '已删除';
+				load();
+			};
+			onMounted(load);
+			return { name, description, albums, create, save, remove, msg };
+		}
+	}).mount('#manageApp');
+});
+</script>
+
+

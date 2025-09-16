@@ -1,0 +1,29 @@
+<section>
+  <h1>相册</h1>
+  <% if (currentUser) { %>
+    <a class="btn" href="/albums/new">创建相册</a>
+  <% } %>
+</section>
+
+<div id="albumsApp" class="masonry">
+  <% albums.forEach(a => { %>
+    <div class="card">
+      <a href="/photos?album=<%= a.id %>">
+        <% if (a.cover_stored_filename) { %>
+          <img src="/thumbs/<%= a.cover_stored_filename %>" alt="cover" />
+        <% } else { %>
+          <div class="placeholder">无封面</div>
+        <% } %>
+      </a>
+      <div class="card-body">
+        <div class="title"><%= a.name %></div>
+        <div class="desc"><%= a.description || '' %></div>
+      </div>
+    </div>
+  <% }) %>
+  <% if (!albums || albums.length === 0) { %>
+    <p>暂无相册</p>
+  <% } %>
+  </div>
+
+

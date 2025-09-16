@@ -1,0 +1,71 @@
+<section id="photosApp" :data-album-id="albumId">
+	<h1>照片</h1>
+	<div class="toolbar">
+		<% if (isAuthenticated) { %>
+		<form id="uploadForm" @submit.prevent="upload" enctype="multipart/form-data">
+			<input type="hidden" name="albumId" :value="albumId"/>
+			<input type="file" name="photos" multiple accept="image/*" @change="selectFiles" />
+			<button>上传</button>
+		</form>
+		<% } %>
+	</div>
+	<div class="masonry">
+		<div class="photo-card" v-for="p in photos" :key="p.id">
+			<a :href="`/uploads/originals/${p.stored_filename}`" target="_blank">
+				<img :src="`/uploads/thumbs/${p.thumbnail_filename}`" :alt="p.original_filename" />
+			</a>
+			<div class="photo-meta">
+				<div class="title">{{ p.display_name || p.original_filename }}</div>
+				<div class="exif" v-if="p.exif_summary">{{ p.exif_summary }}</div>
+			</div>
+			<div class="actions" v-if="isAuthed">
+				<button @click="setCover(p)">设为封面</button>
+				<button class="danger" @click="remove(p)">删除</button>
+			</div>
+		</div>
+	</div>
+	<div v-if="msg" class="alert">{{ msg }}</div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+	const { createApp, ref, onMounted } = Vue;
+	createApp({
+		setup() {
+			const rootEl = document.getElementById('photosApp');
+			const albumId = Number('<%- albumId %>');
+			const photos = ref([]);
+			const files = ref([]);
+			const msg = ref('');
+			const isAuthed = <%- isAuthenticated ? 'true' : 'false' %>;
+			const load = async () => {
+				const r = await fetch(`/photos/api/album/${albumId}`);
+				photos.value = await r.json();
+			};
+			const selectFiles = (e) => { files.value = e.target.files };
+			const upload = async () => {
+				if (!files.value?.length) return;
+				const fd = new FormData();
+				fd.append('albumId', String(albumId));
+				for (const f of files.value) fd.append('photos', f);
+				const r = await fetch('/photos/api/upload', { method: 'POST', body: fd });
+				if (r.ok) { msg.value = '已上传'; load(); }
+			};
+			const remove = async (p) => {
+				if (!confirm('确定删除该照片？')) return;
+				await fetch(`/photos/api/${p.id}`, { method: 'DELETE' });
+				msg.value = '已删除';
+				load();
+			};
+			const setCover = async (p) => {
+				await fetch(`/albums/api/${albumId}/cover`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId: p.id }) });
+				msg.value = '已设为封面';
+			};
+			onMounted(load);
+			return { albumId, photos, msg, selectFiles, upload, remove, setCover, isAuthed };
+		}
+	}).mount('#photosApp');
+});
+</script>
+
+

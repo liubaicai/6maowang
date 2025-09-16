@@ -1,6 +1,32 @@
-# ide
-/.idea
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
+node_modules
 .DS_Store
+dist
+dist-ssr
+dist-all
+dist-out
+coverage
+*.local
 
-/db/*
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+
+auto-imports.d.ts
+components.d.ts
+stats.html
+
+/data/*
+!/data/.gitkeep
+
+/public/uploads/*
+!/public/uploads/.gitkeep
