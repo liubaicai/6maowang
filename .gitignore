@@ -30,3 +30,7 @@ stats.html
 
 /public/uploads/*
 !/public/uploads/.gitkeep
+
+# PM2 logs
+/logs/*
+!/logs/.gitkeep
