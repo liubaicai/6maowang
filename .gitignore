@@ -1,6 +1,35 @@
-# ide
-/.idea
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
 
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
 .DS_Store
+.fleet
+.idea
 
-/db/*
+# Local env files
+.env
+.env.*
+!.env.example
+
+/data/uploads/*
+!/data/uploads/.gitkeep
+
+# PM2 logs
+/logs/*
+!/logs/.gitkeep
+
+/data/app.sqlite
+/data/app.sqlite-shm
+/data/app.sqlite-wal

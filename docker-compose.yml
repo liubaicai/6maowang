@@ -1,21 +1,21 @@
-version: '3'
+version: '3.8'
+
 services:
-  db:
-    image: postgres:12.1-alpine
-    volumes:
-      - ./db:/var/lib/postgresql/data
-    restart: always
-  service:
-    build: ./service
-    restart: always
-    depends_on:
-      - db
-    environment:
-      - WEB_CONCURRENCY=1
-      - RAILS_MIN_THREADS=1
-      - RAILS_MAX_THREADS=5
-  web:
-    build: ./web
+  app:
+    build: .
+    container_name: 6maowang-nuxt
+    restart: unless-stopped
     ports:
-      - "9013:80"
-    restart: always
+      - '3000:3000'
+    volumes:
+      - ./data:/app/data
+      - ./public/uploads:/app/public/uploads
+    environment:
+      - NODE_ENV=production
+      - NUXT_SESSION_PASSWORD=${NUXT_SESSION_PASSWORD:-change-this-secret-min-32-chars}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/stats']
+      interval: 30s
+      timeout: 10s
+      retries: 3
