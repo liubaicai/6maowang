@@ -1,8 +1,7 @@
 <section id="albumsApp">
-	<h1>相册</h1>
 	<div v-if="error" class="alert error">{{ error }}</div>
-	<div class="masonry">
-		<a class="album-card" v-for="a in albums" :key="a.id" :href="`/photos/album/${a.id}`">
+	<div class="masonry" ref="masonryRoot">
+		<a class="album-card masonry-item" v-for="a in albums" :key="a.id" :href="`/photos/album/${a.id}`">
 			<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" alt="cover" />
 			<div class="meta">
 				<div class="name">{{ a.name }}</div>
@@ -14,21 +13,34 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-	const { createApp, ref, onMounted } = Vue;
+	const { createApp, ref, onMounted, nextTick } = Vue;
 	createApp({
 		setup() {
 			const albums = ref([]);
 			const error = ref('');
+			const masonryRoot = ref(null);
 			const load = async () => {
 				try {
 					const r = await fetch('/albums/api');
 					albums.value = await r.json();
+					nextTick(() => {
+						const overlay = document.getElementById('globalLoading');
+						if (overlay) overlay.classList.add('show');
+						if (masonryRoot.value && window.Masonry) {
+							window.Masonry.init(masonryRoot.value, '.masonry-item', {
+								minColWidth: 260, gap: 16, maxCols: 4,
+								onLayout: () => { const o = document.getElementById('globalLoading'); if (o) o.classList.remove('show'); }
+							});
+						} else {
+							if (overlay) overlay.classList.remove('show');
+						}
+					});
 				} catch (e) {
 					error.value = '加载失败';
 				}
 			};
 			onMounted(load);
-			return { albums, error };
+			return { albums, error, masonryRoot };
 		}
 	}).mount('#albumsApp');
 });

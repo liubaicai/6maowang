@@ -14,7 +14,9 @@ export const photosRouter = express.Router();
 // 页面：照片列表（某个相册）
 photosRouter.get('/album/:albumId', (req, res) => {
 	const { albumId } = req.params;
-	res.render('photos/index', { title: '照片', page: 'photos', albumId });
+	const album = db.prepare('SELECT id, name FROM albums WHERE id = ?').get(albumId);
+	const albumName = album?.name || '照片';
+	res.render('photos/index', { title: albumName, page: 'photos', albumId, albumName });
 });
 
 const storage = multer.diskStorage({
@@ -74,7 +76,7 @@ photosRouter.post('/api/upload', requireAuthMiddleware, upload.array('photos', 5
 		const inserted = [];
 		for (const file of req.files) {
 			const storedFilename = file.filename;
-			const thumbFilename = storedFilename.replace(/(\.[^.]+)$/i, '_thumb$1');
+			const thumbFilename = storedFilename.replace(/\.[^.]+$/, '') + '_thumb.jpg';
 			const originalPath = path.join(originalsDir, storedFilename);
 			const thumbPath = path.join(thumbsDir, thumbFilename);
 
@@ -93,8 +95,12 @@ photosRouter.post('/api/upload', requireAuthMiddleware, upload.array('photos', 5
 				}
 			} catch {}
 
-			// 生成缩略图 512px 宽
-			await sharp(originalPath).resize({ width: 512, withoutEnlargement: true }).jpeg({ quality: 80 }).toFile(thumbPath);
+			// 生成缩略图（按 EXIF 方向矫正），统一 JPEG 格式，宽 512px
+			await sharp(originalPath)
+				.rotate() // 根据 EXIF Orientation 纠正方向
+				.resize({ width: 512, withoutEnlargement: true })
+				.jpeg({ quality: 80 })
+				.toFile(thumbPath);
 
 			const info = db
 				.prepare(
@@ -139,14 +145,21 @@ photosRouter.delete('/api/:id', requireAuthMiddleware, (req, res) => {
 	res.json({ ok: true });
 });
 
-// API：更新照片（重命名等）
+// API：更新照片（重命名、移动相册等）
 photosRouter.put('/api/:id', requireAuthMiddleware, (req, res) => {
 	const { id } = req.params;
-	const { albumId } = req.body;
+	const { albumId, original_filename } = req.body || {};
+	const now = new Date().toISOString();
+	let changes = 0;
 	if (albumId) {
-		db.prepare('UPDATE photos SET album_id = ?, updated_at = ? WHERE id = ?').run(Number(albumId), new Date().toISOString(), id);
+		const info = db.prepare('UPDATE photos SET album_id = ?, updated_at = ? WHERE id = ?').run(Number(albumId), now, id);
+		changes += info.changes || 0;
 	}
-	res.json({ ok: true });
+	if (typeof original_filename === 'string' && original_filename.trim()) {
+		const info2 = db.prepare('UPDATE photos SET original_filename = ?, updated_at = ? WHERE id = ?').run(original_filename.trim(), now, id);
+		changes += info2.changes || 0;
+	}
+	res.json({ ok: true, changes });
 });
 
 

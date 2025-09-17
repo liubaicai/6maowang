@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "import:backup": "node scripts/import_backup.mjs"
+    "import:backup": "node scripts/import_backup.mjs",
+    "thumbs:rebuild": "node scripts/rebuild_thumbs.mjs"
   },
   "keywords": [],
   "author": "",

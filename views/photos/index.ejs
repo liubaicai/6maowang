@@ -1,5 +1,5 @@
 <section id="photosApp" :data-album-id="albumId">
-	<h1>照片</h1>
+	<h1><%- albumName %></h1>
 	<div class="toolbar">
 		<% if (isAuthenticated) { %>
 		<form id="uploadForm" @submit.prevent="upload" enctype="multipart/form-data">
@@ -9,18 +9,22 @@
 		</form>
 		<% } %>
 	</div>
-	<div class="masonry">
-		<div class="photo-card" v-for="p in photos" :key="p.id">
+	<div class="masonry" ref="masonryRoot">
+		<div class="photo-card masonry-item" v-for="p in photos" :key="p.id">
 			<a :href="`/uploads/originals/${p.stored_filename}`" target="_blank">
 				<img :src="`/uploads/thumbs/${p.thumbnail_filename}`" :alt="p.original_filename" />
 			</a>
 			<div class="photo-meta">
-				<div class="title">{{ p.display_name || p.original_filename }}</div>
+				<div class="title">
+					<span v-if="!p._editing">{{ p.display_name || p.original_filename }}</span>
+					<input v-else v-model="p._nameDraft" @keyup.enter="saveName(p)" @blur="saveName(p)" />
+				</div>
 				<div class="exif" v-if="p.exif_summary">{{ p.exif_summary }}</div>
 			</div>
 			<div class="actions" v-if="isAuthed">
 				<button @click="setCover(p)">设为封面</button>
 				<button class="danger" @click="remove(p)">删除</button>
+				<button @click="editName(p)" v-if="!p._editing">重命名</button>
 			</div>
 		</div>
 	</div>
@@ -29,7 +33,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-	const { createApp, ref, onMounted } = Vue;
+	const { createApp, ref, onMounted, nextTick } = Vue;
 	createApp({
 		setup() {
 			const rootEl = document.getElementById('photosApp');
@@ -40,7 +44,20 @@ document.addEventListener('DOMContentLoaded', () => {
 			const isAuthed = <%- isAuthenticated ? 'true' : 'false' %>;
 			const load = async () => {
 				const r = await fetch(`/photos/api/album/${albumId}`);
-				photos.value = await r.json();
+				photos.value = (await r.json()).map(x => ({...x, _editing:false, _nameDraft: x.original_filename }));
+				nextTick(() => {
+					const overlay = document.getElementById('globalLoading');
+					if (overlay) overlay.classList.add('show');
+					const root = masonryRoot.value;
+					if (root && window.Masonry) {
+						window.Masonry.init(root, '.masonry-item', {
+							minColWidth: 260, gap: 16, maxCols: 4,
+							onLayout: () => { const o = document.getElementById('globalLoading'); if (o) o.classList.remove('show'); }
+						});
+					} else {
+						if (overlay) overlay.classList.remove('show');
+					}
+				});
 			};
 			const selectFiles = (e) => { files.value = e.target.files };
 			const upload = async () => {
@@ -61,8 +78,25 @@ document.addEventListener('DOMContentLoaded', () => {
 				await fetch(`/albums/api/${albumId}/cover`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId: p.id }) });
 				msg.value = '已设为封面';
 			};
+			const editName = (p) => {
+				p._editing = true; p._nameDraft = p.original_filename;
+				setTimeout(() => {
+					const inputs = document.querySelectorAll('.photo-meta .title input');
+					inputs[inputs.length-1]?.focus();
+				}, 0);
+			};
+			const saveName = async (p) => {
+				p._editing = false;
+				const newName = String(p._nameDraft || '').trim();
+				if (!newName || newName === p.original_filename) return;
+				await fetch(`/photos/api/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ original_filename: newName }) });
+				p.original_filename = newName;
+				p.display_name = newName.replace(/\.[^.]+$/, '');
+				msg.value = '已重命名';
+			};
 			onMounted(load);
-			return { albumId, photos, msg, selectFiles, upload, remove, setCover, isAuthed };
+			const masonryRoot = ref(null);
+			return { albumId, photos, msg, selectFiles, upload, remove, setCover, isAuthed, editName, saveName, masonryRoot };
 		}
 	}).mount('#photosApp');
 });
