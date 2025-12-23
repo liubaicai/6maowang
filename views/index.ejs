@@ -12,9 +12,9 @@
     <div>登录后可以创建你的第一个相册</div>
   </div>
 <% } else { %>
-<div id="albumsApp" class="masonry masonry-loading">
+<div id="albumsApp" class="masonry">
   <% albums.forEach(a => { %>
-    <a class="album-card masonry-item" href="/photos?album=<%= a.id %>">
+    <a class="album-card masonry-item" href="/photos?album=<%= a.id %>" style="width: calc(25% - 12px);">
       <% if (a.cover_stored_filename) { %>
         <img src="/thumbs/<%= a.cover_stored_filename %>" alt="cover" />
       <% } else { %>
@@ -32,8 +32,14 @@
 document.addEventListener('DOMContentLoaded', function() {
   const container = document.getElementById('albumsApp');
   if (container && window.Masonry) {
-    window.Masonry.init(container, '.masonry-item', {
-      minColWidth: 260, gap: 16, maxCols: 4
+    imagesLoaded(container, function() {
+      new Masonry(container, {
+        itemSelector: '.masonry-item',
+        columnWidth: '.masonry-item',
+        percentPosition: true,
+        gutter: 16
+      });
+      container.classList.add('masonry-ready');
     });
   }
 });

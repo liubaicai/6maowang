@@ -13,8 +13,11 @@
 		</button>
 	</div>
 	<% } %>
-	<div class="masonry masonry-loading" ref="masonryRoot">
-		<div class="photo-card masonry-item" v-for="p in photos" :key="p.id">
+	<div v-if="loading" style="text-align: center; padding: 40px 20px;">
+		<div class="spinner" style="width: 48px; height: 48px; margin: 0 auto;"></div>
+	</div>
+	<div class="masonry" ref="masonryRoot" v-show="!loading && photos.length > 0">
+		<div class="photo-card masonry-item" v-for="p in photos" :key="p.id" style="width: calc(25% - 12px);">
 			<a :href="`/uploads/originals/${p.stored_filename}`" target="_blank" style="display: block; position: relative; overflow: hidden;">
 				<img :src="`/uploads/thumbs/${p.thumbnail_filename}`" :alt="p.original_filename" style="transition: transform 0.3s ease;" @mouseover="$event.target.style.transform='scale(1.05)'" @mouseout="$event.target.style.transform='scale(1)'" />
 			</a>
@@ -47,18 +50,34 @@ document.addEventListener('DOMContentLoaded', () => {
 			const photos = ref([]);
 			const files = ref([]);
 			const msg = ref('');
+			const loading = ref(true);
 			const isAuthed = <%- isAuthenticated ? 'true' : 'false' %>;
-			const load = async () => {
-				const r = await fetch(`/photos/api/album/${albumId}`);
-				photos.value = (await r.json()).map(x => ({...x, _editing:false, _nameDraft: x.original_filename }));
+			let msnry = null;
+			
+			const initMasonry = () => {
 				nextTick(() => {
-					const root = masonryRoot.value;
-					if (root && window.Masonry && photos.value.length > 0) {
-						window.Masonry.init(root, '.masonry-item', {
-							minColWidth: 260, gap: 16, maxCols: 4
+					const elem = masonryRoot.value;
+					if (elem && window.Masonry && photos.value.length > 0) {
+						elem.classList.remove('masonry-ready');
+						imagesLoaded(elem, function() {
+							if (msnry) msnry.destroy();
+							msnry = new Masonry(elem, {
+								itemSelector: '.masonry-item',
+								columnWidth: '.masonry-item',
+								percentPosition: true,
+								gutter: 16
+							});
+							elem.classList.add('masonry-ready');
 						});
 					}
 				});
+			};
+			
+			const load = async () => {
+				const r = await fetch(`/photos/api/album/${albumId}`);
+				photos.value = (await r.json()).map(x => ({...x, _editing:false, _nameDraft: x.original_filename }));
+				loading.value = false;
+				initMasonry();
 			};
 			const selectFiles = (e) => { 
 				files.value = e.target.files;
@@ -105,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (!confirm('确定删除该照片？')) return;
 				await fetchWithCsrf(`/photos/api/${p.id}`, { method: 'DELETE' });
 				msg.value = '已删除';
-				load();
+				await load();
 			};
 			const setCover = async (p) => {
 				await fetchWithCsrf(`/albums/api/${albumId}/cover`, { 
@@ -139,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const masonryRoot = ref(null);
 			const fileInput = ref(null);
 			return { 
-				albumId, photos, msg, selectFiles, upload, remove, setCover, 
+				albumId, photos, msg, loading, selectFiles, upload, remove, setCover, 
 				isAuthed, editName, saveName, masonryRoot, files, fileInput,
 				dragOver, dragLeave, handleDrop
 			};

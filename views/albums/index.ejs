@@ -1,12 +1,15 @@
 <section id="albumsApp">
 	<div v-if="error" class="alert error">{{ error }}</div>
-	<div v-if="albums.length === 0 && !error && !loading" style="text-align: center; padding: 60px 20px; color: var(--muted);">
+	<div v-if="albums.length === 0 && !loading && !error" style="text-align: center; padding: 60px 20px; color: var(--muted);">
 		<div style="font-size: 64px; margin-bottom: 16px;">📷</div>
 		<div style="font-size: 18px; margin-bottom: 8px;">还没有相册</div>
 		<div>登录后可以创建你的第一个相册</div>
 	</div>
-	<div class="masonry masonry-loading" ref="masonryRoot">
-		<a class="album-card masonry-item" v-for="a in albums" :key="a.id" :href="`/photos/album/${a.id}`">
+	<div v-if="loading" style="text-align: center; padding: 60px 20px;">
+		<div class="spinner" style="width: 48px; height: 48px; margin: 0 auto;"></div>
+	</div>
+	<div class="masonry" ref="masonryRoot" v-show="!loading && albums.length > 0">
+		<a class="album-card masonry-item" v-for="a in albums" :key="a.id" :href="`/photos/album/${a.id}`" style="width: calc(25% - 12px);">
 			<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" :alt="a.name" />
 			<div class="meta">
 				<div class="name">{{ a.name }}</div>
@@ -25,23 +28,36 @@ document.addEventListener('DOMContentLoaded', () => {
 			const error = ref('');
 			const loading = ref(true);
 			const masonryRoot = ref(null);
+			let msnry = null;
+			
 			const load = async () => {
 				try {
 					const r = await fetch('/albums/api');
 					albums.value = await r.json();
 					loading.value = false;
-					nextTick(() => {
-						if (masonryRoot.value && window.Masonry && albums.value.length > 0) {
-							window.Masonry.init(masonryRoot.value, '.masonry-item', {
-								minColWidth: 260, gap: 16, maxCols: 4
-							});
-						}
-					});
+					
+					if (albums.value.length > 0) {
+						nextTick(() => {
+							const elem = masonryRoot.value;
+							if (elem && window.Masonry) {
+								imagesLoaded(elem, function() {
+									msnry = new Masonry(elem, {
+										itemSelector: '.masonry-item',
+										columnWidth: '.masonry-item',
+										percentPosition: true,
+										gutter: 16
+									});
+									elem.classList.add('masonry-ready');
+								});
+							}
+						});
+					}
 				} catch (e) {
 					error.value = '加载失败';
 					loading.value = false;
 				}
 			};
+			
 			onMounted(load);
 			return { albums, error, loading, masonryRoot };
 		}
