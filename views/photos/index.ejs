@@ -27,7 +27,7 @@
 					<input v-else v-model="p._nameDraft" @keyup.enter="saveName(p)" @blur="saveName(p)" />
 				</div>
 				<div class="exif" v-if="p.exif_summary">
-					📷 {{ p.exif_summary }}
+					{{ p.exif_summary }}
 				</div>
 			</div>
 			<div class="actions" v-if="isAuthed">
