@@ -1,5 +1,5 @@
 <section id="manageApp">
-	<h1>📁 管理相册</h1>
+	<h1>管理相册</h1>
 	<div class="grid">
 		<div class="card">
 			<h3>新建相册</h3>
@@ -24,11 +24,11 @@
 				<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" class="cover-mini" :alt="a.name"/>
 				<input v-model="a.name" placeholder="相册名称 *" maxlength="100" />
 				<input v-model="a.description" placeholder="相册描述（选填）" maxlength="500" />
-				<button @click="save(a)" class="small secondary">💾 保存</button>
+				<button @click="save(a)" class="small secondary">保存</button>
 				<a :href="`/photos/album/${a.id}`" style="text-decoration: none;">
-					<button class="small" type="button">📸 进入</button>
+					<button class="small" type="button">进入</button>
 				</a>
-				<button class="small danger" @click="remove(a)">🗑️ 删除</button>
+				<button class="small danger" @click="remove(a)">删除</button>
 			</div>
 		</div>
 	</div>

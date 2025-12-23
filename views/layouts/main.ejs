@@ -36,19 +36,18 @@
 	<header class="topbar">
 		<div class="topbar-inner">
 			<a class="brand" href="/">
-				<span>🐱</span>
 				<span>遛猫网</span>
 			</a>
 			<nav class="nav">
 				<% if (isAuthenticated) { %>
-					<a href="/albums/manage">📁 管理</a>
-					<a href="/account">⚙️ 账户</a>
+					<a href="/albums/manage">管理</a>
+					<a href="/account">账户</a>
 					<form action="/logout" method="post" style="display:inline; margin: 0;">
 						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-						<button class="link" type="submit">🚪 退出</button>
+						<button class="link" type="submit">退出</button>
 					</form>
 				<% } else { %>
-					<a href="/login">🔐 登录</a>
+					<a href="/login">登录</a>
 				<% } %>
 			</nav>
 		</div>

@@ -1,10 +1,10 @@
 <section id="photosApp" :data-album-id="albumId">
-	<h1>📸 <%- albumName %></h1>
+	<h1><%- albumName %></h1>
 	<% if (isAuthenticated) { %>
 	<div class="toolbar">
 		<label class="upload-area" @dragover.prevent="dragOver" @dragleave.prevent="dragLeave" @drop.prevent="handleDrop">
 			<input type="file" ref="fileInput" name="photos" multiple accept="image/*" @change="selectFiles" />
-			<div class="upload-icon">📁</div>
+			<div class="upload-icon">+</div>
 			<div class="upload-text">点击选择或拖拽图片到此处</div>
 			<div class="upload-hint">支持 JPG、PNG、WebP、GIF 格式，单文件最大 30MB</div>
 		</label>
@@ -31,9 +31,9 @@
 				</div>
 			</div>
 			<div class="actions" v-if="isAuthed">
-				<button @click="setCover(p)" class="small secondary" title="设为封面">🖼️</button>
-				<button @click="editName(p)" class="small secondary" v-if="!p._editing" title="重命名">✏️</button>
-				<button @click="remove(p)" class="small danger" title="删除">🗑️</button>
+				<button @click="setCover(p)" class="small secondary" title="设为封面">封面</button>
+				<button @click="editName(p)" class="small secondary" v-if="!p._editing" title="重命名">重命名</button>
+				<button @click="remove(p)" class="small danger" title="删除">删除</button>
 			</div>
 		</div>
 	</div>
