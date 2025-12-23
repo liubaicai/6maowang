@@ -13,6 +13,8 @@ export function initDatabase() {
 	if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 	db = new Database(dbPath);
 	db.pragma('journal_mode = WAL');
+	// 设置数据库编码为 UTF-8
+	db.pragma('encoding = "UTF-8"');
 
 	// tables
 	db.exec(`
@@ -51,9 +53,18 @@ export function initDatabase() {
 	// seed admin if not exists
 	const row = db.prepare('SELECT id FROM users WHERE username = ?').get('admin');
 	if (!row) {
-		const passwordHash = bcrypt.hashSync('admin', 10);
+		const adminPassword = process.env.ADMIN_PASSWORD || 'admin';
+		
+		// 警告：使用默认密码
+		if (adminPassword === 'admin') {
+			console.warn('\x1b[33m警告: 使用默认管理员密码 "admin"，请立即修改！\x1b[0m');
+		}
+		
+		const passwordHash = bcrypt.hashSync(adminPassword, 10);
 		db.prepare('INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)')
 			.run('admin', passwordHash, new Date().toISOString());
+			
+		console.log('管理员账户已创建: admin');
 	}
 }
 

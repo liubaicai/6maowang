@@ -29,12 +29,38 @@ const storage = multer.diskStorage({
 	},
 });
 
+// 增强文件过滤 - 同时验证 MIME 类型和文件扩展名
 function fileFilter(req, file, cb) {
-	if (/^image\//.test(file.mimetype)) cb(null, true);
-	else cb(new Error('仅支持图片上传'));
+	const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+	const ext = path.extname(file.originalname).toLowerCase();
+	const ALLOWED_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+	
+	// 验证 MIME 类型
+	if (!ALLOWED_TYPES.includes(file.mimetype)) {
+		return cb(new Error('仅支持 JPG/PNG/WebP/GIF 格式'));
+	}
+	
+	// 验证文件扩展名
+	if (!ALLOWED_EXTS.includes(ext)) {
+		return cb(new Error('不支持的文件扩展名'));
+	}
+	
+	// 验证文件名，防止路径遍历攻击
+	if (file.originalname.includes('..') || file.originalname.includes('/') || file.originalname.includes('\\')) {
+		return cb(new Error('文件名包含非法字符'));
+	}
+	
+	cb(null, true);
 }
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 30 * 1024 * 1024 } });
+const upload = multer({ 
+	storage, 
+	fileFilter, 
+	limits: { 
+		fileSize: (process.env.MAX_FILE_SIZE || 30) * 1024 * 1024,
+		files: 50
+	}
+});
 
 // API：列出相册内照片（含 display_name 与 exif_summary）
 photosRouter.get('/api/album/:albumId', (req, res) => {

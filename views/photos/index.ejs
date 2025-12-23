@@ -1,30 +1,36 @@
 <section id="photosApp" :data-album-id="albumId">
-	<h1><%- albumName %></h1>
+	<h1>📸 <%- albumName %></h1>
+	<% if (isAuthenticated) { %>
 	<div class="toolbar">
-		<% if (isAuthenticated) { %>
-		<form id="uploadForm" @submit.prevent="upload" enctype="multipart/form-data">
-			<input type="hidden" name="albumId" :value="albumId"/>
-			<input type="file" name="photos" multiple accept="image/*" @change="selectFiles" />
-			<button>上传</button>
-		</form>
-		<% } %>
+		<label class="upload-area" @dragover.prevent="dragOver" @dragleave.prevent="dragLeave" @drop.prevent="handleDrop">
+			<input type="file" ref="fileInput" name="photos" multiple accept="image/*" @change="selectFiles" />
+			<div class="upload-icon">📁</div>
+			<div class="upload-text">点击选择或拖拽图片到此处</div>
+			<div class="upload-hint">支持 JPG、PNG、WebP、GIF 格式，单文件最大 30MB</div>
+		</label>
+		<button @click="upload" :disabled="!files.length" class="small">
+			{{ files.length ? `上传 ${files.length} 张照片` : '上传照片' }}
+		</button>
 	</div>
-	<div class="masonry" ref="masonryRoot">
+	<% } %>
+	<div class="masonry masonry-loading" ref="masonryRoot">
 		<div class="photo-card masonry-item" v-for="p in photos" :key="p.id">
-			<a :href="`/uploads/originals/${p.stored_filename}`" target="_blank">
-				<img :src="`/uploads/thumbs/${p.thumbnail_filename}`" :alt="p.original_filename" />
+			<a :href="`/uploads/originals/${p.stored_filename}`" target="_blank" style="display: block; position: relative; overflow: hidden;">
+				<img :src="`/uploads/thumbs/${p.thumbnail_filename}`" :alt="p.original_filename" style="transition: transform 0.3s ease;" @mouseover="$event.target.style.transform='scale(1.05)'" @mouseout="$event.target.style.transform='scale(1)'" />
 			</a>
 			<div class="photo-meta">
 				<div class="title">
 					<span v-if="!p._editing">{{ p.display_name || p.original_filename }}</span>
 					<input v-else v-model="p._nameDraft" @keyup.enter="saveName(p)" @blur="saveName(p)" />
 				</div>
-				<div class="exif" v-if="p.exif_summary">{{ p.exif_summary }}</div>
+				<div class="exif" v-if="p.exif_summary">
+					📷 {{ p.exif_summary }}
+				</div>
 			</div>
 			<div class="actions" v-if="isAuthed">
-				<button @click="setCover(p)">设为封面</button>
-				<button class="danger" @click="remove(p)">删除</button>
-				<button @click="editName(p)" v-if="!p._editing">重命名</button>
+				<button @click="setCover(p)" class="small secondary" title="设为封面">🖼️</button>
+				<button @click="editName(p)" class="small secondary" v-if="!p._editing" title="重命名">✏️</button>
+				<button @click="remove(p)" class="small danger" title="删除">🗑️</button>
 			</div>
 		</div>
 	</div>
@@ -46,36 +52,67 @@ document.addEventListener('DOMContentLoaded', () => {
 				const r = await fetch(`/photos/api/album/${albumId}`);
 				photos.value = (await r.json()).map(x => ({...x, _editing:false, _nameDraft: x.original_filename }));
 				nextTick(() => {
-					const overlay = document.getElementById('globalLoading');
-					if (overlay) overlay.classList.add('show');
 					const root = masonryRoot.value;
-					if (root && window.Masonry) {
+					if (root && window.Masonry && photos.value.length > 0) {
 						window.Masonry.init(root, '.masonry-item', {
-							minColWidth: 260, gap: 16, maxCols: 4,
-							onLayout: () => { const o = document.getElementById('globalLoading'); if (o) o.classList.remove('show'); }
+							minColWidth: 260, gap: 16, maxCols: 4
 						});
-					} else {
-						if (overlay) overlay.classList.remove('show');
 					}
 				});
 			};
-			const selectFiles = (e) => { files.value = e.target.files };
+			const selectFiles = (e) => { 
+				files.value = e.target.files;
+			};
+			
+			const dragOver = (e) => {
+				e.currentTarget.classList.add('dragover');
+			};
+			
+			const dragLeave = (e) => {
+				e.currentTarget.classList.remove('dragover');
+			};
+			
+			const handleDrop = (e) => {
+				e.currentTarget.classList.remove('dragover');
+				const droppedFiles = e.dataTransfer.files;
+				if (droppedFiles.length) {
+					files.value = droppedFiles;
+				}
+			};
+			
 			const upload = async () => {
 				if (!files.value?.length) return;
+				msg.value = '准备上传...';
 				const fd = new FormData();
 				fd.append('albumId', String(albumId));
 				for (const f of files.value) fd.append('photos', f);
-				const r = await fetch('/photos/api/upload', { method: 'POST', body: fd });
-				if (r.ok) { msg.value = '已上传'; load(); }
+				
+				try {
+					msg.value = '上传中...';
+					const r = await fetchWithCsrf('/photos/api/upload', { method: 'POST', body: fd });
+					if (r.ok) { 
+						msg.value = '已上传'; 
+						files.value = [];
+						load(); 
+					} else {
+						msg.value = '上传失败，请重试';
+					}
+				} catch (err) {
+					msg.value = '上传失败: ' + err.message;
+				}
 			};
 			const remove = async (p) => {
 				if (!confirm('确定删除该照片？')) return;
-				await fetch(`/photos/api/${p.id}`, { method: 'DELETE' });
+				await fetchWithCsrf(`/photos/api/${p.id}`, { method: 'DELETE' });
 				msg.value = '已删除';
 				load();
 			};
 			const setCover = async (p) => {
-				await fetch(`/albums/api/${albumId}/cover`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId: p.id }) });
+				await fetchWithCsrf(`/albums/api/${albumId}/cover`, { 
+					method: 'POST', 
+					headers: { 'Content-Type': 'application/json' }, 
+					body: JSON.stringify({ photoId: p.id }) 
+				});
 				msg.value = '已设为封面';
 			};
 			const editName = (p) => {
@@ -89,14 +126,23 @@ document.addEventListener('DOMContentLoaded', () => {
 				p._editing = false;
 				const newName = String(p._nameDraft || '').trim();
 				if (!newName || newName === p.original_filename) return;
-				await fetch(`/photos/api/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ original_filename: newName }) });
+				await fetchWithCsrf(`/photos/api/${p.id}`, { 
+					method: 'PUT', 
+					headers: { 'Content-Type': 'application/json' }, 
+					body: JSON.stringify({ original_filename: newName }) 
+				});
 				p.original_filename = newName;
 				p.display_name = newName.replace(/\.[^.]+$/, '');
 				msg.value = '已重命名';
 			};
 			onMounted(load);
 			const masonryRoot = ref(null);
-			return { albumId, photos, msg, selectFiles, upload, remove, setCover, isAuthed, editName, saveName, masonryRoot };
+			const fileInput = ref(null);
+			return { 
+				albumId, photos, msg, selectFiles, upload, remove, setCover, 
+				isAuthed, editName, saveName, masonryRoot, files, fileInput,
+				dragOver, dragLeave, handleDrop
+			};
 		}
 	}).mount('#photosApp');
 });

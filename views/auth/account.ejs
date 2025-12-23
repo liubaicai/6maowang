@@ -1,16 +1,31 @@
 <section class="auth">
-	<h1>账户设置</h1>
-	<% if (typeof error !== 'undefined' && error) { %>
-		<div class="alert error"><%= error %></div>
-	<% } %>
-	<% if (typeof success !== 'undefined' && success) { %>
-		<div class="alert success"><%= success %></div>
-	<% } %>
-	<form action="/account/password" method="post">
-		<label>当前密码<input name="currentPassword" type="password" required></label>
-		<label>新密码<input name="newPassword" type="password" required minlength="4"></label>
-		<button>更新密码</button>
-	</form>
+	<div class="auth-card">
+		<h1>账户设置</h1>
+		<% if (typeof error !== 'undefined' && error) { %>
+			<div class="alert error">
+				<strong>错误</strong><br>
+				<%= error %>
+			</div>
+		<% } %>
+		<% if (typeof success !== 'undefined' && success) { %>
+			<div class="alert success">
+				<strong>成功</strong><br>
+				<%= success %>
+			</div>
+		<% } %>
+		<form action="/account/password" method="post">
+			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+			<label>
+				当前密码
+				<input name="currentPassword" type="password" required placeholder="请输入当前密码" autocomplete="current-password">
+			</label>
+			<label>
+				新密码
+				<input name="newPassword" type="password" required minlength="4" placeholder="请输入新密码（至少4位）" autocomplete="new-password">
+			</label>
+			<button type="submit">更新密码</button>
+		</form>
+	</div>
 </section>
 
 

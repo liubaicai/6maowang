@@ -1,12 +1,21 @@
 <section class="auth">
-	<h1>登录</h1>
-	<% if (typeof error !== 'undefined' && error) { %>
-		<div class="alert error"><%= error %></div>
-	<% } %>
-	<form action="/login" method="post">
-		<label style="display: none;">用户名<input name="username" value="admin" required></label>
-		<label>密码<input name="password" type="password" required></label>
-		<button>登录</button>
-	</form>
+	<div class="auth-card">
+		<h1>🐱 遛猫网</h1>
+		<% if (typeof error !== 'undefined' && error) { %>
+			<div class="alert error">
+				<strong>登录失败</strong><br>
+				<%= error %>
+			</div>
+		<% } %>
+		<form action="/login" method="post">
+			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+			<label style="display: none;">用户名<input name="username" value="admin" required></label>
+			<label>
+				密码
+				<input name="password" type="password" required placeholder="请输入密码" autocomplete="current-password">
+			</label>
+			<button type="submit">登录</button>
+		</form>
+	</div>
 </section>
 

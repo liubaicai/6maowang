@@ -28,6 +28,11 @@ stats.html
 /data/*
 !/data/.gitkeep
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 /public/uploads/*
 !/public/uploads/.gitkeep
 

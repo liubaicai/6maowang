@@ -5,25 +5,39 @@
   <% } %>
 </section>
 
-<div id="albumsApp" class="masonry">
+<% if (!albums || albums.length === 0) { %>
+  <div style="text-align: center; padding: 60px 20px; color: var(--muted);">
+    <div style="font-size: 64px; margin-bottom: 16px;">📷</div>
+    <div style="font-size: 18px; margin-bottom: 8px;">还没有相册</div>
+    <div>登录后可以创建你的第一个相册</div>
+  </div>
+<% } else { %>
+<div id="albumsApp" class="masonry masonry-loading">
   <% albums.forEach(a => { %>
-    <div class="card">
-      <a href="/photos?album=<%= a.id %>">
-        <% if (a.cover_stored_filename) { %>
-          <img src="/thumbs/<%= a.cover_stored_filename %>" alt="cover" />
-        <% } else { %>
-          <div class="placeholder">无封面</div>
-        <% } %>
-      </a>
-      <div class="card-body">
-        <div class="title"><%= a.name %></div>
+    <a class="album-card masonry-item" href="/photos?album=<%= a.id %>">
+      <% if (a.cover_stored_filename) { %>
+        <img src="/thumbs/<%= a.cover_stored_filename %>" alt="cover" />
+      <% } else { %>
+        <div class="placeholder">无封面</div>
+      <% } %>
+      <div class="meta">
+        <div class="name"><%= a.name %></div>
         <div class="desc"><%= a.description || '' %></div>
       </div>
-    </div>
+    </a>
   <% }) %>
-  <% if (!albums || albums.length === 0) { %>
-    <p>暂无相册</p>
-  <% } %>
-  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.getElementById('albumsApp');
+  if (container && window.Masonry) {
+    window.Masonry.init(container, '.masonry-item', {
+      minColWidth: 260, gap: 16, maxCols: 4
+    });
+  }
+});
+</script>
+<% } %>
 
 

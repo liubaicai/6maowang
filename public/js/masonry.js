@@ -18,7 +18,7 @@
 		return Math.min(maxCols || Infinity, count);
 	}
 
-	function layout(container, itemSelector, options) {
+	function layout(container, itemSelector, options, isInitial = false) {
 		const gap = options.gap ?? 16;
 		const minColWidth = options.minColWidth ?? 260;
 		const maxCols = options.maxCols ?? 4;
@@ -50,29 +50,77 @@
 			}
 			const top = colHeights[colIndex];
 			const left = colIndex * (colWidth + gap);
-			positions.push({ el, top, left, height });
+			positions.push({ el, top, left, height, index: i });
 			colHeights[colIndex] = top + height + gap;
 		}
-		// apply positions
-		positions.forEach(p => {
-			p.el.style.transform = `translate(${p.left}px, ${p.top}px)`;
-		});
+		
+		// apply positions with staggered animation on initial layout
+		if (isInitial) {
+			// 首次布局：先设置所有位置（无动画），然后交错淡入
+			positions.forEach(p => {
+				p.el.style.transform = `translate(${p.left}px, ${p.top}px)`;
+			});
+			
+			// 强制重排，确保位置已应用
+			container.offsetHeight;
+			
+			// 然后交错淡入
+			positions.forEach((p, idx) => {
+				const delay = Math.min(idx * 40, 400); // max 400ms delay
+				setTimeout(() => {
+					p.el.classList.add('masonry-visible');
+				}, delay);
+			});
+		} else {
+			// 后续布局（如窗口调整）：直接更新位置
+			positions.forEach(p => {
+				p.el.style.transform = `translate(${p.left}px, ${p.top}px)`;
+			});
+		}
+		
 		const totalHeight = Math.max(0, ...colHeights) - gap; // remove last gap
 		container.style.height = Math.max(0, totalHeight) + 'px';
+		
+		// Mark container as ready
+		if (isInitial) {
+			container.classList.add('masonry-ready');
+		}
+		
 		if (options && typeof options.onLayout === 'function') {
 			try { options.onLayout(); } catch {}
 		}
 	}
 
 	function initMasonry(container, itemSelector, options = {}) {
-		const state = { container, itemSelector, options };
-		const relayout = () => layout(container, itemSelector, options);
-		const schedule = () => nextTick(() => onImagesReady(container, relayout));
+		const state = { container, itemSelector, options, initialized: false };
+		
+		// Mark container as loading
+		container.classList.add('masonry-loading');
+		
+		const relayout = (isInitial = false) => layout(container, itemSelector, options, isInitial);
+		
+		const initialLayout = () => {
+			container.classList.remove('masonry-loading');
+			relayout(true);
+			state.initialized = true;
+		};
+		
+		const resizeLayout = () => {
+			if (state.initialized) {
+				relayout(false);
+			}
+		};
+		
+		const schedule = () => nextTick(() => onImagesReady(container, initialLayout));
+		const scheduleResize = () => nextTick(() => resizeLayout());
+		
 		schedule();
-		window.addEventListener('resize', schedule);
+		window.addEventListener('resize', scheduleResize);
+		
 		return {
-			layout: schedule,
-			destroy() { window.removeEventListener('resize', schedule); }
+			layout: () => nextTick(() => relayout(false)),
+			refresh: schedule,
+			destroy() { window.removeEventListener('resize', scheduleResize); }
 		};
 	}
 

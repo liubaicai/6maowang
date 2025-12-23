@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import express from 'express';
 import session from 'express-session';
 import SQLiteStoreFactory from 'connect-sqlite3';
+import csrf from 'csurf';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -36,25 +37,49 @@ app.set('layout', 'layouts/main');
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// 确保使用 UTF-8 编码处理请求
+app.use(express.urlencoded({ extended: true, charset: 'utf-8' }));
+app.use(express.json({ charset: 'utf-8' }));
 
 // Sessions
 const SQLiteStore = SQLiteStoreFactory(session);
+
+// 确保生产环境配置了 SESSION_SECRET
+if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'change_this_session_secret')) {
+	console.error('错误: 生产环境必须设置 SESSION_SECRET 环境变量');
+	process.exit(1);
+}
+
 app.use(
 	session({
 		store: new SQLiteStore({ db: 'sessions.sqlite', dir: path.join(__dirname, 'data') }),
 		secret: process.env.SESSION_SECRET || 'change_this_session_secret',
 		resave: false,
 		saveUninitialized: false,
-		cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
+		cookie: { 
+			maxAge: 1000 * 60 * 60 * 24 * 7,
+			secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+			httpOnly: true,
+			sameSite: 'strict'
+		},
 	})
 );
+
+// CSRF Protection
+const csrfProtection = csrf({ 
+	cookie: false, // 使用 session 存储 CSRF token
+	value: (req) => {
+		// 支持从请求头或请求体中读取 CSRF token
+		return req.headers['x-csrf-token'] || req.body._csrf || req.query._csrf;
+	}
+});
+app.use(csrfProtection);
 
 // Expose auth to views
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = Boolean(req.session.userId);
 	res.locals.username = req.session.username || null;
+	res.locals.csrfToken = req.csrfToken(); // 提供 CSRF token 给所有视图
 	next();
 });
 
@@ -83,6 +108,15 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
 	console.error(err);
+	
+	// CSRF token 错误
+	if (err.code === 'EBADCSRFTOKEN') {
+		if (req.headers['content-type']?.includes('application/json') || req.path.startsWith('/albums/api') || req.path.startsWith('/photos/api')) {
+			return res.status(403).json({ error: 'CSRF 验证失败' });
+		}
+		return res.status(403).render('errors/403', { title: '禁止访问', error: 'CSRF 验证失败' });
+	}
+	
 	if (req.headers['content-type']?.includes('application/json') || req.path.startsWith('/albums/api') || req.path.startsWith('/photos/api')) {
 		res.status(500).json({ error: '服务器错误' });
 		return;

@@ -1,27 +1,38 @@
 <section id="manageApp">
-	<h1>管理相册</h1>
+	<h1>📁 管理相册</h1>
 	<div class="grid">
 		<div class="card">
 			<h3>新建相册</h3>
 			<form @submit.prevent="create">
-				<label>名称<input v-model="name" required placeholder="如：2025年夏天" /></label>
-				<label>描述<textarea v-model="description" placeholder="一句话描述"></textarea></label>
-				<button>创建</button>
+				<label>
+					名称
+					<input v-model="name" required placeholder="如：2025年夏天" maxlength="100" />
+				</label>
+				<label>
+					描述
+					<textarea v-model="description" placeholder="一句话描述这个相册..." maxlength="500"></textarea>
+				</label>
+				<button type="submit" :disabled="!name.trim()">创建相册</button>
 			</form>
 		</div>
 		<div class="card">
-			<h3>相册列表</h3>
-			<div v-for="a in albums" :key="a.id" class="album-row" style="display:flex;align-items:center;gap:8px;margin:8px 0">
-				<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" class="cover-mini"/>
-				<input v-model="a.name" placeholder="相册名称" />
-				<input v-model="a.description" placeholder="描述" />
-				<button @click="save(a)" style="min-width:72px">保存</button>
-				<a :href="`/photos/album/${a.id}`" style="white-space:nowrap">进入</a>
-				<button class="danger" @click="remove(a)">删除</button>
+			<h3>相册列表 ({{ albums.length }})</h3>
+			<div v-if="albums.length === 0" style="color: var(--muted); text-align: center; padding: 40px 0;">
+				还没有相册，快去创建第一个吧！
+			</div>
+			<div v-for="a in albums" :key="a.id" class="album-row">
+				<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" class="cover-mini" :alt="a.name"/>
+				<input v-model="a.name" placeholder="相册名称" maxlength="100" />
+				<input v-model="a.description" placeholder="描述" maxlength="500" />
+				<button @click="save(a)" class="small secondary">💾 保存</button>
+				<a :href="`/photos/album/${a.id}`" style="text-decoration: none;">
+					<button class="small" type="button">📸 进入</button>
+				</a>
+				<button class="small danger" @click="remove(a)">🗑️ 删除</button>
 			</div>
 		</div>
 	</div>
-	<div v-if="msg" class="alert">{{ msg }}</div>
+	<div v-if="msg" class="alert success">{{ msg }}</div>
 </section>
 
 <script>
@@ -38,16 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
 				albums.value = await r.json();
 			};
 			const create = async () => {
-				const r = await fetch('/albums/api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name.value, description: description.value }) });
+				const r = await fetchWithCsrf('/albums/api', { 
+					method: 'POST', 
+					headers: { 'Content-Type': 'application/json' }, 
+					body: JSON.stringify({ name: name.value, description: description.value }) 
+				});
 				if (r.ok) { msg.value = '已创建'; name.value=''; description.value=''; load(); }
 			};
 			const save = async (a) => {
-				await fetch(`/albums/api/${a.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: a.name, description: a.description }) });
+				await fetchWithCsrf(`/albums/api/${a.id}`, { 
+					method: 'PUT', 
+					headers: { 'Content-Type': 'application/json' }, 
+					body: JSON.stringify({ name: a.name, description: a.description }) 
+				});
 				msg.value = '已保存';
 			};
 			const remove = async (a) => {
 				if (!confirm('确定删除该相册及其所有照片？')) return;
-				await fetch(`/albums/api/${a.id}`, { method: 'DELETE' });
+				await fetchWithCsrf(`/albums/api/${a.id}`, { method: 'DELETE' });
 				msg.value = '已删除';
 				load();
 			};

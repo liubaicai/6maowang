@@ -1,11 +1,16 @@
 <section id="albumsApp">
 	<div v-if="error" class="alert error">{{ error }}</div>
-	<div class="masonry" ref="masonryRoot">
+	<div v-if="albums.length === 0 && !error && !loading" style="text-align: center; padding: 60px 20px; color: var(--muted);">
+		<div style="font-size: 64px; margin-bottom: 16px;">📷</div>
+		<div style="font-size: 18px; margin-bottom: 8px;">还没有相册</div>
+		<div>登录后可以创建你的第一个相册</div>
+	</div>
+	<div class="masonry masonry-loading" ref="masonryRoot">
 		<a class="album-card masonry-item" v-for="a in albums" :key="a.id" :href="`/photos/album/${a.id}`">
-			<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" alt="cover" />
+			<img :src="a.cover_thumb ? `/uploads/thumbs/${a.cover_thumb}` : '/img/placeholder.png'" :alt="a.name" />
 			<div class="meta">
 				<div class="name">{{ a.name }}</div>
-				<div class="desc">{{ a.description }}</div>
+				<div class="desc">{{ a.description || '暂无描述' }}</div>
 			</div>
 		</a>
 	</div>
@@ -18,29 +23,27 @@ document.addEventListener('DOMContentLoaded', () => {
 		setup() {
 			const albums = ref([]);
 			const error = ref('');
+			const loading = ref(true);
 			const masonryRoot = ref(null);
 			const load = async () => {
 				try {
 					const r = await fetch('/albums/api');
 					albums.value = await r.json();
+					loading.value = false;
 					nextTick(() => {
-						const overlay = document.getElementById('globalLoading');
-						if (overlay) overlay.classList.add('show');
-						if (masonryRoot.value && window.Masonry) {
+						if (masonryRoot.value && window.Masonry && albums.value.length > 0) {
 							window.Masonry.init(masonryRoot.value, '.masonry-item', {
-								minColWidth: 260, gap: 16, maxCols: 4,
-								onLayout: () => { const o = document.getElementById('globalLoading'); if (o) o.classList.remove('show'); }
+								minColWidth: 260, gap: 16, maxCols: 4
 							});
-						} else {
-							if (overlay) overlay.classList.remove('show');
 						}
 					});
 				} catch (e) {
 					error.value = '加载失败';
+					loading.value = false;
 				}
 			};
 			onMounted(load);
-			return { albums, error, masonryRoot };
+			return { albums, error, loading, masonryRoot };
 		}
 	}).mount('#albumsApp');
 });

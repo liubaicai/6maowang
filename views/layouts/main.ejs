@@ -32,18 +32,22 @@
 
 <body>
 	<header class="topbar">
-		<div class="container topbar-inner">
-			<a class="brand" href="/">遛猫网</a>
-			<nav class="nav" style="display: flex;align-items: center;">
+		<div class="topbar-inner">
+			<a class="brand" href="/">
+				<span>🐱</span>
+				<span>遛猫网</span>
+			</a>
+			<nav class="nav">
 				<% if (isAuthenticated) { %>
-					<a href="/albums/manage">管理</a>
-					<a href="/account">账户</a>
-					<form action="/logout" method="post" style="display:inline">
-						<button class="link">退出</button>
+					<a href="/albums/manage">📁 管理</a>
+					<a href="/account">⚙️ 账户</a>
+					<form action="/logout" method="post" style="display:inline; margin: 0;">
+						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+						<button class="link" type="submit">🚪 退出</button>
 					</form>
-					<% } else { %>
-						<a href="/login">登录</a>
-						<% } %>
+				<% } else { %>
+					<a href="/login">🔐 登录</a>
+				<% } %>
 			</nav>
 		</div>
 	</header>
@@ -53,6 +57,21 @@
 	<div id="globalLoading" class="loading-overlay">
 		<div class="spinner"></div>
 	</div>
+	<script>
+		// 全局 CSRF token 辅助函数
+		window.getCsrfToken = function() {
+			return '<%= csrfToken %>';
+		};
+		
+		// 为 fetch 添加 CSRF token 的辅助函数
+		window.fetchWithCsrf = function(url, options = {}) {
+			options.headers = options.headers || {};
+			if (options.method && options.method !== 'GET') {
+				options.headers['X-CSRF-Token'] = window.getCsrfToken();
+			}
+			return fetch(url, options);
+		};
+	</script>
 	<script src="/js/masonry.js"></script>
 	<script src="/js/app.js"></script>
 	<div id="footer">Copyright © <a href="https://github.com/liubaicai">菜园子</a> 2021, <a
