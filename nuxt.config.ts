@@ -3,6 +3,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  // 启用 Nitro WebSocket 支持
+  nitro: {
+    experimental: {
+      websocket: true,
+    },
+  },
+
   // 模块
   modules: [
     '@nuxt/ui',

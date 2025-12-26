@@ -48,9 +48,23 @@
     <!-- 系统信息 -->
     <UCard class="mb-8">
       <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-server" class="w-5 h-5 text-gray-500" />
-          <h3 class="font-semibold">系统信息</h3>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-server" class="w-5 h-5 text-gray-500" />
+            <h3 class="font-semibold">系统信息</h3>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span 
+              class="flex items-center gap-1"
+              :class="wsConnected ? 'text-green-500' : 'text-gray-400'"
+            >
+              <span 
+                class="w-2 h-2 rounded-full" 
+                :class="wsConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'"
+              ></span>
+              {{ wsConnected ? '实时更新' : '离线' }}
+            </span>
+          </div>
         </div>
       </template>
       
@@ -177,9 +191,100 @@ useSeoMeta({
 // 获取统计数据
 const { data: stats } = await useFetch('/api/stats')
 
-// 获取系统信息
-const { data: systemInfo } = await useFetch('/api/system', {
+// 获取系统信息（初始加载）
+const { data: systemInfoData } = await useFetch('/api/system', {
   server: false, // 仅在客户端获取，避免服务端渲染问题
+})
+
+// 创建响应式的系统信息对象用于实时更新
+const systemInfo = ref<typeof systemInfoData.value>(null)
+
+// 初始化系统信息
+watch(systemInfoData, (val) => {
+  if (val) {
+    systemInfo.value = JSON.parse(JSON.stringify(val))
+  }
+}, { immediate: true })
+
+// WebSocket 连接状态
+const wsConnected = ref(false)
+const lastUpdate = ref<Date | null>(null)
+
+// WebSocket 相关变量
+let ws: WebSocket | null = null
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+
+const connectWebSocket = () => {
+  // 如果已有连接，先关闭
+  if (ws) {
+    ws.close()
+    ws = null
+  }
+  
+  // 构建 WebSocket URL
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  const wsUrl = `${protocol}//${window.location.host}/api/ws/system`
+  
+  ws = new WebSocket(wsUrl)
+  
+  ws.onopen = () => {
+    console.log('[WebSocket] 已连接到系统信息服务')
+    wsConnected.value = true
+  }
+  
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data)
+      // 更新实时数据（CPU、内存、运行时间）
+      if (systemInfo.value && data.cpu) {
+        // 使用新对象触发响应式更新
+        systemInfo.value = {
+          ...systemInfo.value,
+          cpu: {
+            ...systemInfo.value.cpu,
+            usage: data.cpu.usage,
+            load: data.cpu.load,
+          },
+          memory: data.memory,
+          uptime: data.uptime,
+          uptimeSeconds: data.uptimeSeconds,
+        }
+        lastUpdate.value = new Date()
+      }
+    } catch (e) {
+      console.error('[WebSocket] 解析消息失败:', e)
+    }
+  }
+  
+  ws.onclose = () => {
+    console.log('[WebSocket] 连接已关闭')
+    wsConnected.value = false
+    ws = null
+    // 5 秒后重连
+    reconnectTimer = setTimeout(connectWebSocket, 5000)
+  }
+  
+  ws.onerror = (error) => {
+    console.error('[WebSocket] 连接错误:', error)
+    wsConnected.value = false
+  }
+}
+
+// 设置 WebSocket 实时更新
+onMounted(() => {
+  connectWebSocket()
+})
+
+// 清理 WebSocket 连接
+onUnmounted(() => {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
+  if (ws) {
+    ws.close()
+    ws = null
+  }
 })
 
 // 根据使用率返回样式类
