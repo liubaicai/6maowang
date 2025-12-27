@@ -11,6 +11,7 @@
 - 🌓 深色/浅色模式切换
 - 🔐 用户认证与会话管理
 - 📱 响应式设计
+- 🚀 **RESTful API** - 支持移动端 App 接入
 
 ## 技术栈
 
@@ -19,6 +20,32 @@
 - **数据库**: SQLite + Drizzle ORM
 - **图片处理**: Sharp
 - **EXIF 解析**: exifr
+
+## API 文档
+
+项目提供完整的 RESTful API 供移动端 App 使用。
+
+### API 特性
+
+- 使用 `/api/v1` 前缀区分版本
+- 支持 Bearer Token 认证（适合移动端）
+- 统一的 JSON 响应格式
+- 完整的错误码体系
+
+### 快速示例
+
+```bash
+# 登录获取 Token
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin"}'
+
+# 使用 Token 访问 API
+curl http://localhost:3000/api/v1/albums \
+  -H "Authorization: Bearer <your_token>"
+```
+
+详细文档请查看 [API 文档](./docs/API.md)
 
 ## 快速开始
 

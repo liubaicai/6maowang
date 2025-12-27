@@ -59,6 +59,18 @@ export function initDatabase() {
       FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
     );
     
+    CREATE TABLE IF NOT EXISTS tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      device_info TEXT DEFAULT '',
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    
     CREATE INDEX IF NOT EXISTS idx_photos_album ON photos(album_id);
+    CREATE INDEX IF NOT EXISTS idx_tokens_user ON tokens(user_id);
+    CREATE INDEX IF NOT EXISTS idx_tokens_token ON tokens(token);
   `)
 }

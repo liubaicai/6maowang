@@ -34,6 +34,16 @@ export const photos = sqliteTable('photos', {
   updatedAt: text('updated_at').notNull(),
 })
 
+// 令牌表（用于 App 端 Token 认证）
+export const tokens = sqliteTable('tokens', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text('token').notNull().unique(),
+  deviceInfo: text('device_info').default(''),
+  expiresAt: text('expires_at').notNull(),
+  createdAt: text('created_at').notNull(),
+})
+
 // 类型导出
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -41,3 +51,5 @@ export type Album = typeof albums.$inferSelect
 export type NewAlbum = typeof albums.$inferInsert
 export type Photo = typeof photos.$inferSelect
 export type NewPhoto = typeof photos.$inferInsert
+export type Token = typeof tokens.$inferSelect
+export type NewToken = typeof tokens.$inferInsert

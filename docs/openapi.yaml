@@ -1,0 +1,694 @@
+openapi: "3.0.3"
+info:
+  title: 遛猫网 API
+  description: |
+    遛猫网照片相册管理系统 API 文档
+    
+    ## 认证方式
+    
+    API 支持 Bearer Token 认证。需要在请求头中添加：
+    ```
+    Authorization: Bearer <your_access_token>
+    ```
+    
+    Token 默认有效期为 7 天，可通过刷新接口延长。
+  version: "1.0.0"
+  contact:
+    name: API 支持
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+tags:
+  - name: 认证
+    description: 用户认证相关接口
+  - name: 相册
+    description: 相册管理接口
+  - name: 照片
+    description: 照片管理接口
+  - name: 其他
+    description: 其他接口
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer Token 认证
+
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 业务状态码，0 表示成功
+          example: 0
+        message:
+          type: string
+          description: 操作结果描述
+          example: 操作成功
+        data:
+          type: object
+          description: 响应数据
+        timestamp:
+          type: integer
+          description: 响应时间戳（毫秒）
+          example: 1703664000000
+
+    PaginatedResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: 获取成功
+        data:
+          type: object
+          properties:
+            list:
+              type: array
+              items: {}
+            total:
+              type: integer
+              example: 100
+            page:
+              type: integer
+              example: 1
+            pageSize:
+              type: integer
+              example: 20
+            totalPages:
+              type: integer
+              example: 5
+        timestamp:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: admin
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: password123
+        deviceInfo:
+          type: string
+          example: iPhone 15 Pro
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: a1b2c3d4e5f6...
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2024-01-10T10:00:00.000Z"
+        user:
+          $ref: "#/components/schemas/User"
+
+    Album:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: 我的相册
+        description:
+          type: string
+          nullable: true
+          example: 相册描述
+        coverPhotoId:
+          type: integer
+          nullable: true
+          example: 10
+        coverThumb:
+          type: string
+          nullable: true
+          example: thumb_abc123.jpg
+        photoCount:
+          type: integer
+          example: 50
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AlbumCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: 新相册
+        description:
+          type: string
+          example: 相册描述
+
+    Photo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        albumId:
+          type: integer
+          example: 1
+        originalFilename:
+          type: string
+          example: photo.jpg
+        storedFilename:
+          type: string
+          example: abc123.jpg
+        thumbnailFilename:
+          type: string
+          example: thumb_abc123.jpg
+        mimeType:
+          type: string
+          example: image/jpeg
+        width:
+          type: integer
+          nullable: true
+          example: 1920
+        height:
+          type: integer
+          nullable: true
+          example: 1080
+        displayName:
+          type: string
+          example: photo
+        exifSummary:
+          type: string
+          example: iPhone 15 Pro | 24mm f/1.78 1/120s ISO100
+        shotAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Stats:
+      type: object
+      properties:
+        albumCount:
+          type: integer
+          example: 10
+        photoCount:
+          type: integer
+          example: 500
+        storageSize:
+          type: integer
+          example: 1073741824
+        storageSizeFormatted:
+          type: string
+          example: "1.00 GB"
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - 认证
+      summary: 用户登录
+      description: 使用用户名密码登录，获取访问令牌
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LoginResponse"
+
+  /auth/logout:
+    post:
+      tags:
+        - 认证
+      summary: 用户登出
+      description: 撤销当前令牌
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 登出成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+
+  /auth/refresh:
+    post:
+      tags:
+        - 认证
+      summary: 刷新令牌
+      description: 延长当前令牌的有效期
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 刷新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LoginResponse"
+
+  /auth/profile:
+    get:
+      tags:
+        - 认证
+      summary: 获取用户信息
+      description: 获取当前登录用户信息
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+
+  /albums:
+    get:
+      tags:
+        - 相册
+      summary: 获取相册列表
+      description: 获取所有相册，支持分页
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: 每页数量
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          list:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/Album"
+
+    post:
+      tags:
+        - 相册
+      summary: 创建相册
+      description: 创建新相册
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlbumCreate"
+      responses:
+        "200":
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Album"
+
+  /albums/{id}:
+    get:
+      tags:
+        - 相册
+      summary: 获取相册详情
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 相册 ID
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Album"
+
+    put:
+      tags:
+        - 相册
+      summary: 更新相册
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlbumCreate"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+
+    delete:
+      tags:
+        - 相册
+      summary: 删除相册
+      description: 删除相册及其所有照片
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+
+  /albums/{id}/cover:
+    post:
+      tags:
+        - 相册
+      summary: 设置相册封面
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - photoId
+              properties:
+                photoId:
+                  type: integer
+                  description: 照片 ID
+      responses:
+        "200":
+          description: 设置成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+
+  /albums/{id}/photos:
+    get:
+      tags:
+        - 相册
+      summary: 获取相册照片
+      description: 获取相册内的照片列表
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          list:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/Photo"
+
+  /photos/{id}:
+    get:
+      tags:
+        - 照片
+      summary: 获取照片详情
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Photo"
+
+    put:
+      tags:
+        - 照片
+      summary: 更新照片
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                albumId:
+                  type: integer
+                  description: 目标相册 ID
+                originalFilename:
+                  type: string
+                  description: 新文件名
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+
+    delete:
+      tags:
+        - 照片
+      summary: 删除照片
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+
+  /photos/upload:
+    post:
+      tags:
+        - 照片
+      summary: 上传照片
+      description: 上传照片到指定相册，支持批量上传
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - albumId
+                - photos
+              properties:
+                albumId:
+                  type: string
+                  description: 相册 ID
+                photos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: 照片文件（最多 50 张）
+      responses:
+        "200":
+          description: 上传成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          uploaded:
+                            type: integer
+                            description: 成功上传数量
+                          failed:
+                            type: integer
+                            description: 失败数量
+                          photos:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                originalFilename:
+                                  type: string
+                                storedFilename:
+                                  type: string
+                                thumbnailFilename:
+                                  type: string
+                          errors:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                filename:
+                                  type: string
+                                error:
+                                  type: string
+
+  /stats:
+    get:
+      tags:
+        - 其他
+      summary: 获取统计信息
+      description: 获取系统统计数据
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Stats"
