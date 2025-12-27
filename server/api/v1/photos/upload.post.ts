@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
         const mimeType = file.mimetype || 'image/jpeg'
         
         // 验证文件类型
-        const validation = validateImageFile({ mimetype: mimeType, originalFilename })
+        const validation = validateImageFile(originalFilename, mimeType)
         if (!validation.valid) {
           failed.push({ filename: originalFilename, error: validation.error })
           continue
@@ -79,16 +79,13 @@ export default defineEventHandler(async (event) => {
         
         // 生成缩略图
         const thumbnailFilename = `thumb_${storedFilename}`
-        await generateThumbnail(
-          join(originalsDir, storedFilename),
-          thumbnailFilename
-        )
+        await generateThumbnail(storedFilename, thumbnailFilename)
         
         // 获取图片元数据
-        const metadata = await getImageMetadata(join(originalsDir, storedFilename))
+        const metadata = await getImageMetadata(storedFilename)
         
         // 解析 EXIF
-        const exifData = await parseExif(join(originalsDir, storedFilename))
+        const exifData = await parseExif(storedFilename)
         
         // 插入数据库
         const result = db.insert(schema.photos).values({
