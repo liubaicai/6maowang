@@ -51,6 +51,8 @@ export default defineEventHandler(async (event) => {
       user: {
         id: user.id,
         username: user.username,
+        nickname: user.nickname || user.username,
+        role: user.role || 'admin',
       },
     }, '登录成功')
   } catch (error: any) {

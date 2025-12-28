@@ -53,7 +53,7 @@ export function createUserToken(userId: number, deviceInfo?: string): { token: s
 /**
  * 验证令牌并返回用户信息
  */
-export function verifyToken(token: string): { id: number; username: string } | null {
+export function verifyToken(token: string): { id: number; username: string; nickname?: string | null; role: string } | null {
   const now = new Date().toISOString()
   
   const record = db
@@ -61,6 +61,8 @@ export function verifyToken(token: string): { id: number; username: string } | n
       userId: schema.tokens.userId,
       expiresAt: schema.tokens.expiresAt,
       username: schema.users.username,
+      nickname: schema.users.nickname,
+      role: schema.users.role,
     })
     .from(schema.tokens)
     .innerJoin(schema.users, eq(schema.tokens.userId, schema.users.id))
@@ -81,6 +83,8 @@ export function verifyToken(token: string): { id: number; username: string } | n
   return {
     id: record.userId,
     username: record.username,
+    nickname: record.nickname,
+    role: record.role || 'admin',
   }
 }
 

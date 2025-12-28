@@ -5,19 +5,21 @@
  * 请求头:
  * - Authorization: Bearer <token>
  * 
+ * 需要管理员权限
  * 会同时删除相册内所有照片文件
  */
 import { db, schema } from '../../../database'
 import { eq } from 'drizzle-orm'
-import { requireAuth } from '../../../utils/auth'
+import { requireAdmin } from '../../../utils/auth'
 import { rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { originalsDir, thumbsDir } from '../../../utils/paths'
 import { successResponse, errorResponse } from '../../../utils/api-response'
+import { logOperation } from '../../../utils/operation-log'
 
 export default defineEventHandler(async (event) => {
   try {
-    await requireAuth(event)
+    const user = await requireAdmin(event)
     
     const id = getRouterParam(event, 'id')
     if (!id) {
@@ -57,10 +59,19 @@ export default defineEventHandler(async (event) => {
       .where(eq(schema.albums.id, Number(id)))
       .run()
     
+    // 记录操作日志
+    logOperation(user.id, 'delete_album', 'album', Number(id), {
+      albumName: album.name,
+      photoCount: photos.length,
+    })
+    
     return successResponse({ id: Number(id) }, '删除成功')
   } catch (error: any) {
     if (error.statusCode === 401) {
       return errorResponse(error.message, 1004)
+    }
+    if (error.statusCode === 403) {
+      return errorResponse(error.message, 1005)
     }
     return errorResponse(error.message || '删除失败', 2000)
   }

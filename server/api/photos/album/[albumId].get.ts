@@ -1,5 +1,5 @@
 import { db, schema } from '../../../database'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, isNull } from 'drizzle-orm'
 import { formatExifSummary } from '../../../utils/image'
 
 export default defineEventHandler(async (event) => {
@@ -12,11 +12,12 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  // 获取照片列表
+  // 获取照片列表（排除软删除的照片）
   const photos = db
     .select()
     .from(schema.photos)
     .where(eq(schema.photos.albumId, Number(albumId)))
+    .where(isNull(schema.photos.deletedAt))
     .orderBy(desc(schema.photos.createdAt))
     .all()
   

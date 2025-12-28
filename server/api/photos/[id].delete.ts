@@ -1,13 +1,11 @@
 import { db, schema } from '../../database'
 import { eq } from 'drizzle-orm'
 import { requireAuth } from '../../utils/auth'
-import { rmSync } from 'node:fs'
-import { join } from 'node:path'
-import { originalsDir, thumbsDir } from '../../utils/paths'
+import { logOperation } from '../../utils/operation-log'
 
 export default defineEventHandler(async (event) => {
   // 验证登录
-  await requireAuth(event)
+  const user = await requireAuth(event)
   
   const id = getRouterParam(event, 'id')
   if (!id) {
@@ -31,16 +29,12 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  // 删除文件
-  try {
-    rmSync(join(originalsDir, photo.storedFilename), { force: true })
-    rmSync(join(thumbsDir, photo.thumbnailFilename), { force: true })
-  } catch {
-    // 忽略文件删除错误
-  }
-  
-  // 删除数据库记录
-  db.delete(schema.photos)
+  // 软删除：标记为已删除而不是物理删除
+  db.update(schema.photos)
+    .set({ 
+      deletedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
     .where(eq(schema.photos.id, Number(id)))
     .run()
   
@@ -49,6 +43,12 @@ export default defineEventHandler(async (event) => {
     .set({ coverPhotoId: null })
     .where(eq(schema.albums.coverPhotoId, Number(id)))
     .run()
+  
+  // 记录操作日志
+  logOperation(user.id, 'delete_photo', 'photo', Number(id), {
+    filename: photo.originalFilename,
+    albumId: photo.albumId,
+  })
   
   return { ok: true }
 })

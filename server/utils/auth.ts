@@ -35,6 +35,23 @@ export async function requireAuth(event: any) {
 }
 
 /**
+ * 验证用户是否为管理员
+ * 如果不是管理员则抛出 403 错误
+ */
+export async function requireAdmin(event: any) {
+  const user = await requireAuth(event)
+  
+  if (user.role !== 'admin') {
+    throw createError({
+      statusCode: 403,
+      message: '权限不足，仅管理员可访问',
+    })
+  }
+  
+  return user
+}
+
+/**
  * 获取当前用户（可选认证）
  * 如果未登录返回 null，不抛出错误
  */

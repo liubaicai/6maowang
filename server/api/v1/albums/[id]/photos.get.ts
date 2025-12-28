@@ -9,7 +9,7 @@
  * 公开接口，无需认证
  */
 import { db, schema } from '../../../../database'
-import { eq, desc, count } from 'drizzle-orm'
+import { eq, desc, count, isNull, and } from 'drizzle-orm'
 import { formatExifSummary } from '../../../../utils/image'
 import { paginatedResponse, errorResponse } from '../../../../utils/api-response'
 
@@ -37,11 +37,17 @@ export default defineEventHandler(async (event) => {
     const pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 20))
     const offset = (page - 1) * pageSize
     
+    // 查询条件：相册ID匹配且未被软删除
+    const whereCondition = and(
+      eq(schema.photos.albumId, Number(albumId)),
+      isNull(schema.photos.deletedAt)
+    )
+    
     // 获取总数
     const totalResult = db
       .select({ count: count() })
       .from(schema.photos)
-      .where(eq(schema.photos.albumId, Number(albumId)))
+      .where(whereCondition)
       .get()
     const total = totalResult?.count || 0
     
@@ -49,7 +55,7 @@ export default defineEventHandler(async (event) => {
     const photos = db
       .select()
       .from(schema.photos)
-      .where(eq(schema.photos.albumId, Number(albumId)))
+      .where(whereCondition)
       .orderBy(desc(schema.photos.createdAt))
       .limit(pageSize)
       .offset(offset)

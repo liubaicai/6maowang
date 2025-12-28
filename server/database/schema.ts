@@ -5,6 +5,8 @@ export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   username: text('username').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  nickname: text('nickname'), // 昵称（可选）
+  role: text('role').notNull().default('admin'), // 用户角色：admin 或 user
   createdAt: text('created_at').notNull(),
 })
 
@@ -14,6 +16,7 @@ export const albums = sqliteTable('albums', {
   name: text('name').notNull(),
   description: text('description').default(''),
   coverPhotoId: integer('cover_photo_id'),
+  createdBy: integer('created_by'), // 创建者用户ID（可选，保持向后兼容）
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 })
@@ -30,6 +33,8 @@ export const photos = sqliteTable('photos', {
   height: integer('height'),
   exifJson: text('exif_json'),
   shotAt: text('shot_at'),
+  createdBy: integer('created_by'), // 创建者用户ID（可选，保持向后兼容）
+  deletedAt: text('deleted_at'), // 软删除时间戳（null 表示未删除）
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 })
@@ -44,6 +49,17 @@ export const tokens = sqliteTable('tokens', {
   createdAt: text('created_at').notNull(),
 })
 
+// 操作日志表（记录用户操作）
+export const operationLogs = sqliteTable('operation_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  action: text('action').notNull(), // 操作类型：create_album, upload_photo, delete_photo, delete_album 等
+  resourceType: text('resource_type').notNull(), // 资源类型：album, photo, user 等
+  resourceId: integer('resource_id'), // 资源ID（可选）
+  details: text('details'), // 操作详情（JSON字符串）
+  createdAt: text('created_at').notNull(),
+})
+
 // 类型导出
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -53,3 +69,5 @@ export type Photo = typeof photos.$inferSelect
 export type NewPhoto = typeof photos.$inferInsert
 export type Token = typeof tokens.$inferSelect
 export type NewToken = typeof tokens.$inferInsert
+export type OperationLog = typeof operationLogs.$inferSelect
+export type NewOperationLog = typeof operationLogs.$inferInsert

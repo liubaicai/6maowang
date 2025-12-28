@@ -4,6 +4,7 @@ import { requireAuth } from '../../utils/auth'
 import { validateImageFile } from '../../utils/validators'
 import { generateThumbnail, getImageMetadata, parseExif } from '../../utils/image'
 import { originalsDir } from '../../utils/paths'
+import { logOperation } from '../../utils/operation-log'
 import { randomUUID } from 'node:crypto'
 import { extname, join } from 'node:path'
 import { writeFileSync } from 'node:fs'
@@ -11,7 +12,7 @@ import formidable from 'formidable'
 
 export default defineEventHandler(async (event) => {
   // 验证登录
-  await requireAuth(event)
+  const user = await requireAuth(event)
   
   const config = useRuntimeConfig()
   const maxFileSize = (config.maxFileSize || 30) * 1024 * 1024 // MB to bytes
@@ -99,6 +100,7 @@ export default defineEventHandler(async (event) => {
       height: height || null,
       exifJson,
       shotAt,
+      createdBy: user.id,
       createdAt: now,
       updatedAt: now,
     }).run()
@@ -115,6 +117,14 @@ export default defineEventHandler(async (event) => {
     .set({ updatedAt: now })
     .where(eq(schema.albums.id, Number(albumId)))
     .run()
+  
+  // 记录操作日志
+  if (inserted.length > 0) {
+    logOperation(user.id, 'upload_photos', 'photo', Number(albumId), {
+      albumName: album.name,
+      photoCount: inserted.length,
+    })
+  }
   
   return {
     ok: true,

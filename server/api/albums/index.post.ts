@@ -1,10 +1,11 @@
 import { db, schema } from '../../database'
 import { requireAuth } from '../../utils/auth'
 import { validateAlbumName } from '../../utils/validators'
+import { logOperation } from '../../utils/operation-log'
 
 export default defineEventHandler(async (event) => {
   // 验证登录
-  await requireAuth(event)
+  const user = await requireAuth(event)
   
   const body = await readBody(event)
   const { name, description } = body
@@ -23,9 +24,15 @@ export default defineEventHandler(async (event) => {
   const result = db.insert(schema.albums).values({
     name: name.trim(),
     description: description?.trim() || '',
+    createdBy: user.id,
     createdAt: now,
     updatedAt: now,
   }).run()
+  
+  // 记录操作日志
+  logOperation(user.id, 'create_album', 'album', Number(result.lastInsertRowid), {
+    albumName: name.trim(),
+  })
   
   return {
     ok: true,

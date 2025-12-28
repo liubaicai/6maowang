@@ -1,5 +1,5 @@
 import { db, schema } from '../database'
-import { count } from 'drizzle-orm'
+import { count, isNull } from 'drizzle-orm'
 import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { originalsDir, thumbsDir } from '../utils/paths'
@@ -11,10 +11,11 @@ export default defineEventHandler(async () => {
     .from(schema.albums)
     .get()?.count || 0
   
-  // 统计照片数
+  // 统计照片数（排除软删除的照片）
   const photoCount = db
     .select({ count: count() })
     .from(schema.photos)
+    .where(isNull(schema.photos.deletedAt))
     .get()?.count || 0
   
   // 计算存储占用
