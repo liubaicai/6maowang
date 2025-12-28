@@ -70,6 +70,7 @@
               编辑
             </UButton>
             <UButton
+              v-if="isAdmin"
               color="error"
               variant="soft"
               size="sm"
@@ -121,6 +122,10 @@ useSeoMeta({
 
 const toast = useToast()
 
+// 获取当前用户信息
+const { data: session } = await useFetch('/api/auth/session')
+const isAdmin = computed(() => session.value?.user?.role === 'admin')
+
 // 获取相册列表
 const { data: albums, status, refresh } = await useFetch('/api/albums')
 
@@ -150,7 +155,7 @@ const handleDelete = async () => {
   } catch (err: any) {
     toast.add({ 
       title: '删除失败', 
-      description: err.message,
+      description: err.data?.message || err.message,
       color: 'error' 
     })
   } finally {

@@ -28,7 +28,10 @@
         <!-- 底部操作 -->
         <div class="p-4 border-t border-gray-200 dark:border-gray-800">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-sm text-gray-500">{{ session?.user?.username }}</span>
+            <div class="flex flex-col min-w-0">
+              <span class="text-sm font-medium truncate">{{ session?.user?.nickname || session?.user?.username }}</span>
+              <span class="text-xs text-gray-500">@{{ session?.user?.username }}</span>
+            </div>
             <UButton
               icon="i-heroicons-arrow-right-on-rectangle"
               color="neutral"
@@ -85,12 +88,25 @@ onMounted(() => {
 // 获取会话
 const { data: session } = await useFetch('/api/auth/session')
 
-// 菜单项
-const menuItems = [
-  { to: '/admin', icon: 'i-heroicons-home', label: '仪表盘' },
-  { to: '/admin/albums', icon: 'i-heroicons-folder', label: '相册管理' },
-  { to: '/admin/account', icon: 'i-heroicons-user-circle', label: '账户设置' },
-]
+// 菜单项（根据角色显示）
+const menuItems = computed(() => {
+  const items = [
+    { to: '/admin', icon: 'i-heroicons-home', label: '仪表盘' },
+    { to: '/admin/albums', icon: 'i-heroicons-folder', label: '相册管理' },
+  ]
+  
+  // 仅管理员可见的菜单
+  if (session.value?.user?.role === 'admin') {
+    items.push(
+      { to: '/admin/users', icon: 'i-heroicons-users', label: '用户管理' },
+      { to: '/admin/logs', icon: 'i-heroicons-document-text', label: '操作日志' }
+    )
+  }
+  
+  items.push({ to: '/admin/account', icon: 'i-heroicons-user-circle', label: '账户设置' })
+  
+  return items
+})
 
 // 页面标题
 const pageTitle = computed(() => {
@@ -98,6 +114,8 @@ const pageTitle = computed(() => {
     '/admin': '仪表盘',
     '/admin/albums': '相册管理',
     '/admin/albums/new': '新建相册',
+    '/admin/users': '用户管理',
+    '/admin/logs': '操作日志',
     '/admin/account': '账户设置',
   }
   return titles[route.path] || '管理后台'
