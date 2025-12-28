@@ -13,10 +13,11 @@ import { db, schema } from '../../../database'
 import { requireAuth } from '../../../utils/auth'
 import { validateAlbumName } from '../../../utils/validators'
 import { successResponse, errorResponse } from '../../../utils/api-response'
+import { logOperation } from '../../../utils/operation-log'
 
 export default defineEventHandler(async (event) => {
   try {
-    await requireAuth(event)
+    const user = await requireAuth(event)
     
     const body = await readBody(event)
     const { name, description } = body
@@ -32,9 +33,15 @@ export default defineEventHandler(async (event) => {
     const result = db.insert(schema.albums).values({
       name: name.trim(),
       description: description?.trim() || '',
+      createdBy: user.id,
       createdAt: now,
       updatedAt: now,
     }).run()
+    
+    // 记录操作日志
+    logOperation(user.id, 'create_album', 'album', Number(result.lastInsertRowid), {
+      albumName: name.trim(),
+    })
     
     return successResponse({
       id: Number(result.lastInsertRowid),
