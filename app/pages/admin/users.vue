@@ -74,66 +74,75 @@
     </UCard>
     
     <!-- 创建/编辑用户模态框 -->
-    <UModal v-model="showModal" :title="editingUser ? '编辑用户' : '新建用户'">
-      <form @submit.prevent="handleSubmit" class="space-y-4 p-4">
-        <div v-if="!editingUser">
-          <label class="block text-sm font-medium mb-1">用户名 <span class="text-red-500">*</span></label>
-          <UInput
-            v-model="form.username"
-            placeholder="请输入用户名"
-            class="w-full"
-          />
-          <p class="text-xs text-gray-500 mt-1">3-20 个字符</p>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium mb-1">昵称</label>
-          <UInput
-            v-model="form.nickname"
-            placeholder="请输入昵称（可选）"
-            class="w-full"
-          />
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium mb-1">
-            密码 <span v-if="!editingUser" class="text-red-500">*</span>
-          </label>
-          <UInput
-            v-model="form.password"
-            type="password"
-            :placeholder="editingUser ? '留空则不修改密码' : '请输入密码'"
-            class="w-full"
-          />
-          <p class="text-xs text-gray-500 mt-1">至少 4 个字符</p>
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium mb-1">角色</label>
-          <select v-model="form.role" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
-            <option value="admin">管理员</option>
-            <option value="user">普通用户</option>
-          </select>
-        </div>
-        
-        <div class="flex justify-end gap-2 pt-4">
-          <UButton
-            type="button"
-            color="neutral"
-            variant="soft"
-            @click="showModal = false"
-          >
-            取消
-          </UButton>
-          <UButton
-            type="submit"
-            color="primary"
-            :loading="submitting"
-          >
-            {{ editingUser ? '保存' : '创建' }}
-          </UButton>
-        </div>
-      </form>
+    <UModal v-model:open="showModal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="font-semibold">{{ editingUser ? '编辑用户' : '新建用户' }}</h3>
+          </template>
+          
+          <form @submit.prevent="handleSubmit" class="space-y-4">
+            <div v-if="!editingUser">
+              <label class="block text-sm font-medium mb-1">用户名 <span class="text-red-500">*</span></label>
+              <UInput
+                v-model="form.username"
+                placeholder="请输入用户名"
+                class="w-full"
+              />
+              <p class="text-xs text-gray-500 mt-1">3-20 个字符</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">昵称</label>
+              <UInput
+                v-model="form.nickname"
+                placeholder="请输入昵称（可选）"
+                class="w-full"
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                密码 <span v-if="!editingUser" class="text-red-500">*</span>
+              </label>
+              <UInput
+                v-model="form.password"
+                type="password"
+                :placeholder="editingUser ? '留空则不修改密码' : '请输入密码'"
+                class="w-full"
+              />
+              <p class="text-xs text-gray-500 mt-1">至少 4 个字符</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">角色</label>
+              <select v-model="form.role" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
+                <option value="admin">管理员</option>
+                <option value="user">普通用户</option>
+              </select>
+            </div>
+          </form>
+          
+          <template #footer>
+            <div class="flex justify-end gap-2">
+              <UButton
+                color="neutral"
+                variant="soft"
+                @click="showModal = false"
+              >
+                取消
+              </UButton>
+              <UButton
+                color="primary"
+                :loading="submitting"
+                @click="handleSubmit"
+              >
+                {{ editingUser ? '保存' : '创建' }}
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
     </UModal>
   </div>
 </template>
