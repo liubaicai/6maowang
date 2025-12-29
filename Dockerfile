@@ -1,5 +1,8 @@
 FROM node:20-alpine AS base
 
+# 安装 pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # 安装依赖阶段
 FROM base AS deps
 WORKDIR /app
@@ -7,8 +10,8 @@ WORKDIR /app
 # 安装构建依赖（用于 better-sqlite3 和 sharp）
 RUN apk add --no-cache python3 make g++ 
 
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # 构建阶段
 FROM base AS builder
@@ -17,7 +20,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 # 生产阶段
 FROM base AS runner
