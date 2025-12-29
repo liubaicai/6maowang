@@ -17,6 +17,24 @@
         </div>
         
         <div v-if="form.enabled" class="space-y-4">
+          <!-- 存储提供商选择 -->
+          <div>
+            <label class="block text-sm font-medium mb-1">
+              存储提供商 <span class="text-red-500">*</span>
+            </label>
+            <USelect
+              v-model="form.provider"
+              :options="[
+                { label: '标准 S3（AWS S3、MinIO 等）', value: 'standard-s3' },
+                { label: '阿里云 OSS', value: 'aliyun-oss' }
+              ]"
+              option-attribute="label"
+              value-attribute="value"
+              class="w-full"
+            />
+            <p class="text-xs text-gray-500 mt-1">选择您使用的对象存储提供商</p>
+          </div>
+          
           <!-- 端点 -->
           <div>
             <label class="block text-sm font-medium mb-1">
@@ -24,10 +42,13 @@
             </label>
             <UInput
               v-model="form.endpoint"
-              placeholder="https://s3.amazonaws.com 或 https://your-minio.com"
+              :placeholder="form.provider === 'aliyun-oss' ? 'https://oss-cn-hangzhou.aliyuncs.com' : 'https://s3.amazonaws.com 或 https://your-minio.com'"
               class="w-full"
             />
-            <p class="text-xs text-gray-500 mt-1">S3 API 端点地址，支持 AWS S3、MinIO、阿里云 OSS 等</p>
+            <p class="text-xs text-gray-500 mt-1">
+              <span v-if="form.provider === 'aliyun-oss'">阿里云 OSS Endpoint，例如: https://oss-cn-hangzhou.aliyuncs.com</span>
+              <span v-else>S3 API 端点地址，支持 AWS S3、MinIO 等</span>
+            </p>
           </div>
           
           <!-- Region -->
@@ -35,10 +56,13 @@
             <label class="block text-sm font-medium mb-1">Region</label>
             <UInput
               v-model="form.region"
-              placeholder="us-east-1"
+              :placeholder="form.provider === 'aliyun-oss' ? 'oss-cn-hangzhou' : 'us-east-1'"
               class="w-full"
             />
-            <p class="text-xs text-gray-500 mt-1">存储区域，默认 us-east-1</p>
+            <p class="text-xs text-gray-500 mt-1">
+              <span v-if="form.provider === 'aliyun-oss'">存储区域，例如: oss-cn-hangzhou, oss-cn-beijing</span>
+              <span v-else>存储区域，默认 us-east-1</span>
+            </p>
           </div>
           
           <!-- Bucket -->
@@ -81,17 +105,49 @@
             </p>
           </div>
           
+          <!-- 使用签名 URL -->
+          <div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <USwitch v-model="form.useSignedUrl" class="mt-0.5" />
+            <div class="flex-1">
+              <span class="text-sm font-medium">使用签名 URL（私有存储桶）</span>
+              <p class="text-xs text-gray-500 mt-1">
+                启用后，将为私有存储桶生成临时访问 URL。如果您的存储桶设置为私有（不允许公开访问），请启用此选项。
+              </p>
+            </div>
+          </div>
+          
+          <!-- URL 过期时间 -->
+          <div v-if="form.useSignedUrl">
+            <label class="block text-sm font-medium mb-1">
+              签名 URL 过期时间（秒）
+            </label>
+            <UInput
+              v-model.number="form.urlExpirationSeconds"
+              type="number"
+              min="60"
+              max="604800"
+              placeholder="3600"
+              class="w-full"
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              签名 URL 的有效时长，建议设置 3600（1小时）到 86400（24小时）之间
+            </p>
+          </div>
+          
           <!-- Public URL -->
           <div>
             <label class="block text-sm font-medium mb-1">
-              公开访问 URL <span class="text-red-500">*</span>
+              公开访问 URL {{ form.useSignedUrl ? '' : '(必填)' }}
             </label>
             <UInput
               v-model="form.publicUrl"
               placeholder="https://cdn.example.com 或 https://bucket.s3.region.amazonaws.com"
               class="w-full"
             />
-            <p class="text-xs text-gray-500 mt-1">用于生成图片访问链接的 URL 前缀（可以是 CDN 地址）</p>
+            <p class="text-xs text-gray-500 mt-1">
+              <span v-if="form.useSignedUrl">（可选）使用签名 URL 时，此字段可以留空</span>
+              <span v-else>用于生成图片访问链接的 URL 前缀（可以是 CDN 地址）</span>
+            </p>
           </div>
         </div>
         
@@ -227,12 +283,15 @@ const toast = useToast()
 // S3 配置类型
 interface S3Config {
   enabled: boolean
+  provider: 'standard-s3' | 'aliyun-oss'
   endpoint: string
   region: string
   bucket: string
   accessKeyId: string
   secretAccessKey: string
   publicUrl: string
+  useSignedUrl: boolean
+  urlExpirationSeconds: number
 }
 
 // 获取当前配置
@@ -241,12 +300,15 @@ const { data: config, refresh: refreshConfig } = await useFetch<S3Config>('/api/
 // 表单数据
 const form = ref<S3Config>({
   enabled: false,
+  provider: 'standard-s3',
   endpoint: '',
   region: 'us-east-1',
   bucket: '',
   accessKeyId: '',
   secretAccessKey: '',
   publicUrl: '',
+  useSignedUrl: false,
+  urlExpirationSeconds: 3600,
 })
 
 // 初始化表单
@@ -254,12 +316,15 @@ watchEffect(() => {
   if (config.value) {
     form.value = {
       enabled: config.value.enabled || false,
+      provider: config.value.provider || 'standard-s3',
       endpoint: config.value.endpoint || '',
       region: config.value.region || 'us-east-1',
       bucket: config.value.bucket || '',
       accessKeyId: config.value.accessKeyId || '',
       secretAccessKey: config.value.secretAccessKey || '',
       publicUrl: config.value.publicUrl || '',
+      useSignedUrl: config.value.useSignedUrl ?? false,
+      urlExpirationSeconds: config.value.urlExpirationSeconds || 3600,
     }
   }
 })

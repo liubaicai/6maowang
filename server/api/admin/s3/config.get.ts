@@ -10,11 +10,14 @@ export default defineEventHandler(async (event) => {
   // 隐藏 secret key 的具体值
   return {
     enabled: config.enabled,
+    provider: config.provider,
     endpoint: config.endpoint,
     region: config.region,
     bucket: config.bucket,
     accessKeyId: config.accessKeyId,
     secretAccessKey: config.secretAccessKey ? '********' : '',
     publicUrl: config.publicUrl,
+    useSignedUrl: config.useSignedUrl,
+    urlExpirationSeconds: config.urlExpirationSeconds,
   }
 })

@@ -18,10 +18,19 @@ export default defineEventHandler(async (event) => {
   
   // 验证必填字段
   if (body.enabled) {
-    if (!body.endpoint || !body.bucket || !body.accessKeyId || !body.publicUrl) {
+    if (!body.endpoint || !body.bucket || !body.accessKeyId) {
       throw createError({
         statusCode: 400,
-        message: '启用 S3 时，endpoint、bucket、accessKeyId 和 publicUrl 为必填项',
+        message: '启用 S3 时，endpoint、bucket 和 accessKeyId 为必填项',
+      })
+    }
+    
+    // 如果使用签名 URL，不需要 publicUrl
+    // 如果不使用签名 URL，publicUrl 为必填项
+    if (!body.useSignedUrl && !body.publicUrl) {
+      throw createError({
+        statusCode: 400,
+        message: '未启用签名 URL 时，publicUrl 为必填项',
       })
     }
   }
@@ -30,11 +39,14 @@ export default defineEventHandler(async (event) => {
   const currentConfig = getS3Config()
   const newConfig: Partial<S3Config> = {
     enabled: body.enabled ?? false,
+    provider: body.provider || 'standard-s3',
     endpoint: body.endpoint || '',
     region: body.region || 'us-east-1',
     bucket: body.bucket || '',
     accessKeyId: body.accessKeyId || '',
     publicUrl: body.publicUrl || '',
+    useSignedUrl: body.useSignedUrl ?? false,
+    urlExpirationSeconds: body.urlExpirationSeconds || 3600,
   }
   
   // 如果密钥不是占位符，则更新

@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     .all()
   
   // 格式化返回数据
-  const result = photos.map((photo) => {
+  const result = await Promise.all(photos.map(async (photo) => {
     // 显示名称（去除扩展名）
     const displayName = photo.originalFilename.replace(/\.[^.]+$/, '')
     
@@ -48,9 +48,9 @@ export default defineEventHandler(async (event) => {
       // 忽略解析错误
     }
     
-    // 优先使用 S3 URL（如果有），数据库存储的是相对路径，需要拼接 publicUrl
-    const originalUrl = getS3PublicUrl(photo.s3OriginalUrl) || `/api/uploads/originals/${photo.storedFilename}`
-    const thumbnailUrl = getS3PublicUrl(photo.s3ThumbnailUrl) || `/api/uploads/thumbs/${photo.thumbnailFilename}`
+    // 优先使用 S3 URL（如果有），数据库存储的是相对路径，需要获取完整 URL（可能是签名 URL）
+    const originalUrl = await getS3PublicUrl(photo.s3OriginalUrl) || `/api/uploads/originals/${photo.storedFilename}`
+    const thumbnailUrl = await getS3PublicUrl(photo.s3ThumbnailUrl) || `/api/uploads/thumbs/${photo.thumbnailFilename}`
     
     return {
       ...photo,
@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
       thumbnailUrl,
       hasS3: !!photo.s3OriginalUrl,
     }
-  })
+  }))
   
   return result
 })

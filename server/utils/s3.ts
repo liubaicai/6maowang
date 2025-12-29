@@ -1,31 +1,27 @@
-import { S3Client, PutObjectCommand, HeadBucketCommand, HeadObjectCommand, ListObjectsV2Command, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
-import { Upload } from '@aws-sdk/lib-storage'
 import { db, schema } from '../database'
 import { eq } from 'drizzle-orm'
-import { readFileSync, existsSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { originalsDir, thumbsDir } from './paths'
+import { createStorageProvider, type StorageConfig, type IStorageProvider } from './storage'
 
-// S3 配置接口
-export interface S3Config {
-  enabled: boolean
-  endpoint: string
-  region: string
-  bucket: string
-  accessKeyId: string
-  secretAccessKey: string
-  publicUrl: string // 公开访问 URL 前缀
+// S3 配置接口（扩展 StorageConfig）
+export interface S3Config extends StorageConfig {
+  // 保持向后兼容
 }
 
 // 默认配置
 const defaultS3Config: S3Config = {
   enabled: false,
+  provider: 'standard-s3',
   endpoint: '',
   region: 'us-east-1',
   bucket: '',
   accessKeyId: '',
   secretAccessKey: '',
   publicUrl: '',
+  useSignedUrl: false,
+  urlExpirationSeconds: 3600,
 }
 
 // 获取 S3 配置
@@ -73,46 +69,29 @@ export function saveS3Config(config: Partial<S3Config>): void {
   }
 }
 
-// 创建 S3 客户端
-export function createS3Client(config: S3Config): S3Client {
-  return new S3Client({
-    endpoint: config.endpoint,
-    region: config.region,
-    credentials: {
-      accessKeyId: config.accessKeyId,
-      secretAccessKey: config.secretAccessKey,
-    },
-    forcePathStyle: true, // 兼容 MinIO 等自建存储
-  })
+// 创建存储提供商实例
+function getStorageProvider(config: S3Config): IStorageProvider {
+  return createStorageProvider(config)
 }
 
 // 检测 S3 连接
 export async function testS3Connection(config: S3Config): Promise<{ success: boolean; message: string }> {
   try {
-    const client = createS3Client(config)
-    await client.send(new HeadBucketCommand({ Bucket: config.bucket }))
-    return { success: true, message: 'S3 连接成功' }
+    const provider = getStorageProvider(config)
+    return await provider.testConnection()
   } catch (error: any) {
-    console.error('S3 连接测试失败:', error)
-    return { success: false, message: error.message || 'S3 连接失败' }
+    console.error('存储连接测试失败:', error)
+    return { success: false, message: error.message || '连接失败' }
   }
 }
 
 // 检测 S3 文件是否存在
 export async function checkS3ObjectExists(config: S3Config, s3Key: string): Promise<boolean> {
   try {
-    const client = createS3Client(config)
-    await client.send(new HeadObjectCommand({
-      Bucket: config.bucket,
-      Key: s3Key,
-    }))
-    return true
+    const provider = getStorageProvider(config)
+    return await provider.checkObjectExists(s3Key)
   } catch (error: any) {
-    // 404 表示文件不存在
-    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
-      return false
-    }
-    // 其他错误也当作不存在处理
+    console.error('检查文件是否存在失败:', error)
     return false
   }
 }
@@ -124,43 +103,26 @@ export async function uploadToS3(
   s3Key: string,
   contentType: string
 ): Promise<string> {
-  const client = createS3Client(config)
+  const provider = getStorageProvider(config)
+  const result = await provider.uploadFile(localPath, s3Key, contentType)
   
-  // 统一使用 Buffer 读取，避免文件流导致的文件描述符问题
-  const fileBuffer = readFileSync(localPath)
-  
-  // 对于大文件（>5MB）使用分片上传
-  if (fileBuffer.length > 5 * 1024 * 1024) {
-    const upload = new Upload({
-      client,
-      params: {
-        Bucket: config.bucket,
-        Key: s3Key,
-        Body: fileBuffer,
-        ContentType: contentType,
-      },
-    })
-    await upload.done()
-  } else {
-    await client.send(new PutObjectCommand({
-      Bucket: config.bucket,
-      Key: s3Key,
-      Body: fileBuffer,
-      ContentType: contentType,
-    }))
-  }
-
-  // 返回相对路径（s3Key），不包含 publicUrl
-  return s3Key
+  // 返回相对路径（s3Key）
+  return result.key
 }
 
-// 根据相对路径生成完整的 S3 公开访问 URL
-export function getS3PublicUrl(s3Key: string | null): string | null {
+// 根据相对路径生成访问 URL（支持签名 URL）
+export async function getS3PublicUrl(s3Key: string | null): Promise<string | null> {
   if (!s3Key) return null
   const config = getS3Config()
-  if (!config.enabled || !config.publicUrl) return null
-  const publicUrl = config.publicUrl.replace(/\/$/, '')
-  return `${publicUrl}/${s3Key}`
+  if (!config.enabled) return null
+  
+  try {
+    const provider = getStorageProvider(config)
+    return await provider.getFileUrl(s3Key)
+  } catch (error) {
+    console.error('获取文件 URL 失败:', error)
+    return null
+  }
 }
 
 // 上传原图和缩略图到 S3（返回相对路径）
@@ -231,25 +193,20 @@ export async function getS3StorageStats(): Promise<{
   }
 
   try {
-    const client = createS3Client(config)
+    const provider = getStorageProvider(config)
     let totalSize = 0
     let objectCount = 0
     let continuationToken: string | undefined
 
     do {
-      const response = await client.send(new ListObjectsV2Command({
-        Bucket: config.bucket,
-        ContinuationToken: continuationToken,
-      }))
+      const response = await provider.listObjects(continuationToken)
 
-      if (response.Contents) {
-        for (const obj of response.Contents) {
-          totalSize += obj.Size || 0
-          objectCount++
-        }
+      for (const obj of response.objects) {
+        totalSize += obj.size || 0
+        objectCount++
       }
 
-      continuationToken = response.NextContinuationToken
+      continuationToken = response.nextToken
     } while (continuationToken)
 
     return {
@@ -259,7 +216,7 @@ export async function getS3StorageStats(): Promise<{
       objectCount,
     }
   } catch (error) {
-    console.error('获取 S3 存储统计失败:', error)
+    console.error('获取存储统计失败:', error)
     return {
       enabled: true,
       totalSize: 0,
