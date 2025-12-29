@@ -15,7 +15,7 @@ export interface StorageConfig {
   bucket: string
   accessKeyId: string
   secretAccessKey: string
-  publicUrl: string // 公开访问 URL 前缀（可选，用于公开存储桶）
+  publicUrl?: string // 公开访问 URL 前缀（可选，仅在 useSignedUrl 为 false 时必填）
   useSignedUrl: boolean // 是否使用签名 URL（私有存储桶时必须）
   urlExpirationSeconds: number // 签名 URL 过期时间（秒）
 }

@@ -58,9 +58,6 @@ export class AliyunOSSProvider implements IStorageProvider {
     // 上传到 OSS
     const result = await this.client.put(key, fileBuffer, {
       mime: contentType,
-      headers: {
-        'Content-Type': contentType,
-      },
     })
 
     return { 
@@ -97,12 +94,12 @@ export class AliyunOSSProvider implements IStorageProvider {
     return null
   }
 
-  async listObjects(marker?: string): Promise<{
+  async listObjects(continuationToken?: string): Promise<{
     objects: Array<{ key: string; size: number }>
     nextToken?: string
   }> {
     const result = await this.client.list({
-      marker: marker,
+      marker: continuationToken,
       'max-keys': 1000,
     })
 

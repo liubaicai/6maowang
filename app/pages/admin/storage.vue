@@ -124,7 +124,7 @@
             <UInput
               v-model.number="form.urlExpirationSeconds"
               type="number"
-              min="60"
+              min="30"
               max="604800"
               placeholder="3600"
               class="w-full"
@@ -289,7 +289,7 @@ interface S3Config {
   bucket: string
   accessKeyId: string
   secretAccessKey: string
-  publicUrl: string
+  publicUrl?: string
   useSignedUrl: boolean
   urlExpirationSeconds: number
 }
@@ -306,7 +306,7 @@ const form = ref<S3Config>({
   bucket: '',
   accessKeyId: '',
   secretAccessKey: '',
-  publicUrl: '',
+  publicUrl: undefined,
   useSignedUrl: false,
   urlExpirationSeconds: 3600,
 })

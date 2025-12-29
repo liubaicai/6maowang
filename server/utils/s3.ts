@@ -19,7 +19,7 @@ const defaultS3Config: S3Config = {
   bucket: '',
   accessKeyId: '',
   secretAccessKey: '',
-  publicUrl: '',
+  publicUrl: undefined,
   useSignedUrl: false,
   urlExpirationSeconds: 3600,
 }
