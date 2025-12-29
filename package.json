@@ -2,6 +2,7 @@
   "name": "6maowang-nuxt",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@10.11.0",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev --host",
