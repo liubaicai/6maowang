@@ -1,5 +1,5 @@
 import { db, schema } from '../../../database'
-import { eq, desc, isNull } from 'drizzle-orm'
+import { eq, desc, isNull, and } from 'drizzle-orm'
 import { formatExifSummary } from '../../../utils/image'
 
 export default defineEventHandler(async (event) => {
@@ -16,8 +16,10 @@ export default defineEventHandler(async (event) => {
   const photos = db
     .select()
     .from(schema.photos)
-    .where(eq(schema.photos.albumId, Number(albumId)))
-    .where(isNull(schema.photos.deletedAt))
+    .where(and(
+      eq(schema.photos.albumId, Number(albumId)),
+      isNull(schema.photos.deletedAt)
+    ))
     .orderBy(desc(schema.photos.createdAt))
     .all()
   
