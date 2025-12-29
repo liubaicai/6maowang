@@ -129,7 +129,8 @@ const { data: photos, pending: photosPending, refresh: refreshPhotos } = await u
 
 // 查看原图
 const viewPhoto = (photo: any) => {
-  window.open(`/api/uploads/originals/${photo.storedFilename}`, '_blank')
+  const url = photo.originalUrl || `/api/uploads/originals/${photo.storedFilename}`
+  window.open(url, '_blank')
 }
 
 // 设置封面

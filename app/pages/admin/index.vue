@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 统计卡片 -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <UCard>
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 flex items-center justify-center bg-primary-100 dark:bg-primary-900 rounded-lg">
@@ -36,9 +36,28 @@
             <UIcon name="i-heroicons-circle-stack" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">存储占用</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">本地存储</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">
               {{ stats?.storageSizeFormatted || '0 B' }}
+            </p>
+          </div>
+        </div>
+      </UCard>
+      
+      <UCard>
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 flex items-center justify-center bg-purple-100 dark:bg-purple-900 rounded-lg">
+            <UIcon name="i-heroicons-cloud" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">S3 存储</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              <template v-if="s3Stats?.enabled">
+                {{ s3Stats?.totalSizeFormatted || '0 B' }}
+              </template>
+              <template v-else>
+                <span class="text-sm font-normal text-gray-400">未启用</span>
+              </template>
             </p>
           </div>
         </div>
@@ -169,6 +188,10 @@
           <UIcon name="i-heroicons-folder" class="w-4 h-4 mr-1" />
           管理相册
         </UButton>
+        <UButton to="/admin/storage" color="neutral" variant="soft">
+          <UIcon name="i-heroicons-cloud" class="w-4 h-4 mr-1" />
+          S3 存储
+        </UButton>
         <UButton to="/" color="neutral" variant="ghost" target="_blank">
           <UIcon name="i-heroicons-eye" class="w-4 h-4 mr-1" />
           查看前台
@@ -190,6 +213,11 @@ useSeoMeta({
 
 // 获取统计数据
 const { data: stats } = await useFetch('/api/stats')
+
+// 获取 S3 统计
+const { data: s3Stats } = await useFetch('/api/admin/s3/stats', {
+  server: false,
+})
 
 // 获取系统信息（初始加载）
 const { data: systemInfoData } = await useFetch('/api/system', {

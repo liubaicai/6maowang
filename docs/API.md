@@ -743,19 +743,218 @@ GET /api/v1/stats
 
 ---
 
-### 5. 静态资源
+### 5. S3 存储管理（后台 API）
 
-#### 5.1 获取原图
+> ⚠️ 以下接口为后台管理接口，需要管理员权限（session 认证），不使用 v1 前缀。
+
+#### 5.1 获取 S3 配置
+
+获取当前 S3 存储配置。
+
+**请求**
+
+```
+GET /api/admin/s3/config
+```
+
+**响应示例**
+
+```json
+{
+  "enabled": true,
+  "endpoint": "https://s3.example.com",
+  "region": "us-east-1",
+  "bucket": "my-bucket",
+  "accessKeyId": "AKIAXXXXXXXX",
+  "secretAccessKey": "********",
+  "publicUrl": "https://cdn.example.com/bucket"
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| enabled | boolean | 是否启用 S3 存储 |
+| endpoint | string | S3 端点地址 |
+| region | string | S3 区域 |
+| bucket | string | 存储桶名称 |
+| accessKeyId | string | 访问密钥 ID |
+| secretAccessKey | string | 访问密钥（返回时为 `********` 占位符） |
+| publicUrl | string | 公开访问 URL 前缀 |
+
+---
+
+#### 5.2 保存 S3 配置
+
+保存 S3 存储配置。保存前会自动测试连接。
+
+**请求**
+
+```
+PUT /api/admin/s3/config
+Content-Type: application/json
+
+{
+  "enabled": true,
+  "endpoint": "https://s3.example.com",
+  "region": "us-east-1",
+  "bucket": "my-bucket",
+  "accessKeyId": "AKIAXXXXXXXX",
+  "secretAccessKey": "your-secret-key",
+  "publicUrl": "https://cdn.example.com/bucket"
+}
+```
+
+**响应示例**
+
+```json
+{
+  "ok": true,
+  "message": "S3 配置已保存"
+}
+```
+
+**说明**
+- `secretAccessKey` 传入 `********` 时保留原值
+- 启用时会先测试 S3 连接，连接失败则返回错误
+- `publicUrl` 修改后立即生效（数据库存储相对路径，输出时动态拼接）
+
+---
+
+#### 5.3 测试 S3 连接
+
+测试 S3 配置是否可用。
+
+**请求**
+
+```
+POST /api/admin/s3/test
+Content-Type: application/json
+
+{
+  "endpoint": "https://s3.example.com",
+  "region": "us-east-1",
+  "bucket": "my-bucket",
+  "accessKeyId": "AKIAXXXXXXXX",
+  "secretAccessKey": "your-secret-key"
+}
+```
+
+**响应示例**
+
+成功：
+```json
+{
+  "ok": true,
+  "message": "S3 连接成功"
+}
+```
+
+失败：
+```json
+{
+  "ok": false,
+  "message": "S3 连接失败: Access Denied"
+}
+```
+
+---
+
+#### 5.4 获取 S3 存储统计
+
+获取 S3 存储使用情况。
+
+**请求**
+
+```
+GET /api/admin/s3/stats
+```
+
+**响应示例**
+
+```json
+{
+  "enabled": true,
+  "totalSize": 3337211154,
+  "totalSizeFormatted": "3.11 GB",
+  "objectCount": 1636
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| enabled | boolean | S3 是否已启用 |
+| totalSize | number | 总存储大小（字节） |
+| totalSizeFormatted | string | 格式化的存储大小 |
+| objectCount | number | 对象数量 |
+
+---
+
+#### 5.5 同步照片到 S3（流式）
+
+将本地照片批量同步到 S3，使用 Server-Sent Events (SSE) 返回实时进度。
+
+**请求**
+
+```
+GET /api/admin/s3/sync-stream
+```
+
+**响应格式**
+
+SSE 事件流，包含以下事件类型：
+
+**开始事件**
+```
+data: {"type":"start","total":100}
+```
+
+**进度事件**
+```
+data: {"type":"progress","current":1,"total":100,"percent":1,"filename":"photo.jpg"}
+```
+
+**完成事件**
+```
+data: {"type":"complete","message":"同步完成","synced":50,"failed":0,"skipped":50,"total":100,"errors":[]}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| type | string | 事件类型：start/progress/complete |
+| total | number | 总照片数 |
+| current | number | 当前处理序号 |
+| percent | number | 完成百分比 |
+| filename | string | 当前处理的文件名 |
+| synced | number | 新上传数量 |
+| skipped | number | 跳过数量（已存在于 S3） |
+| failed | number | 失败数量 |
+| errors | string[] | 错误信息列表 |
+
+**同步逻辑**
+1. 检查本地文件是否存在，不存在则跳过
+2. 检查 S3 是否已有该文件，已有则跳过（更新数据库记录）
+3. 上传原图和缩略图到 S3
+4. 更新数据库记录
+
+---
+
+### 6. 静态资源
+
+#### 6.1 获取原图
 
 ```
 GET /api/uploads/originals/:filename
 ```
 
-#### 5.2 获取缩略图
+#### 6.2 获取缩略图
 
 ```
 GET /api/uploads/thumbs/:filename
 ```
+
+**说明**
+
+如果系统配置了 S3 存储且照片已同步，API 返回的 `originalUrl` 和 `thumbnailUrl` 字段会自动使用 S3 的公开访问地址。客户端应优先使用这两个字段的 URL，而非拼接静态资源路径。
 
 ---
 
@@ -792,11 +991,17 @@ interface Photo {
   height: number | null
   exifJson: string | null
   shotAt: string | null
+  s3OriginalUrl: string | null      // S3 原图相对路径
+  s3ThumbnailUrl: string | null     // S3 缩略图相对路径
+  s3UploadedAt: string | null       // S3 上传时间
   createdAt: string
   updatedAt: string
   displayName?: string
   exifSummary?: string
   exifData?: object
+  originalUrl?: string              // 完整原图访问 URL（优先 S3）
+  thumbnailUrl?: string             // 完整缩略图访问 URL（优先 S3）
+  hasS3?: boolean                   // 是否已同步到 S3
 }
 ```
 
@@ -820,6 +1025,20 @@ interface User {
 5. **分页加载**: 实现上拉加载更多，建议 pageSize 为 20
 
 ### C. 更新日志
+
+#### v1.2.0 (2024-12-29)
+
+- 新增 S3 对象存储支持
+  - 支持配置 S3 兼容存储（AWS S3、MinIO、阿里云 OSS 等）
+  - 上传图片时自动同步到 S3
+  - 支持批量同步已有图片到 S3（带实时进度）
+  - 查看原图时优先使用 S3 地址
+  - 后台可查看 S3 存储统计信息
+- 数据库变更
+  - photos 表新增 `s3_original_url`、`s3_thumbnail_url`、`s3_uploaded_at` 列
+  - 新增 `system_settings` 表用于存储系统配置
+- API 返回字段新增
+  - Photo 对象新增 `originalUrl`、`thumbnailUrl`、`hasS3` 字段
 
 #### v1.0.0 (2024-12-27)
 

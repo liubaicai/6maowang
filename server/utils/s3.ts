@@ -1,0 +1,388 @@
+import { S3Client, PutObjectCommand, HeadBucketCommand, HeadObjectCommand, ListObjectsV2Command, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
+import { Upload } from '@aws-sdk/lib-storage'
+import { db, schema } from '../database'
+import { eq } from 'drizzle-orm'
+import { readFileSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { originalsDir, thumbsDir } from './paths'
+
+// S3 配置接口
+export interface S3Config {
+  enabled: boolean
+  endpoint: string
+  region: string
+  bucket: string
+  accessKeyId: string
+  secretAccessKey: string
+  publicUrl: string // 公开访问 URL 前缀
+}
+
+// 默认配置
+const defaultS3Config: S3Config = {
+  enabled: false,
+  endpoint: '',
+  region: 'us-east-1',
+  bucket: '',
+  accessKeyId: '',
+  secretAccessKey: '',
+  publicUrl: '',
+}
+
+// 获取 S3 配置
+export function getS3Config(): S3Config {
+  const settings = db
+    .select()
+    .from(schema.systemSettings)
+    .where(eq(schema.systemSettings.key, 's3_config'))
+    .get()
+
+  if (!settings?.value) {
+    return defaultS3Config
+  }
+
+  try {
+    return { ...defaultS3Config, ...JSON.parse(settings.value) }
+  } catch {
+    return defaultS3Config
+  }
+}
+
+// 保存 S3 配置
+export function saveS3Config(config: Partial<S3Config>): void {
+  const now = new Date().toISOString()
+  const currentConfig = getS3Config()
+  const newConfig = { ...currentConfig, ...config }
+
+  const existing = db
+    .select()
+    .from(schema.systemSettings)
+    .where(eq(schema.systemSettings.key, 's3_config'))
+    .get()
+
+  if (existing) {
+    db.update(schema.systemSettings)
+      .set({ value: JSON.stringify(newConfig), updatedAt: now })
+      .where(eq(schema.systemSettings.key, 's3_config'))
+      .run()
+  } else {
+    db.insert(schema.systemSettings).values({
+      key: 's3_config',
+      value: JSON.stringify(newConfig),
+      updatedAt: now,
+    }).run()
+  }
+}
+
+// 创建 S3 客户端
+export function createS3Client(config: S3Config): S3Client {
+  return new S3Client({
+    endpoint: config.endpoint,
+    region: config.region,
+    credentials: {
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
+    },
+    forcePathStyle: true, // 兼容 MinIO 等自建存储
+  })
+}
+
+// 检测 S3 连接
+export async function testS3Connection(config: S3Config): Promise<{ success: boolean; message: string }> {
+  try {
+    const client = createS3Client(config)
+    await client.send(new HeadBucketCommand({ Bucket: config.bucket }))
+    return { success: true, message: 'S3 连接成功' }
+  } catch (error: any) {
+    console.error('S3 连接测试失败:', error)
+    return { success: false, message: error.message || 'S3 连接失败' }
+  }
+}
+
+// 检测 S3 文件是否存在
+export async function checkS3ObjectExists(config: S3Config, s3Key: string): Promise<boolean> {
+  try {
+    const client = createS3Client(config)
+    await client.send(new HeadObjectCommand({
+      Bucket: config.bucket,
+      Key: s3Key,
+    }))
+    return true
+  } catch (error: any) {
+    // 404 表示文件不存在
+    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+      return false
+    }
+    // 其他错误也当作不存在处理
+    return false
+  }
+}
+
+// 上传文件到 S3
+export async function uploadToS3(
+  config: S3Config,
+  localPath: string,
+  s3Key: string,
+  contentType: string
+): Promise<string> {
+  const client = createS3Client(config)
+  
+  // 统一使用 Buffer 读取，避免文件流导致的文件描述符问题
+  const fileBuffer = readFileSync(localPath)
+  
+  // 对于大文件（>5MB）使用分片上传
+  if (fileBuffer.length > 5 * 1024 * 1024) {
+    const upload = new Upload({
+      client,
+      params: {
+        Bucket: config.bucket,
+        Key: s3Key,
+        Body: fileBuffer,
+        ContentType: contentType,
+      },
+    })
+    await upload.done()
+  } else {
+    await client.send(new PutObjectCommand({
+      Bucket: config.bucket,
+      Key: s3Key,
+      Body: fileBuffer,
+      ContentType: contentType,
+    }))
+  }
+
+  // 返回相对路径（s3Key），不包含 publicUrl
+  return s3Key
+}
+
+// 根据相对路径生成完整的 S3 公开访问 URL
+export function getS3PublicUrl(s3Key: string | null): string | null {
+  if (!s3Key) return null
+  const config = getS3Config()
+  if (!config.enabled || !config.publicUrl) return null
+  const publicUrl = config.publicUrl.replace(/\/$/, '')
+  return `${publicUrl}/${s3Key}`
+}
+
+// 上传原图和缩略图到 S3（返回相对路径）
+export async function uploadPhotoToS3(
+  storedFilename: string,
+  thumbnailFilename: string,
+  mimeType: string
+): Promise<{ originalUrl: string | null; thumbnailUrl: string | null }> {
+  const config = getS3Config()
+  
+  if (!config.enabled) {
+    return { originalUrl: null, thumbnailUrl: null }
+  }
+
+  const result: { originalUrl: string | null; thumbnailUrl: string | null } = {
+    originalUrl: null,
+    thumbnailUrl: null,
+  }
+
+  try {
+    // 上传原图
+    const originalPath = join(originalsDir, storedFilename)
+    const originalKey = `originals/${storedFilename}`
+    
+    // 检查本地原图是否存在
+    if (!existsSync(originalPath)) {
+      console.warn(`本地原图不存在，跳过上传: ${originalPath}`)
+      return result
+    }
+    
+    result.originalUrl = await uploadToS3(config, originalPath, originalKey, mimeType)
+
+    // 上传缩略图
+    const thumbPath = join(thumbsDir, thumbnailFilename)
+    const thumbKey = `thumbs/${thumbnailFilename}`
+    
+    // 检查本地缩略图是否存在
+    if (existsSync(thumbPath)) {
+      result.thumbnailUrl = await uploadToS3(config, thumbPath, thumbKey, 'image/jpeg')
+    } else {
+      console.warn(`本地缩略图不存在，跳过上传: ${thumbPath}`)
+      // 缩略图不存在时，使用原图 URL 作为替代
+      result.thumbnailUrl = result.originalUrl
+    }
+  } catch (error) {
+    console.error('上传到 S3 失败:', error)
+  }
+
+  return result
+}
+
+// 获取 S3 存储统计
+export async function getS3StorageStats(): Promise<{
+  enabled: boolean
+  totalSize: number
+  totalSizeFormatted: string
+  objectCount: number
+}> {
+  const config = getS3Config()
+  
+  if (!config.enabled) {
+    return {
+      enabled: false,
+      totalSize: 0,
+      totalSizeFormatted: '0 B',
+      objectCount: 0,
+    }
+  }
+
+  try {
+    const client = createS3Client(config)
+    let totalSize = 0
+    let objectCount = 0
+    let continuationToken: string | undefined
+
+    do {
+      const response = await client.send(new ListObjectsV2Command({
+        Bucket: config.bucket,
+        ContinuationToken: continuationToken,
+      }))
+
+      if (response.Contents) {
+        for (const obj of response.Contents) {
+          totalSize += obj.Size || 0
+          objectCount++
+        }
+      }
+
+      continuationToken = response.NextContinuationToken
+    } while (continuationToken)
+
+    return {
+      enabled: true,
+      totalSize,
+      totalSizeFormatted: formatBytes(totalSize),
+      objectCount,
+    }
+  } catch (error) {
+    console.error('获取 S3 存储统计失败:', error)
+    return {
+      enabled: true,
+      totalSize: 0,
+      totalSizeFormatted: '0 B',
+      objectCount: 0,
+    }
+  }
+}
+
+// 同步本地照片到 S3（带并发控制和文件存在性检测）
+export async function syncPhotosToS3(
+  onProgress?: (current: number, total: number, filename: string) => void
+): Promise<{ synced: number; failed: number; skipped: number; errors: string[] }> {
+  const config = getS3Config()
+  
+  if (!config.enabled) {
+    return { synced: 0, failed: 0, skipped: 0, errors: ['S3 未启用'] }
+  }
+
+  // 查找所有照片（排除已删除的）
+  const photos = db
+    .select()
+    .from(schema.photos)
+    .all()
+    .filter(p => !p.deletedAt)
+
+  let synced = 0
+  let failed = 0
+  let skipped = 0
+  const errors: string[] = []
+  const total = photos.length
+  
+  // 批处理大小 - 每批处理 5 张照片
+  const batchSize = 5
+  
+  for (let i = 0; i < photos.length; i += batchSize) {
+    const batch = photos.slice(i, i + batchSize)
+    
+    // 串行处理每批照片，避免文件描述符耗尽
+    for (let j = 0; j < batch.length; j++) {
+      const photo = batch[j]
+      const currentIndex = i + j
+      
+      if (onProgress) {
+        onProgress(currentIndex + 1, total, photo.storedFilename)
+      }
+
+      try {
+        // 先检查本地原图是否存在
+        const localOriginalPath = join(originalsDir, photo.storedFilename)
+        if (!existsSync(localOriginalPath)) {
+          // 本地文件不存在，跳过
+          skipped++
+          continue
+        }
+        
+        // 检测 S3 上是否已存在原图
+        const originalKey = `originals/${photo.storedFilename}`
+        const exists = await checkS3ObjectExists(config, originalKey)
+        
+        if (exists) {
+          // S3 上已存在，跳过上传但确保数据库有相对路径
+          if (!photo.s3OriginalUrl) {
+            const now = new Date().toISOString()
+            const thumbKey = `thumbs/${photo.thumbnailFilename}`
+            db.update(schema.photos)
+              .set({
+                s3OriginalUrl: originalKey,
+                s3ThumbnailUrl: thumbKey,
+                s3UploadedAt: now,
+                updatedAt: now,
+              })
+              .where(eq(schema.photos.id, photo.id))
+              .run()
+          }
+          skipped++
+          continue
+        }
+        
+        // S3 上不存在，执行上传
+        const result = await uploadPhotoToS3(
+          photo.storedFilename,
+          photo.thumbnailFilename,
+          photo.mimeType
+        )
+
+        if (result.originalUrl) {
+          const now = new Date().toISOString()
+          db.update(schema.photos)
+            .set({
+              s3OriginalUrl: result.originalUrl,
+              s3ThumbnailUrl: result.thumbnailUrl,
+              s3UploadedAt: now,
+              updatedAt: now,
+            })
+            .where(eq(schema.photos.id, photo.id))
+            .run()
+          
+          synced++
+        } else {
+          failed++
+          errors.push(`${photo.storedFilename}: 上传失败`)
+        }
+      } catch (error: any) {
+        failed++
+        errors.push(`${photo.storedFilename}: ${error.message}`)
+        console.error(`上传到 S3 失败 (${photo.storedFilename}):`, error.message)
+      }
+    }
+    
+    // 每批处理完后等待 100ms，让系统有时间回收资源
+    if (i + batchSize < photos.length) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+  }
+
+  return { synced, failed, skipped, errors }
+}
+
+// 格式化字节大小
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
+}

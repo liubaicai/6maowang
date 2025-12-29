@@ -99,6 +99,7 @@ const menuItems = computed(() => {
   if (session.value?.user?.role === 'admin') {
     items.push(
       { to: '/admin/users', icon: 'i-heroicons-users', label: '用户管理' },
+      { to: '/admin/storage', icon: 'i-heroicons-cloud', label: 'S3 存储' },
       { to: '/admin/logs', icon: 'i-heroicons-document-text', label: '操作日志' }
     )
   }
@@ -115,6 +116,7 @@ const pageTitle = computed(() => {
     '/admin/albums': '相册管理',
     '/admin/albums/new': '新建相册',
     '/admin/users': '用户管理',
+    '/admin/storage': 'S3 存储配置',
     '/admin/logs': '操作日志',
     '/admin/account': '账户设置',
   }

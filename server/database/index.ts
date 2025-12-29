@@ -140,6 +140,62 @@ function migrateDatabase() {
       // 创建索引
       sqlite.exec('CREATE INDEX IF NOT EXISTS idx_photos_deleted ON photos(deleted_at)')
     }
+    
+    // 检查并添加 photos 表的 S3 相关列
+    const hasS3OriginalUrl = photosColumns.some((col: any) => col.name === 's3_original_url')
+    const hasS3ThumbnailUrl = photosColumns.some((col: any) => col.name === 's3_thumbnail_url')
+    const hasS3UploadedAt = photosColumns.some((col: any) => col.name === 's3_uploaded_at')
+    
+    if (!hasS3OriginalUrl) {
+      console.log('正在迁移: 添加 photos.s3_original_url 列...')
+      sqlite.exec('ALTER TABLE photos ADD COLUMN s3_original_url TEXT')
+    }
+    
+    if (!hasS3ThumbnailUrl) {
+      console.log('正在迁移: 添加 photos.s3_thumbnail_url 列...')
+      sqlite.exec('ALTER TABLE photos ADD COLUMN s3_thumbnail_url TEXT')
+    }
+    
+    if (!hasS3UploadedAt) {
+      console.log('正在迁移: 添加 photos.s3_uploaded_at 列...')
+      sqlite.exec('ALTER TABLE photos ADD COLUMN s3_uploaded_at TEXT')
+    }
+    
+    // 创建系统配置表
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS system_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        key TEXT UNIQUE NOT NULL,
+        value TEXT,
+        updated_at TEXT NOT NULL
+      )
+    `)
+    
+    // 迁移 S3 URL 从完整路径到相对路径
+    // 检查是否有完整 URL（包含 http:// 或 https://）
+    const photosWithFullUrl = sqlite.prepare(`
+      SELECT COUNT(*) as count FROM photos 
+      WHERE s3_original_url LIKE 'http://%' OR s3_original_url LIKE 'https://%'
+    `).get() as { count: number }
+    
+    if (photosWithFullUrl.count > 0) {
+      console.log(`正在迁移: 将 ${photosWithFullUrl.count} 条 S3 URL 转换为相对路径...`)
+      
+      // 提取相对路径（从 URL 中提取 originals/ 或 thumbs/ 开始的部分）
+      sqlite.exec(`
+        UPDATE photos 
+        SET s3_original_url = SUBSTR(s3_original_url, INSTR(s3_original_url, 'originals/'))
+        WHERE s3_original_url LIKE '%/originals/%' AND (s3_original_url LIKE 'http://%' OR s3_original_url LIKE 'https://%')
+      `)
+      
+      sqlite.exec(`
+        UPDATE photos 
+        SET s3_thumbnail_url = SUBSTR(s3_thumbnail_url, INSTR(s3_thumbnail_url, 'thumbs/'))
+        WHERE s3_thumbnail_url LIKE '%/thumbs/%' AND (s3_thumbnail_url LIKE 'http://%' OR s3_thumbnail_url LIKE 'https://%')
+      `)
+      
+      console.log('S3 URL 迁移完成')
+    }
   } catch (error) {
     console.error('数据库迁移出错:', error)
   }

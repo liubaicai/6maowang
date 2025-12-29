@@ -8,11 +8,19 @@
       @click="$emit('view', photo)"
     >
       <img
-        :src="`/api/uploads/thumbs/${photo.thumbnailFilename}`"
+        :src="photo.thumbnailUrl || `/api/uploads/thumbs/${photo.thumbnailFilename}`"
         :alt="photo.displayName"
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
       />
+      <!-- S3 标识 -->
+      <div 
+        v-if="photo.hasS3" 
+        class="absolute top-2 right-2 w-5 h-5 bg-purple-500/80 rounded-full flex items-center justify-center"
+        title="已同步到 S3"
+      >
+        <UIcon name="i-heroicons-cloud" class="w-3 h-3 text-white" />
+      </div>
     </div>
     
     <!-- 信息 -->
@@ -65,6 +73,9 @@ interface Photo {
   storedFilename: string
   displayName: string
   exifSummary?: string
+  thumbnailUrl?: string
+  originalUrl?: string
+  hasS3?: boolean
 }
 
 defineProps<{

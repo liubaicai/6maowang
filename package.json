@@ -13,6 +13,8 @@
     "migrate:data": "npx tsx scripts/migrate-data.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.958.0",
+    "@aws-sdk/lib-storage": "^3.958.0",
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.3.0",
     "bcrypt": "^6.0.0",

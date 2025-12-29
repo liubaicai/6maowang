@@ -5,6 +5,7 @@ import { validateImageFile } from '../../utils/validators'
 import { generateThumbnail, getImageMetadata, parseExif } from '../../utils/image'
 import { originalsDir } from '../../utils/paths'
 import { logOperation } from '../../utils/operation-log'
+import { uploadPhotoToS3 } from '../../utils/s3'
 import { randomUUID } from 'node:crypto'
 import { extname, join } from 'node:path'
 import { writeFileSync } from 'node:fs'
@@ -105,8 +106,30 @@ export default defineEventHandler(async (event) => {
       updatedAt: now,
     }).run()
     
+    const photoId = result.lastInsertRowid
+    
+    // 尝试上传到 S3（异步，不阻塞主流程）
+    uploadPhotoToS3(storedFilename, thumbFilename, mimeType)
+      .then(s3Result => {
+        if (s3Result.originalUrl) {
+          const uploadedAt = new Date().toISOString()
+          db.update(schema.photos)
+            .set({
+              s3OriginalUrl: s3Result.originalUrl,
+              s3ThumbnailUrl: s3Result.thumbnailUrl,
+              s3UploadedAt: uploadedAt,
+              updatedAt: uploadedAt,
+            })
+            .where(eq(schema.photos.id, Number(photoId)))
+            .run()
+        }
+      })
+      .catch(err => {
+        console.error(`S3 上传失败 (${storedFilename}):`, err)
+      })
+    
     inserted.push({
-      id: result.lastInsertRowid,
+      id: photoId,
       storedFilename,
       thumbFilename,
     })

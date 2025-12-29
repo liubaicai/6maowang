@@ -12,6 +12,7 @@ import { db, schema } from '../../../../database'
 import { eq, desc, count, isNull, and } from 'drizzle-orm'
 import { formatExifSummary } from '../../../../utils/image'
 import { paginatedResponse, errorResponse } from '../../../../utils/api-response'
+import { getS3PublicUrl } from '../../../../utils/s3'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -82,10 +83,17 @@ export default defineEventHandler(async (event) => {
         // 忽略解析错误
       }
       
+      // 优先使用 S3 URL（如果有），数据库存储的是相对路径，需要拼接 publicUrl
+      const originalUrl = getS3PublicUrl(photo.s3OriginalUrl) || `/api/uploads/originals/${photo.storedFilename}`
+      const thumbnailUrl = getS3PublicUrl(photo.s3ThumbnailUrl) || `/api/uploads/thumbs/${photo.thumbnailFilename}`
+      
       return {
         ...photo,
         displayName,
         exifSummary,
+        originalUrl,
+        thumbnailUrl,
+        hasS3: !!photo.s3OriginalUrl,
       }
     })
     

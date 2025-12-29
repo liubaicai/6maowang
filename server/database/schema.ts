@@ -33,9 +33,20 @@ export const photos = sqliteTable('photos', {
   height: integer('height'),
   exifJson: text('exif_json'),
   shotAt: text('shot_at'),
+  s3OriginalUrl: text('s3_original_url'), // S3 原图 URL
+  s3ThumbnailUrl: text('s3_thumbnail_url'), // S3 缩略图 URL
+  s3UploadedAt: text('s3_uploaded_at'), // S3 上传时间
   createdBy: integer('created_by'), // 创建者用户ID（可选，保持向后兼容）
   deletedAt: text('deleted_at'), // 软删除时间戳（null 表示未删除）
   createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+})
+
+// 系统配置表
+export const systemSettings = sqliteTable('system_settings', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  key: text('key').notNull().unique(),
+  value: text('value'),
   updatedAt: text('updated_at').notNull(),
 })
 
@@ -71,3 +82,5 @@ export type Token = typeof tokens.$inferSelect
 export type NewToken = typeof tokens.$inferInsert
 export type OperationLog = typeof operationLogs.$inferSelect
 export type NewOperationLog = typeof operationLogs.$inferInsert
+export type SystemSetting = typeof systemSettings.$inferSelect
+export type NewSystemSetting = typeof systemSettings.$inferInsert

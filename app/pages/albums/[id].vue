@@ -71,7 +71,7 @@
           <!-- 图片 -->
           <img
             v-if="currentPhoto"
-            :src="`/api/uploads/originals/${currentPhoto.storedFilename}`"
+            :src="currentPhoto.originalUrl || `/api/uploads/originals/${currentPhoto.storedFilename}`"
             :alt="currentPhoto.displayName"
             class="max-w-full max-h-full object-contain"
           />
