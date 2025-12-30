@@ -110,6 +110,8 @@
 </template>
 
 <script setup lang="ts">
+import type { RandomPhoto } from '~/types'
+
 // SEO
 useSeoMeta({
   title: '幻灯片放映 - 遛猫网',
@@ -132,7 +134,7 @@ const transitions = [
 ]
 
 // 状态
-const photos = ref<any[]>([])
+const photos = ref<RandomPhoto[]>([])
 const currentIndex = ref(0)
 const currentPhoto = computed(() => photos.value[currentIndex.value])
 const isPlaying = ref(true)
@@ -155,10 +157,10 @@ let timer: NodeJS.Timeout | null = null
 const loadPhotos = async () => {
   try {
     isLoading.value = true
-    const data = await $fetch('/api/photos/random', {
+    const data = await $fetch<RandomPhoto[]>('/api/photos/random', {
       query: { count: 50 }, // 加载 50 张随机照片
     })
-    photos.value = data as any[]
+    photos.value = data
     
     if (photos.value.length === 0) {
       // 没有照片，返回首页

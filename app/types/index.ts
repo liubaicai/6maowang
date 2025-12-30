@@ -109,3 +109,16 @@ export interface UploadResponse {
     error: string
   }[]
 }
+
+// 随机照片响应（用于幻灯片）
+export interface RandomPhoto {
+  id: number
+  albumId: number
+  originalFilename: string
+  width: number | null
+  height: number | null
+  shotAt: string | null
+  originalUrl: string
+  thumbnailUrl: string
+  hasS3: boolean
+}
