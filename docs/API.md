@@ -642,7 +642,67 @@ Authorization: Bearer <token>
 
 ---
 
-#### 3.3 更新照片
+#### 3.4 获取随机照片
+
+获取随机照片（用于幻灯片放映等场景）。**无需认证**。
+
+**请求**
+
+```
+GET /api/v1/photos/random?count=10
+```
+
+**查询参数**
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| count | number | ✗ | 1 | 获取照片数量（最小 1，最大 50） |
+
+**响应示例**
+
+```json
+{
+  "code": 0,
+  "message": "获取成功",
+  "data": [
+    {
+      "id": 1,
+      "albumId": 1,
+      "originalFilename": "photo.jpg",
+      "width": 1920,
+      "height": 1080,
+      "shotAt": "2024-01-01T10:00:00.000Z",
+      "originalUrl": "/api/uploads/originals/abc123.jpg",
+      "thumbnailUrl": "/api/uploads/thumbs/thumb_abc123.jpg",
+      "hasS3": false
+    },
+    {
+      "id": 5,
+      "albumId": 2,
+      "originalFilename": "sunset.jpg",
+      "width": 3840,
+      "height": 2160,
+      "shotAt": "2024-01-02T18:30:00.000Z",
+      "originalUrl": "https://cdn.example.com/originals/def456.jpg",
+      "thumbnailUrl": "https://cdn.example.com/thumbs/thumb_def456.jpg",
+      "hasS3": true
+    }
+  ],
+  "timestamp": 1703664000000
+}
+```
+
+**说明**
+
+- 返回从所有相册中随机选择的照片
+- 每次请求返回的照片都是随机的
+- 只返回未删除的照片
+- 如果系统没有照片，返回空数组
+- 返回的照片包含原图和缩略图的完整 URL
+
+---
+
+#### 3.5 更新照片
 
 更新照片信息或移动到其他相册。**需要认证**。
 
@@ -682,7 +742,7 @@ Authorization: Bearer <token>
 
 ---
 
-#### 3.4 删除照片
+#### 3.6 删除照片
 
 删除照片及其文件。**需要认证**。
 
@@ -1025,6 +1085,21 @@ interface User {
 5. **分页加载**: 实现上拉加载更多，建议 pageSize 为 20
 
 ### C. 更新日志
+
+#### v1.3.0 (2024-12-30)
+
+- 新增随机照片接口
+  - 新增 `GET /api/v1/photos/random` 接口，支持获取 1-50 张随机照片
+  - 用于幻灯片放映功能
+- 新增幻灯片放映页面
+  - 全屏幻灯片播放模式
+  - 支持 7 种过渡效果（淡入淡出、上下左右滑动、缩放、旋转）
+  - 每次切换随机选择过渡效果
+  - 可配置播放间隔（3s、5s、8s、10s）
+  - 支持播放/暂停控制
+  - 支持键盘导航（方向键、空格、ESC、P）
+- UI 改进
+  - 首页添加浮动按钮，快速进入幻灯片模式
 
 #### v1.2.0 (2024-12-29)
 
