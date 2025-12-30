@@ -2,13 +2,13 @@ import { db, schema } from '../../database'
 import { eq } from 'drizzle-orm'
 import { requireAuth } from '../../utils/auth'
 import { validateImageFile } from '../../utils/validators'
-import { generateThumbnail, getImageMetadata, parseExif } from '../../utils/image'
+import { generateThumbnail, getImageMetadata, parseExif, optimizeOriginal } from '../../utils/image'
 import { originalsDir } from '../../utils/paths'
 import { logOperation } from '../../utils/operation-log'
 import { uploadPhotoToS3 } from '../../utils/s3'
 import { randomUUID } from 'node:crypto'
 import { extname, join } from 'node:path'
-import { writeFileSync } from 'node:fs'
+import { writeFileSync, statSync } from 'node:fs'
 import formidable from 'formidable'
 
 export default defineEventHandler(async (event) => {
@@ -72,7 +72,12 @@ export default defineEventHandler(async (event) => {
     const storedFilename = file.newFilename
     const thumbFilename = storedFilename.replace(/\.[^.]+$/, '') + '_thumb.jpg'
     
-    // 生成缩略图
+    // 优化原图（如果超过 4MB）
+    const originalPath = join(originalsDir, storedFilename)
+    const originalSize = statSync(originalPath).size
+    await optimizeOriginal(storedFilename, originalSize)
+    
+    // 生成缩略图（在原图优化之后）
     try {
       await generateThumbnail(storedFilename, thumbFilename)
     } catch (err) {
