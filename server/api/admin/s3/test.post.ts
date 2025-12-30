@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
   // 合并测试配置
   const testConfig: S3Config = {
     enabled: true,
+    provider: body.provider || currentConfig.provider || 'standard-s3',
     endpoint: body.endpoint || currentConfig.endpoint,
     region: body.region || currentConfig.region || 'us-east-1',
     bucket: body.bucket || currentConfig.bucket,
@@ -21,6 +22,8 @@ export default defineEventHandler(async (event) => {
       ? currentConfig.secretAccessKey 
       : (body.secretAccessKey || currentConfig.secretAccessKey),
     publicUrl: body.publicUrl || currentConfig.publicUrl,
+    useSignedUrl: body.useSignedUrl ?? currentConfig.useSignedUrl ?? false,
+    urlExpirationSeconds: body.urlExpirationSeconds || currentConfig.urlExpirationSeconds || 3600,
   }
   
   // 验证必填字段

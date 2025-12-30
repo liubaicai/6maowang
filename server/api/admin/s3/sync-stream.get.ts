@@ -73,8 +73,8 @@ export default defineEventHandler(async (event) => {
     message: `开始同步 ${total} 张照片...`,
   })
   
-  // 批处理大小
-  const batchSize = 5
+  // 批处理大小 - 减少并发以避免文件描述符耗尽
+  const batchSize = 3
   
   for (let i = 0; i < photos.length; i += batchSize) {
     const batch = photos.slice(i, i + batchSize)
@@ -154,9 +154,9 @@ export default defineEventHandler(async (event) => {
       }
     }
     
-    // 每批处理完后等待 50ms
+    // 每批处理完后等待 200ms，让系统回收资源
     if (i + batchSize < photos.length) {
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, 200))
     }
   }
   

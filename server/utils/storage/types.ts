@@ -4,7 +4,7 @@
  */
 
 // 存储提供商类型
-export type StorageProviderType = 'standard-s3' | 'aliyun-oss'
+export type StorageProviderType = 'standard-s3' | 'aliyun-oss' | 'tencent-cos'
 
 // 存储配置基础接口
 export interface StorageConfig {

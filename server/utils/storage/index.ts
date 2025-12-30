@@ -6,4 +6,5 @@
 export * from './types'
 export * from './standard-s3-provider'
 export * from './aliyun-oss-provider'
+export * from './tencent-cos-provider'
 export * from './factory'

@@ -3,33 +3,64 @@
     <!-- S3 配置表单 -->
     <UCard>
       <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-cloud" class="w-5 h-5 text-primary-500" />
-          <h3 class="font-semibold">S3 对象存储配置</h3>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-cloud" class="w-5 h-5 text-primary-500" />
+            <h3 class="font-semibold">S3 对象存储配置</h3>
+          </div>
+          <!-- 启用开关和操作按钮放在头部右侧 -->
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <USwitch v-model="form.enabled" />
+              <span class="text-sm">{{ form.enabled ? '已启用' : '未启用' }}</span>
+            </div>
+            <UButton
+              v-if="form.enabled"
+              size="sm"
+              color="neutral"
+              variant="soft"
+              :loading="testing"
+              @click="handleTestConnection"
+            >
+              测试连接
+            </UButton>
+            <UButton
+              size="sm"
+              color="primary"
+              :loading="saving"
+              @click="handleSaveConfig"
+            >
+              保存配置
+            </UButton>
+          </div>
         </div>
       </template>
       
       <form @submit.prevent="handleSaveConfig" class="space-y-6">
-        <!-- 启用开关 -->
-        <div class="flex items-center gap-3">
-          <USwitch v-model="form.enabled" />
-          <span class="text-sm font-medium">启用 S3 存储</span>
-        </div>
-        
-        <div v-if="form.enabled" class="space-y-4">
+        <!-- 配置详情（折叠区域） -->
+        <div v-if="form.enabled">
+          <button
+            type="button"
+            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors mb-4"
+            @click="showConfigDetails = !showConfigDetails"
+          >
+            <UIcon 
+              :name="showConfigDetails ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'" 
+              class="w-4 h-4" 
+            />
+            {{ showConfigDetails ? '收起配置详情' : '展开配置详情' }}
+          </button>
+          
+          <div v-show="showConfigDetails" class="space-y-4">
           <!-- 存储提供商选择 -->
           <div>
             <label class="block text-sm font-medium mb-1">
               存储提供商 <span class="text-red-500">*</span>
             </label>
-            <USelect
+            <USelectMenu
               v-model="form.provider"
-              :options="[
-                { label: '标准 S3（AWS S3、MinIO 等）', value: 'standard-s3' },
-                { label: '阿里云 OSS', value: 'aliyun-oss' }
-              ]"
-              option-attribute="label"
-              value-attribute="value"
+              :items="providerOptions"
+              value-key="value"
               class="w-full"
             />
             <p class="text-xs text-gray-500 mt-1">选择您使用的对象存储提供商</p>
@@ -42,11 +73,12 @@
             </label>
             <UInput
               v-model="form.endpoint"
-              :placeholder="form.provider === 'aliyun-oss' ? 'https://oss-cn-hangzhou.aliyuncs.com' : 'https://s3.amazonaws.com 或 https://your-minio.com'"
+              :placeholder="endpointPlaceholder"
               class="w-full"
             />
             <p class="text-xs text-gray-500 mt-1">
               <span v-if="form.provider === 'aliyun-oss'">阿里云 OSS Endpoint，例如: https://oss-cn-hangzhou.aliyuncs.com</span>
+              <span v-else-if="form.provider === 'tencent-cos'">腾讯云 COS Endpoint，例如: https://cos.ap-guangzhou.myqcloud.com</span>
               <span v-else>S3 API 端点地址，支持 AWS S3、MinIO 等</span>
             </p>
           </div>
@@ -56,11 +88,12 @@
             <label class="block text-sm font-medium mb-1">Region</label>
             <UInput
               v-model="form.region"
-              :placeholder="form.provider === 'aliyun-oss' ? 'oss-cn-hangzhou' : 'us-east-1'"
+              :placeholder="regionPlaceholder"
               class="w-full"
             />
             <p class="text-xs text-gray-500 mt-1">
               <span v-if="form.provider === 'aliyun-oss'">存储区域，例如: oss-cn-hangzhou, oss-cn-beijing</span>
+              <span v-else-if="form.provider === 'tencent-cos'">存储区域，例如: ap-guangzhou, ap-shanghai, ap-beijing</span>
               <span v-else>存储区域，默认 us-east-1</span>
             </p>
           </div>
@@ -149,27 +182,7 @@
               <span v-else>用于生成图片访问链接的 URL 前缀（可以是 CDN 地址）</span>
             </p>
           </div>
-        </div>
-        
-        <div class="flex gap-3">
-          <UButton
-            type="submit"
-            color="primary"
-            :loading="saving"
-          >
-            保存配置
-          </UButton>
-          
-          <UButton
-            v-if="form.enabled"
-            type="button"
-            color="neutral"
-            variant="soft"
-            :loading="testing"
-            @click="handleTestConnection"
-          >
-            测试连接
-          </UButton>
+          </div>
         </div>
       </form>
     </UCard>
@@ -265,6 +278,40 @@
         </UButton>
       </div>
     </UCard>
+    
+    <!-- 切换为本地存储 -->
+    <UCard v-if="config?.enabled">
+      <template #header>
+        <div class="flex items-center gap-2">
+          <UIcon name="i-heroicons-server" class="w-5 h-5 text-orange-500" />
+          <h3 class="font-semibold">切换为本地存储</h3>
+        </div>
+      </template>
+      
+      <div class="space-y-4">
+        <div class="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+          <p class="text-sm text-orange-800 dark:text-orange-200">
+            <strong>⚠️ 注意：</strong>此操作将清除数据库中所有照片的 S3 关联信息，使照片恢复使用本地文件路径访问。
+          </p>
+          <ul class="mt-2 text-xs text-orange-700 dark:text-orange-300 space-y-1 list-disc list-inside">
+            <li>不会删除 S3 上的实际文件</li>
+            <li>不会删除本地的照片文件</li>
+            <li>之后可随时重新同步到 S3</li>
+          </ul>
+        </div>
+        
+        <UButton
+          color="warning"
+          variant="soft"
+          :loading="resetting"
+          :disabled="resetting"
+          @click="handleResetS3"
+        >
+          <UIcon name="i-heroicons-arrow-uturn-left" class="w-4 h-4 mr-1" />
+          {{ resetting ? '重置中...' : '切换为本地存储' }}
+        </UButton>
+      </div>
+    </UCard>
   </div>
 </template>
 
@@ -280,10 +327,17 @@ useSeoMeta({
 
 const toast = useToast()
 
+// 存储提供商选项
+const providerOptions = [
+  { label: '标准 S3（AWS S3、MinIO 等）', value: 'standard-s3' },
+  { label: '阿里云 OSS', value: 'aliyun-oss' },
+  { label: '腾讯云 COS', value: 'tencent-cos' },
+]
+
 // S3 配置类型
 interface S3Config {
   enabled: boolean
-  provider: 'standard-s3' | 'aliyun-oss'
+  provider: 'standard-s3' | 'aliyun-oss' | 'tencent-cos'
   endpoint: string
   region: string
   bucket: string
@@ -297,6 +351,9 @@ interface S3Config {
 // 获取当前配置
 const { data: config, refresh: refreshConfig } = await useFetch<S3Config>('/api/admin/s3/config')
 
+// 配置详情展开/折叠状态
+const showConfigDetails = ref(false)
+
 // 表单数据
 const form = ref<S3Config>({
   enabled: false,
@@ -309,6 +366,29 @@ const form = ref<S3Config>({
   publicUrl: undefined,
   useSignedUrl: false,
   urlExpirationSeconds: 3600,
+})
+
+// 根据提供商动态计算占位符
+const endpointPlaceholder = computed(() => {
+  switch (form.value.provider) {
+    case 'aliyun-oss':
+      return 'https://oss-cn-hangzhou.aliyuncs.com'
+    case 'tencent-cos':
+      return 'https://cos.ap-guangzhou.myqcloud.com'
+    default:
+      return 'https://s3.amazonaws.com 或 https://your-minio.com'
+  }
+})
+
+const regionPlaceholder = computed(() => {
+  switch (form.value.provider) {
+    case 'aliyun-oss':
+      return 'oss-cn-hangzhou'
+    case 'tencent-cos':
+      return 'ap-guangzhou'
+    default:
+      return 'us-east-1'
+  }
 })
 
 // 初始化表单
@@ -495,6 +575,39 @@ const handleSync = () => {
     })
     syncing.value = false
     eventSource.close()
+  }
+}
+
+// 重置 S3 字段，切换为本地存储
+const resetting = ref(false)
+const handleResetS3 = async () => {
+  // 确认操作
+  if (!confirm('确定要切换为本地存储吗？这将清除所有照片的 S3 关联信息。')) {
+    return
+  }
+  
+  resetting.value = true
+  try {
+    const result = await $fetch<{ ok: boolean; message: string; count: number }>('/api/admin/s3/reset', {
+      method: 'POST',
+    })
+    
+    toast.add({
+      title: '切换成功',
+      description: result.message,
+      color: 'success',
+    })
+    
+    // 刷新统计
+    refreshS3Stats()
+  } catch (error: any) {
+    toast.add({
+      title: '切换失败',
+      description: error.data?.message || error.message || '操作失败',
+      color: 'error',
+    })
+  } finally {
+    resetting.value = false
   }
 }
 </script>

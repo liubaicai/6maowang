@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { originalsDir, thumbsDir } from './paths'
-import { createStorageProvider, type StorageConfig, type IStorageProvider } from './storage'
+import { createStorageProvider, clearStorageProviderCache, type StorageConfig, type IStorageProvider } from './storage'
 
 // S3 配置接口（扩展 StorageConfig）
 export interface S3Config extends StorageConfig {
@@ -67,6 +67,9 @@ export function saveS3Config(config: Partial<S3Config>): void {
       updatedAt: now,
     }).run()
   }
+  
+  // 清除缓存的存储提供商实例，使新配置生效
+  clearStorageProviderCache()
 }
 
 // 创建存储提供商实例
@@ -249,8 +252,8 @@ export async function syncPhotosToS3(
   const errors: string[] = []
   const total = photos.length
   
-  // 批处理大小 - 每批处理 5 张照片
-  const batchSize = 5
+  // 批处理大小 - 减少并发以避免文件描述符耗尽
+  const batchSize = 3
   
   for (let i = 0; i < photos.length; i += batchSize) {
     const batch = photos.slice(i, i + batchSize)
@@ -327,9 +330,9 @@ export async function syncPhotosToS3(
       }
     }
     
-    // 每批处理完后等待 100ms，让系统有时间回收资源
+    // 每批处理完后等待 200ms，让系统有时间回收资源
     if (i + batchSize < photos.length) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, 200))
     }
   }
 

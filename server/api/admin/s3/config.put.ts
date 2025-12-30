@@ -17,10 +17,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   
   // 验证 provider 字段
-  if (body.provider && !['standard-s3', 'aliyun-oss'].includes(body.provider)) {
+  if (body.provider && !['standard-s3', 'aliyun-oss', 'tencent-cos'].includes(body.provider)) {
     throw createError({
       statusCode: 400,
-      message: 'provider 必须是 standard-s3 或 aliyun-oss',
+      message: 'provider 必须是 standard-s3、aliyun-oss 或 tencent-cos',
     })
   }
   
