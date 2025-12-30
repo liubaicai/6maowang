@@ -24,6 +24,9 @@ function getConfigHash(config: StorageConfig): string {
     bucket: config.bucket,
     accessKeyId: config.accessKeyId,
     secretAccessKey: config.secretAccessKey,
+    publicUrl: config.publicUrl,
+    useSignedUrl: config.useSignedUrl,
+    urlExpirationSeconds: config.urlExpirationSeconds,
   })
 }
 

@@ -119,9 +119,30 @@ export async function getS3PublicUrl(s3Key: string | null): Promise<string | nul
   const config = getS3Config()
   if (!config.enabled) return null
   
+  // 检测是否是完整 URL（旧格式数据），如果是则提取相对路径
+  let key = s3Key
+  if (s3Key.startsWith('http://') || s3Key.startsWith('https://')) {
+    // 尝试从完整 URL 中提取相对路径
+    // URL 格式可能是: https://endpoint/bucket/originals/xxx.jpg 或 https://bucket.endpoint/originals/xxx.jpg
+    try {
+      const url = new URL(s3Key)
+      const pathname = url.pathname
+      // 移除开头的 / 和可能的 bucket 名称
+      let path = pathname.startsWith('/') ? pathname.substring(1) : pathname
+      // 如果路径以 bucket 名开头，移除它
+      if (path.startsWith(config.bucket + '/')) {
+        path = path.substring(config.bucket.length + 1)
+      }
+      key = path
+    } catch {
+      // URL 解析失败，使用原值
+      console.warn('无法解析 S3 URL:', s3Key)
+    }
+  }
+  
   try {
     const provider = getStorageProvider(config)
-    return await provider.getFileUrl(s3Key)
+    return await provider.getFileUrl(key)
   } catch (error) {
     console.error('获取文件 URL 失败:', error)
     return null

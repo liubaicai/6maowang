@@ -70,6 +70,7 @@ export class AliyunOSSProvider implements IStorageProvider {
     if (!key) return null
 
     // 如果配置了使用签名 URL，生成签名 URL
+    // 注意：签名 URL 必须使用原始 endpoint，不能替换为 publicUrl，否则签名会失效
     if (this.config.useSignedUrl) {
       const expiresIn = expireSeconds || this.config.urlExpirationSeconds || 3600
       
@@ -85,7 +86,7 @@ export class AliyunOSSProvider implements IStorageProvider {
       }
     }
 
-    // 否则使用公开 URL
+    // 非签名 URL 使用公开 URL（CDN 域名）
     if (this.config.publicUrl) {
       const publicUrl = this.config.publicUrl.replace(/\/$/, '')
       return `${publicUrl}/${key}`

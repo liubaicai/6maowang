@@ -86,7 +86,7 @@ export default defineEventHandler(async (event) => {
   const methodPadded = method.padEnd(7)
 
   // 生产模式：仅打印简要日志
-  if (!isDev) {
+  if (!isDev || process.env.LOG_MORE !== 'true') {
     console.log(
       `${colors.dim}[${timestamp}]${colors.reset} ` +
       `${methodColor}${methodPadded}${colors.reset} ` +
