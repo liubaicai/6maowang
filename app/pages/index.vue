@@ -40,6 +40,19 @@
         :album="album"
       />
     </div>
+
+    <!-- 浮动幻灯片按钮 -->
+    <UButton
+      v-if="albums && albums.length > 0"
+      icon="i-heroicons-play-circle"
+      size="xl"
+      color="primary"
+      class="fixed bottom-8 right-8 shadow-2xl hover:scale-110 transition-transform z-40"
+      @click="navigateTo('/slideshow')"
+      aria-label="播放幻灯片"
+    >
+      幻灯片
+    </UButton>
   </div>
 </template>
 
