@@ -33,11 +33,27 @@ export default defineEventHandler(async (event) => {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no', // 禁用 nginx 缓冲
   })
   
   const sendEvent = (data: any) => {
     event.node.res.write(`data: ${JSON.stringify(data)}\n\n`)
   }
+  
+  // 发送心跳保持连接（每 15 秒）
+  const heartbeatInterval = setInterval(() => {
+    try {
+      event.node.res.write(`: heartbeat\n\n`)
+    } catch {
+      // 连接已关闭，清理定时器
+      clearInterval(heartbeatInterval)
+    }
+  }, 15000)
+  
+  // 确保在响应结束时清理心跳定时器
+  event.node.res.on('close', () => {
+    clearInterval(heartbeatInterval)
+  })
   
   // 查询所有照片（排除已删除的）
   const photos = db
@@ -57,6 +73,7 @@ export default defineEventHandler(async (event) => {
       skipped: 0,
       total: 0,
     })
+    clearInterval(heartbeatInterval)
     event.node.res.end()
     return
   }
@@ -189,5 +206,7 @@ export default defineEventHandler(async (event) => {
     errors: errors.slice(0, 10),
   })
   
+  // 清理心跳定时器
+  clearInterval(heartbeatInterval)
   event.node.res.end()
 })
