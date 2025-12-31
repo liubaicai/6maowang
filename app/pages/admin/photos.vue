@@ -47,6 +47,15 @@
           取消轮播
         </UButton>
         <UButton
+          icon="i-heroicons-folder-arrow-down"
+          size="sm"
+          color="primary"
+          variant="soft"
+          @click="confirmBatchMove"
+        >
+          移动到相册
+        </UButton>
+        <UButton
           icon="i-heroicons-trash"
           size="sm"
           color="error"
@@ -157,6 +166,15 @@
                 @click="toggleSlideshow(photo)"
               >
                 设为轮播
+              </UButton>
+              <UButton
+                icon="i-heroicons-folder-arrow-down"
+                color="primary"
+                variant="soft"
+                size="xs"
+                @click="confirmMove(photo)"
+              >
+                移动
               </UButton>
               <UButton
                 icon="i-heroicons-trash"
@@ -272,6 +290,50 @@
         </UCard>
       </template>
     </UModal>
+
+    <!-- 移动照片对话框 -->
+    <UModal v-model:open="moveModalOpen">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="font-semibold">移动照片到相册</h3>
+          </template>
+
+          <div class="space-y-3">
+            <p v-if="photoToMove">
+              将照片「{{ photoToMove.originalFilename }}」移动到：
+            </p>
+            <p v-else>
+              将选中的 <strong>{{ selectedIds.length }}</strong> 张照片移动到：
+            </p>
+
+            <USelectMenu
+              v-model="selectedAlbumId"
+              :items="albumOptions"
+              value-key="value"
+              placeholder="选择目标相册"
+              :loading="albumsLoading"
+            />
+          </div>
+
+          <template #footer>
+            <div class="flex justify-end gap-3">
+              <UButton color="neutral" variant="ghost" @click="moveModalOpen = false">
+                取消
+              </UButton>
+              <UButton 
+                color="primary" 
+                :loading="isProcessing" 
+                :disabled="!selectedAlbumId"
+                @click="doMove"
+              >
+                确认移动
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -308,6 +370,16 @@ interface PhotoListResponse {
     total: number
     totalPages: number
   }
+}
+
+interface Album {
+  id: number
+  name: string
+  description: string | null
+  coverPhotoId: number | null
+  coverThumb: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 const toast = useToast()
@@ -392,9 +464,50 @@ const clearSelection = () => {
 const deleteModalOpen = ref(false)
 const cleanupModalOpen = ref(false)
 const batchDeleteModalOpen = ref(false)
+const moveModalOpen = ref(false)
 const photoToDelete = ref<AdminPhoto | null>(null)
 const photoToCleanup = ref<AdminPhoto | null>(null)
+const photoToMove = ref<AdminPhoto | null>(null)
 const isProcessing = ref(false)
+
+// 相册列表
+const albums = ref<Album[]>([])
+const albumsLoading = ref(false)
+const selectedAlbumId = ref<number | undefined>(undefined)
+
+// 计算选中的相册名称
+const selectedAlbumName = computed(() => {
+  if (!selectedAlbumId.value) return ''
+  const album = albums.value.find(a => a.id === selectedAlbumId.value)
+  return album?.name || ''
+})
+
+// 将相册列表转换为 USelectMenu 需要的格式
+const albumOptions = computed(() => {
+  return albums.value.map(album => ({
+    label: album.name,
+    value: album.id
+  }))
+})
+
+// 获取相册列表
+const fetchAlbums = async () => {
+  albumsLoading.value = true
+  try {
+    const response = await $fetch<{ albums: Album[] }>('/api/albums', {
+      query: { limit: 100 }
+    })
+    albums.value = response.albums
+  } catch (error: any) {
+    toast.add({
+      title: '获取相册列表失败',
+      description: error.data?.message || '请稍后重试',
+      color: 'error',
+    })
+  } finally {
+    albumsLoading.value = false
+  }
+}
 
 // 格式化日期
 const formatDate = (dateStr: string) => {
@@ -613,6 +726,104 @@ const doCleanup = async () => {
   } catch (error: any) {
     toast.add({
       title: '清理失败',
+      description: error.data?.message || '请稍后重试',
+      color: 'error',
+    })
+  } finally {
+    isProcessing.value = false
+  }
+}
+
+// 确认移动单张照片
+const confirmMove = async (photo: AdminPhoto) => {
+  photoToMove.value = photo
+  selectedAlbumId.value = undefined
+  await fetchAlbums()
+  moveModalOpen.value = true
+}
+
+// 确认批量移动
+const confirmBatchMove = async () => {
+  if (selectedIds.value.length === 0) return
+  photoToMove.value = null
+  selectedAlbumId.value = undefined
+  await fetchAlbums()
+  moveModalOpen.value = true
+}
+
+// 执行移动
+const doMove = async () => {
+  if (!selectedAlbumId.value) return
+
+  isProcessing.value = true
+  
+  try {
+    // 单张照片移动
+    if (photoToMove.value) {
+      await $fetch(`/api/photos/${photoToMove.value.id}`, {
+        method: 'PUT',
+        body: { albumId: selectedAlbumId.value },
+      })
+
+      // 更新本地数据
+      const targetAlbum = albums.value.find(a => a.id === selectedAlbumId.value)
+      photos.value = photos.value.map(photo => {
+        if (photo.id === photoToMove.value!.id) {
+          return { 
+            ...photo, 
+            albumId: selectedAlbumId.value!, 
+            albumName: targetAlbum?.name || null 
+          }
+        }
+        return photo
+      })
+
+      toast.add({
+        title: '移动成功',
+        color: 'success',
+      })
+    }
+    // 批量移动
+    else {
+      const successIds: number[] = []
+      for (const id of selectedIds.value) {
+        try {
+          await $fetch(`/api/photos/${id}`, {
+            method: 'PUT',
+            body: { albumId: selectedAlbumId.value },
+          })
+          successIds.push(id)
+        } catch (e) {
+          // 忽略单个失败
+        }
+      }
+
+      // 更新本地数据
+      const targetAlbum = albums.value.find(a => a.id === selectedAlbumId.value)
+      photos.value = photos.value.map(photo => {
+        if (successIds.includes(photo.id)) {
+          return { 
+            ...photo, 
+            albumId: selectedAlbumId.value!, 
+            albumName: targetAlbum?.name || null 
+          }
+        }
+        return photo
+      })
+
+      toast.add({
+        title: '批量移动完成',
+        description: `成功移动 ${successIds.length} 张照片`,
+        color: 'success',
+      })
+
+      selectedIds.value = []
+    }
+
+    moveModalOpen.value = false
+  } catch (error: any) {
+    toast.add({
+      title: '移动失败',
       description: error.data?.message || '请稍后重试',
       color: 'error',
     })
