@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   }
   
   const body = await readBody(event)
-  const { name, description } = body
+  const { name, description, isPublic } = body
   
   // 验证相册名称
   const validation = validateAlbumName(name)
@@ -29,12 +29,19 @@ export default defineEventHandler(async (event) => {
   
   const now = new Date().toISOString()
   
+  const updateData: Record<string, any> = {
+    name: name.trim(),
+    description: description?.trim() || '',
+    updatedAt: now,
+  }
+  
+  // 只有明确传递了 isPublic 时才更新
+  if (typeof isPublic === 'boolean') {
+    updateData.isPublic = isPublic ? 1 : 0
+  }
+  
   db.update(schema.albums)
-    .set({
-      name: name.trim(),
-      description: description?.trim() || '',
-      updatedAt: now,
-    })
+    .set(updateData)
     .where(eq(schema.albums.id, Number(id)))
     .run()
   

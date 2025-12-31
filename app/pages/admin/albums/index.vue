@@ -2,10 +2,20 @@
   <div>
     <!-- 操作栏 -->
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-lg font-semibold">所有相册</h2>
       <div class="flex items-center gap-4">
+        <h2 class="text-lg font-semibold">所有相册</h2>
+        <span v-if="pagination" class="text-sm text-gray-500">
+          共 {{ pagination.total }} 个
+        </span>
+      </div>
+      <div class="flex items-center gap-3">
         <!-- 每页条数 -->
-        <USelect v-model="pageSize" :items="pageSizeOptions" class="w-32" />
+        <USelectMenu
+          v-model="pageSize"
+          :items="pageSizeOptions"
+          value-key="value"
+          class="w-28"
+        />
         <UButton to="/admin/albums/new" color="primary">
           <UIcon name="i-heroicons-plus" class="w-4 h-4 mr-1" />
           新建相册
@@ -26,15 +36,16 @@
       description="点击上方按钮创建第一个相册"
     />
     
-    <!-- 相册列表 -->
-    <div v-else class="space-y-2">
-      <div
-        v-for="album in albums"
-        :key="album.id"
-        class="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-sm transition-shadow"
-      >
+    <!-- 相册列表（网格布局，与照片管理风格一致） -->
+    <div v-else>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div
+          v-for="album in albums"
+          :key="album.id"
+          class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        >
           <!-- 封面 -->
-          <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+          <div class="w-24 h-24 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
             <img
               v-if="album.coverThumb"
               :src="`/api/uploads/thumbs/${album.coverThumb}`"
@@ -42,64 +53,65 @@
               class="w-full h-full object-cover"
             />
             <div v-else class="w-full h-full flex items-center justify-center">
-              <UIcon name="i-heroicons-photo" class="w-5 h-5 text-gray-400" />
+              <UIcon name="i-heroicons-photo" class="w-10 h-10 text-gray-400" />
             </div>
           </div>
           
           <!-- 信息 -->
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <h3 class="font-medium text-sm text-gray-900 dark:text-white">{{ album.name }}</h3>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ album.name }}</h3>
               <UBadge color="neutral" variant="soft" size="xs">
                 {{ album.photoCount }} 张照片
               </UBadge>
+              <UBadge v-if="album.isPublic === 0" color="warning" variant="soft" size="xs">
+                <UIcon name="i-heroicons-lock-closed" class="w-3 h-3 mr-0.5" />
+                私有
+              </UBadge>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p class="text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
               {{ album.description || '暂无描述' }}
             </p>
+            <!-- 操作 -->
+            <div class="flex items-center gap-1 mt-2">
+              <UButton
+                :to="`/admin/albums/${album.id}/photos`"
+                color="primary"
+                variant="soft"
+                size="xs"
+              >
+                管理照片
+              </UButton>
+              <UButton
+                :to="`/admin/albums/${album.id}/edit`"
+                color="neutral"
+                variant="soft"
+                size="xs"
+              >
+                编辑
+              </UButton>
+              <UButton
+                v-if="isAdmin"
+                color="error"
+                variant="soft"
+                size="xs"
+                @click="confirmDelete(album)"
+              >
+                删除
+              </UButton>
+            </div>
           </div>
-          
-          <!-- 操作 -->
-          <div class="flex items-center gap-1">
-            <UButton
-              :to="`/admin/albums/${album.id}/photos`"
-              color="primary"
-              variant="soft"
-              size="xs"
-            >
-              管理照片
-            </UButton>
-            <UButton
-              :to="`/admin/albums/${album.id}/edit`"
-              color="neutral"
-              variant="soft"
-              size="xs"
-            >
-              编辑
-            </UButton>
-            <UButton
-              v-if="isAdmin"
-              color="error"
-              variant="soft"
-              size="xs"
-              @click="confirmDelete(album)"
-            >
-              删除
-            </UButton>
-          </div>
+        </div>
       </div>
-    </div>
-    
-    <!-- 分页 -->
-    <div v-if="pagination && pagination.totalPages > 1" class="flex items-center justify-between mt-6">
-      <div class="text-sm text-gray-500">
-        共 {{ pagination.total }} 个相册，第 {{ pagination.page }}/{{ pagination.totalPages }} 页
+      
+      <!-- 分页（与照片管理页面一致） -->
+      <div v-if="pagination && pagination.totalPages > 1" class="mt-6 flex justify-center">
+        <UPagination
+          v-model:page="currentPage"
+          :total="pagination.total"
+          :items-per-page="pageSize"
+        />
       </div>
-      <UPagination
-        v-model:page="currentPage"
-        :total="pagination.total"
-        :items-per-page="pageSize"
-      />
     </div>
     
     <!-- 删除确认对话框 -->
@@ -137,6 +149,7 @@ interface Album {
   coverPhotoId: number | null
   coverThumb: string | null
   photoCount: number
+  isPublic: number
   createdAt: string
   updatedAt: string
 }

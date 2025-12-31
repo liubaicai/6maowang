@@ -18,6 +18,14 @@
       >
         <UIcon name="i-heroicons-photo" class="w-16 h-16" />
       </div>
+      <!-- 私有相册标记 -->
+      <div 
+        v-if="album.isPublic === 0"
+        class="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded-md flex items-center gap-1 text-xs"
+      >
+        <UIcon name="i-heroicons-lock-closed" class="w-3 h-3" />
+        <span>私有</span>
+      </div>
     </div>
     
     <!-- 信息 -->
@@ -47,6 +55,7 @@ interface Album {
   name: string
   description?: string
   coverThumb?: string | null
+  isPublic?: number
 }
 
 defineProps<{

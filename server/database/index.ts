@@ -41,6 +41,7 @@ export function initDatabase() {
       name TEXT NOT NULL,
       description TEXT DEFAULT '',
       cover_photo_id INTEGER,
+      is_public INTEGER NOT NULL DEFAULT 1,
       created_by INTEGER,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -118,10 +119,16 @@ function migrateDatabase() {
     // 检查并添加 albums 表的新列
     const albumsColumns = sqlite.pragma('table_info(albums)')
     const hasAlbumCreatedBy = albumsColumns.some((col: any) => col.name === 'created_by')
+    const hasAlbumIsPublic = albumsColumns.some((col: any) => col.name === 'is_public')
     
     if (!hasAlbumCreatedBy) {
       console.log('正在迁移: 添加 albums.created_by 列...')
       sqlite.exec('ALTER TABLE albums ADD COLUMN created_by INTEGER')
+    }
+    
+    if (!hasAlbumIsPublic) {
+      console.log('正在迁移: 添加 albums.is_public 列...')
+      sqlite.exec('ALTER TABLE albums ADD COLUMN is_public INTEGER NOT NULL DEFAULT 1')
     }
     
     // 检查并添加 photos 表的新列

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex bg-gray-50 dark:bg-gray-950">
     <!-- 侧边栏 -->
-    <aside class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-shrink-0">
+    <aside class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-shrink-0 sticky top-0 h-screen overflow-hidden">
       <div class="h-full flex flex-col">
         <!-- Logo -->
         <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-800">
@@ -12,7 +12,7 @@
         </div>
         
         <!-- 导航菜单 -->
-        <nav class="flex-1 p-4 space-y-1">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
           <NuxtLink
             v-for="item in menuItems"
             :key="item.to"
@@ -100,6 +100,7 @@ const menuItems = computed(() => {
   if (session.value?.user?.role === 'admin') {
     items.push(
       { to: '/admin/users', icon: 'i-heroicons-users', label: '用户管理' },
+      { to: '/admin/files', icon: 'i-heroicons-folder-open', label: '文件管理' },
       { to: '/admin/storage', icon: 'i-heroicons-cloud', label: 'S3 存储' },
       { to: '/admin/logs', icon: 'i-heroicons-document-text', label: '操作日志' }
     )
@@ -118,6 +119,7 @@ const pageTitle = computed(() => {
     '/admin/albums/new': '新建相册',
     '/admin/photos': '照片管理',
     '/admin/users': '用户管理',
+    '/admin/files': '文件管理',
     '/admin/storage': 'S3 存储配置',
     '/admin/logs': '操作日志',
     '/admin/account': '账户设置',

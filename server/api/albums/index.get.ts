@@ -1,5 +1,6 @@
 import { db, schema } from '../../database'
-import { eq, desc, count, sql } from 'drizzle-orm'
+import { eq, desc, count, sql, and } from 'drizzle-orm'
+import { getOptionalAuth } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -7,24 +8,43 @@ export default defineEventHandler(async (event) => {
   const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 10))
   const offset = (page - 1) * limit
   
+  // 获取当前用户（可选认证）
+  const user = await getOptionalAuth(event)
+  const isLoggedIn = !!user
+  
+  // 构建查询条件：如果未登录，只显示公开相册
+  const whereCondition = isLoggedIn ? undefined : eq(schema.albums.isPublic, 1)
+  
   // 获取总数
-  const totalResult = db
+  const totalQuery = db
     .select({ count: count() })
     .from(schema.albums)
-    .get()
+  
+  if (whereCondition) {
+    totalQuery.where(whereCondition)
+  }
+  
+  const totalResult = totalQuery.get()
   const total = totalResult?.count || 0
   
   // 获取相册列表，包含封面信息
-  const albums = db
+  const albumsQuery = db
     .select({
       id: schema.albums.id,
       name: schema.albums.name,
       description: schema.albums.description,
       coverPhotoId: schema.albums.coverPhotoId,
+      isPublic: schema.albums.isPublic,
       createdAt: schema.albums.createdAt,
       updatedAt: schema.albums.updatedAt,
     })
     .from(schema.albums)
+  
+  if (whereCondition) {
+    albumsQuery.where(whereCondition)
+  }
+  
+  const albums = albumsQuery
     .orderBy(desc(schema.albums.updatedAt))
     .limit(limit)
     .offset(offset)

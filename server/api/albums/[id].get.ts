@@ -1,5 +1,6 @@
 import { db, schema } from '../../database'
 import { eq } from 'drizzle-orm'
+import { getOptionalAuth } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -22,6 +23,17 @@ export default defineEventHandler(async (event) => {
       statusCode: 404,
       message: '相册不存在',
     })
+  }
+  
+  // 如果是私有相册，需要登录才能访问
+  if (album.isPublic === 0) {
+    const user = await getOptionalAuth(event)
+    if (!user) {
+      throw createError({
+        statusCode: 401,
+        message: '此相册为私有相册，请先登录',
+      })
+    }
   }
   
   // 获取照片数量

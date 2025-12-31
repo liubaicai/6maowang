@@ -26,6 +26,20 @@
           />
         </div>
         
+        <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <USwitch v-model="form.isPublic" />
+          <div class="flex-1">
+            <span class="text-sm font-medium">{{ form.isPublic ? '公开相册' : '私有相册' }}</span>
+            <p class="text-xs text-gray-500 mt-0.5">
+              {{ form.isPublic ? '所有人都可以浏览此相册' : '仅登录用户可以浏览此相册' }}
+            </p>
+          </div>
+          <UIcon 
+            :name="form.isPublic ? 'i-heroicons-globe-alt' : 'i-heroicons-lock-closed'" 
+            class="w-5 h-5 text-gray-400"
+          />
+        </div>
+        
         <div class="flex gap-3">
           <UButton
             type="submit"
@@ -64,6 +78,7 @@ const loading = ref(false)
 const form = reactive({
   name: '',
   description: '',
+  isPublic: true,
 })
 
 const handleSubmit = async () => {
