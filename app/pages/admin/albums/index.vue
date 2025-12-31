@@ -48,7 +48,12 @@
           
           <!-- 信息 -->
           <div class="flex-1 min-w-0">
-            <h3 class="font-medium text-sm text-gray-900 dark:text-white">{{ album.name }}</h3>
+            <div class="flex items-center gap-2">
+              <h3 class="font-medium text-sm text-gray-900 dark:text-white">{{ album.name }}</h3>
+              <UBadge color="neutral" variant="soft" size="xs">
+                {{ album.photoCount }} 张照片
+              </UBadge>
+            </div>
             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
               {{ album.description || '暂无描述' }}
             </p>
@@ -131,6 +136,7 @@ interface Album {
   description: string | null
   coverPhotoId: number | null
   coverThumb: string | null
+  photoCount: number
   createdAt: string
   updatedAt: string
 }

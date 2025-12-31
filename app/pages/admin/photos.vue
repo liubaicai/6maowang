@@ -14,7 +14,7 @@
           :items="albumFilterOptions"
           value-key="value"
           placeholder="所有相册"
-          class="w-40"
+          class="w-80"
         />
         <USelectMenu
           v-model="filterSlideshow"
@@ -333,6 +333,7 @@
               value-key="value"
               placeholder="选择目标相册"
               :loading="albumsLoading"
+              class="w-full"
             />
           </div>
 
@@ -398,6 +399,7 @@ interface Album {
   description: string | null
   coverPhotoId: number | null
   coverThumb: string | null
+  photoCount: number
   createdAt: string
   updatedAt: string
 }
@@ -515,7 +517,7 @@ const selectedAlbumId = ref<number | undefined>(undefined)
 const albumFilterOptions = computed(() => [
   { label: '所有相册', value: undefined },
   ...albums.value.map(album => ({
-    label: album.name,
+    label: `${album.name} (${album.photoCount})`,
     value: album.id
   }))
 ])
@@ -530,7 +532,7 @@ const selectedAlbumName = computed(() => {
 // 将相册列表转换为 USelectMenu 需要的格式
 const albumOptions = computed(() => {
   return albums.value.map(album => ({
-    label: album.name,
+    label: `${album.name} (${album.photoCount})`,
     value: album.id
   }))
 })

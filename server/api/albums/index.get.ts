@@ -1,5 +1,5 @@
 import { db, schema } from '../../database'
-import { eq, desc, count } from 'drizzle-orm'
+import { eq, desc, count, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     .offset(offset)
     .all()
   
-  // 获取封面缩略图
+  // 获取封面缩略图和照片数量
   const result = albums.map((album) => {
     let coverThumb: string | null = null
     
@@ -44,9 +44,17 @@ export default defineEventHandler(async (event) => {
       coverThumb = photo?.thumbnailFilename || null
     }
     
+    // 获取相册内的照片数量（不包括已删除的）
+    const photoCountResult = db
+      .select({ count: count() })
+      .from(schema.photos)
+      .where(sql`${schema.photos.albumId} = ${album.id} AND ${schema.photos.deletedAt} IS NULL`)
+      .get()
+    
     return {
       ...album,
       coverThumb,
+      photoCount: photoCountResult?.count || 0,
     }
   })
   
