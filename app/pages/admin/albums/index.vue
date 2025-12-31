@@ -3,10 +3,14 @@
     <!-- 操作栏 -->
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-lg font-semibold">所有相册</h2>
-      <UButton to="/admin/albums/new" color="primary">
-        <UIcon name="i-heroicons-plus" class="w-4 h-4 mr-1" />
-        新建相册
-      </UButton>
+      <div class="flex items-center gap-4">
+        <!-- 每页条数 -->
+        <USelect v-model="pageSize" :items="pageSizeOptions" class="w-32" />
+        <UButton to="/admin/albums/new" color="primary">
+          <UIcon name="i-heroicons-plus" class="w-4 h-4 mr-1" />
+          新建相册
+        </UButton>
+      </div>
     </div>
     
     <!-- 加载状态 -->
@@ -83,6 +87,18 @@
       </UCard>
     </div>
     
+    <!-- 分页 -->
+    <div v-if="pagination && pagination.totalPages > 1" class="flex items-center justify-between mt-6">
+      <div class="text-sm text-gray-500">
+        共 {{ pagination.total }} 个相册，第 {{ pagination.page }}/{{ pagination.totalPages }} 页
+      </div>
+      <UPagination
+        v-model="currentPage"
+        :total="pagination.total"
+        :items-per-page="pageSize"
+      />
+    </div>
+    
     <!-- 删除确认对话框 -->
     <UModal v-model:open="deleteModalOpen">
       <template #content>
@@ -111,6 +127,26 @@
 </template>
 
 <script setup lang="ts">
+interface Album {
+  id: number
+  name: string
+  description: string | null
+  coverPhotoId: number | null
+  coverThumb: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+interface AlbumListResponse {
+  albums: Album[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
 definePageMeta({
   layout: 'admin',
   middleware: 'auth',
@@ -122,12 +158,44 @@ useSeoMeta({
 
 const toast = useToast()
 
+// 分页状态
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+const pageSizeOptions = [
+  { label: '10 条/页', value: 10 },
+  { label: '20 条/页', value: 20 },
+  { label: '50 条/页', value: 50 },
+]
+
 // 获取当前用户信息
 const { data: session } = await useFetch('/api/auth/session')
 const isAdmin = computed(() => session.value?.user?.role === 'admin')
 
+// 本地数据（用于响应式更新）
+const albums = ref<Album[]>([])
+const pagination = ref<AlbumListResponse['pagination'] | null>(null)
+
 // 获取相册列表
-const { data: albums, status, refresh } = await useFetch('/api/albums')
+const { data, status, refresh } = await useFetch<AlbumListResponse>('/api/albums', {
+  query: computed(() => ({
+    page: currentPage.value,
+    limit: pageSize.value,
+  })),
+})
+
+// 同步数据到本地
+watch(data, (newData) => {
+  if (newData) {
+    albums.value = newData.albums
+    pagination.value = newData.pagination
+  }
+}, { immediate: true })
+
+// 切换每页数量时重置到第一页
+watch(pageSize, () => {
+  currentPage.value = 1
+})
 
 // 删除相关
 const deleteModalOpen = ref(false)

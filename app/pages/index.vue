@@ -62,6 +62,9 @@ useSeoMeta({
   title: '相册 - 遛猫网',
 })
 
-// 获取相册列表
-const { data: albums, status, error, refresh } = await useFetch('/api/albums')
+// 获取相册列表（一次加载全部）
+const { data, status, error, refresh } = await useFetch('/api/albums', {
+  query: { limit: 1000 }
+})
+const albums = computed(() => data.value?.albums || [])
 </script>

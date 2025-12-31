@@ -36,6 +36,7 @@ export const photos = sqliteTable('photos', {
   s3OriginalUrl: text('s3_original_url'), // S3 原图 URL
   s3ThumbnailUrl: text('s3_thumbnail_url'), // S3 缩略图 URL
   s3UploadedAt: text('s3_uploaded_at'), // S3 上传时间
+  isSlideshow: integer('is_slideshow').notNull().default(0), // 是否参与轮播（1=是，0=否，默认不参与）
   createdBy: integer('created_by'), // 创建者用户ID（可选，保持向后兼容）
   deletedAt: text('deleted_at'), // 软删除时间戳（null 表示未删除）
   createdAt: text('created_at').notNull(),

@@ -53,6 +53,9 @@
         </NuxtLink>
       </div>
     </div>
+    
+    <!-- Toast 通知 -->
+    <UToaster />
   </div>
 </template>
 

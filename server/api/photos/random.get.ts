@@ -1,5 +1,5 @@
 import { db, schema } from '../../database'
-import { isNull, sql } from 'drizzle-orm'
+import { isNull, sql, eq, and } from 'drizzle-orm'
 import { getS3PublicUrl } from '../../utils/s3'
 
 export default defineEventHandler(async (event) => {
@@ -8,11 +8,14 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const count = Math.min(Math.max(parseInt(query.count as string) || 1, 1), 50) // 限制在 1-50 张之间
 
-    // 查询所有未删除的照片，使用 RANDOM() 排序
+    // 查询所有未删除且参与轮播的照片，使用 RANDOM() 排序
     const photos = db
       .select()
       .from(schema.photos)
-      .where(isNull(schema.photos.deletedAt))
+      .where(and(
+        isNull(schema.photos.deletedAt),
+        eq(schema.photos.isSlideshow, 1)
+      ))
       .orderBy(sql`RANDOM()`)
       .limit(count)
       .all()

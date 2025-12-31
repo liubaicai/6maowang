@@ -1,7 +1,19 @@
 import { db, schema } from '../../database'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, count } from 'drizzle-orm'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event)
+  const page = Math.max(1, parseInt(query.page as string) || 1)
+  const limit = Math.min(100, Math.max(1, parseInt(query.limit as string) || 10))
+  const offset = (page - 1) * limit
+  
+  // 获取总数
+  const totalResult = db
+    .select({ count: count() })
+    .from(schema.albums)
+    .get()
+  const total = totalResult?.count || 0
+  
   // 获取相册列表，包含封面信息
   const albums = db
     .select({
@@ -14,6 +26,8 @@ export default defineEventHandler(async () => {
     })
     .from(schema.albums)
     .orderBy(desc(schema.albums.updatedAt))
+    .limit(limit)
+    .offset(offset)
     .all()
   
   // 获取封面缩略图
@@ -36,5 +50,13 @@ export default defineEventHandler(async () => {
     }
   })
   
-  return result
+  return {
+    albums: result,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  }
 })

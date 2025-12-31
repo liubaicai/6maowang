@@ -93,6 +93,7 @@ const menuItems = computed(() => {
   const items = [
     { to: '/admin', icon: 'i-heroicons-home', label: '仪表盘' },
     { to: '/admin/albums', icon: 'i-heroicons-folder', label: '相册管理' },
+    { to: '/admin/photos', icon: 'i-heroicons-photo', label: '照片管理' },
   ]
   
   // 仅管理员可见的菜单
@@ -115,6 +116,7 @@ const pageTitle = computed(() => {
     '/admin': '仪表盘',
     '/admin/albums': '相册管理',
     '/admin/albums/new': '新建相册',
+    '/admin/photos': '照片管理',
     '/admin/users': '用户管理',
     '/admin/storage': 'S3 存储配置',
     '/admin/logs': '操作日志',
