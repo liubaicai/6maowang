@@ -27,15 +27,14 @@
     />
     
     <!-- 相册列表 -->
-    <div v-else class="space-y-4">
-      <UCard
+    <div v-else class="space-y-2">
+      <div
         v-for="album in albums"
         :key="album.id"
-        class="hover:shadow-md transition-shadow"
+        class="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-sm transition-shadow"
       >
-        <div class="flex items-center gap-4">
           <!-- 封面 -->
-          <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+          <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
             <img
               v-if="album.coverThumb"
               :src="`/api/uploads/thumbs/${album.coverThumb}`"
@@ -43,25 +42,25 @@
               class="w-full h-full object-cover"
             />
             <div v-else class="w-full h-full flex items-center justify-center">
-              <UIcon name="i-heroicons-photo" class="w-8 h-8 text-gray-400" />
+              <UIcon name="i-heroicons-photo" class="w-5 h-5 text-gray-400" />
             </div>
           </div>
           
           <!-- 信息 -->
           <div class="flex-1 min-w-0">
-            <h3 class="font-semibold text-gray-900 dark:text-white">{{ album.name }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+            <h3 class="font-medium text-sm text-gray-900 dark:text-white">{{ album.name }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
               {{ album.description || '暂无描述' }}
             </p>
           </div>
           
           <!-- 操作 -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1">
             <UButton
               :to="`/admin/albums/${album.id}/photos`"
               color="primary"
               variant="soft"
-              size="sm"
+              size="xs"
             >
               管理照片
             </UButton>
@@ -69,7 +68,7 @@
               :to="`/admin/albums/${album.id}/edit`"
               color="neutral"
               variant="soft"
-              size="sm"
+              size="xs"
             >
               编辑
             </UButton>
@@ -77,14 +76,13 @@
               v-if="isAdmin"
               color="error"
               variant="soft"
-              size="sm"
+              size="xs"
               @click="confirmDelete(album)"
             >
               删除
             </UButton>
           </div>
-        </div>
-      </UCard>
+      </div>
     </div>
     
     <!-- 分页 -->
@@ -93,7 +91,7 @@
         共 {{ pagination.total }} 个相册，第 {{ pagination.page }}/{{ pagination.totalPages }} 页
       </div>
       <UPagination
-        v-model="currentPage"
+        v-model:page="currentPage"
         :total="pagination.total"
         :items-per-page="pageSize"
       />
@@ -182,6 +180,7 @@ const { data, status, refresh } = await useFetch<AlbumListResponse>('/api/albums
     page: currentPage.value,
     limit: pageSize.value,
   })),
+  watch: [currentPage, pageSize],
 })
 
 // 同步数据到本地

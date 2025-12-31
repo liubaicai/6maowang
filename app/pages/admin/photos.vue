@@ -82,7 +82,7 @@
     <!-- 照片列表 -->
     <div v-else class="space-y-2">
       <!-- 全选 -->
-      <div class="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <UCheckbox
           :model-value="isAllSelected"
           :indeterminate="isPartialSelected"
@@ -92,13 +92,12 @@
       </div>
 
       <!-- 列表项 -->
-      <UCard
+      <div
         v-for="photo in photos"
         :key="photo.id"
-        class="hover:shadow-md transition-shadow"
+        class="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-sm transition-shadow"
         :class="{ 'opacity-60 bg-red-50 dark:bg-red-950/20': photo.isDeleted }"
       >
-        <div class="flex items-center gap-4">
           <!-- 选择框 -->
           <UCheckbox
             :model-value="selectedIds.includes(photo.id)"
@@ -106,7 +105,7 @@
           />
 
           <!-- 缩略图 -->
-          <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+          <div class="w-10 h-10 rounded overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
             <img
               :src="photo.thumbnailUrl"
               :alt="photo.originalFilename"
@@ -118,7 +117,7 @@
           <!-- 信息 -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <h3 class="font-medium text-gray-900 dark:text-white truncate">
+              <h3 class="font-medium text-sm text-gray-900 dark:text-white truncate">
                 {{ photo.originalFilename }}
               </h3>
               <!-- 状态标签 -->
@@ -129,22 +128,22 @@
                 已删除
               </UBadge>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
               相册: {{ photo.albumName || '未知' }}
-              <span class="mx-2">•</span>
+              <span class="mx-1">•</span>
               {{ formatDate(photo.createdAt) }}
             </p>
           </div>
 
           <!-- 操作 -->
-          <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="flex items-center gap-1 flex-shrink-0">
             <template v-if="!photo.isDeleted">
               <UButton
                 v-if="photo.isSlideshow"
                 icon="i-heroicons-pause"
                 color="warning"
                 variant="soft"
-                size="sm"
+                size="xs"
                 @click="toggleSlideshow(photo)"
               >
                 取消轮播
@@ -154,7 +153,7 @@
                 icon="i-heroicons-play"
                 color="success"
                 variant="soft"
-                size="sm"
+                size="xs"
                 @click="toggleSlideshow(photo)"
               >
                 设为轮播
@@ -163,7 +162,7 @@
                 icon="i-heroicons-trash"
                 color="error"
                 variant="soft"
-                size="sm"
+                size="xs"
                 @click="confirmDelete(photo)"
               >
                 删除
@@ -174,15 +173,14 @@
                 icon="i-heroicons-trash"
                 color="error"
                 variant="solid"
-                size="sm"
+                size="xs"
                 @click="confirmCleanup(photo)"
               >
                 清理
               </UButton>
             </template>
           </div>
-        </div>
-      </UCard>
+      </div>
 
       <!-- 分页 -->
       <div v-if="pagination && pagination.totalPages > 1" class="mt-6 flex justify-center">
