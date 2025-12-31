@@ -9,7 +9,27 @@
         </span>
       </div>
       <div class="flex items-center gap-3">
-        <UCheckbox v-model="showDeleted" label="显示已删除" />
+        <USelectMenu
+          v-model="filterAlbumId"
+          :items="albumFilterOptions"
+          value-key="value"
+          placeholder="所有相册"
+          class="w-40"
+        />
+        <USelectMenu
+          v-model="filterSlideshow"
+          :items="slideshowFilterOptions"
+          value-key="value"
+          placeholder="轮播状态"
+          class="w-32"
+        />
+        <USelectMenu
+          v-model="filterDeleted"
+          :items="deletedFilterOptions"
+          value-key="value"
+          placeholder="删除状态"
+          class="w-32"
+        />
         <USelectMenu
           v-model="pageSize"
           :items="pageSizeOptions"
@@ -386,14 +406,28 @@ const toast = useToast()
 
 // 分页状态
 const currentPage = ref(1)
-const showDeleted = ref(true)
 const pageSize = ref(10)
+const filterAlbumId = ref<number | undefined>(undefined)
+const filterSlideshow = ref<boolean | undefined>(undefined)
+const filterDeleted = ref<boolean | undefined>(undefined)
 
 const pageSizeOptions = [
   { label: '10 条/页', value: 10 },
   { label: '20 条/页', value: 20 },
   { label: '50 条/页', value: 50 },
   { label: '100 条/页', value: 100 },
+]
+
+const slideshowFilterOptions = [
+  { label: '全部', value: undefined },
+  { label: '轮播中', value: true },
+  { label: '未轮播', value: false },
+]
+
+const deletedFilterOptions = [
+  { label: '全部', value: undefined },
+  { label: '已删除', value: true },
+  { label: '未删除', value: false },
 ]
 
 // 选择状态
@@ -408,9 +442,11 @@ const { data, status, refresh } = await useFetch<PhotoListResponse>('/api/admin/
   query: computed(() => ({
     page: currentPage.value,
     limit: pageSize.value,
-    showDeleted: showDeleted.value,
+    isDeleted: filterDeleted.value,
+    albumId: filterAlbumId.value,
+    isSlideshow: filterSlideshow.value,
   })),
-  watch: [currentPage, showDeleted, pageSize],
+  watch: [currentPage, pageSize, filterDeleted, filterAlbumId, filterSlideshow],
 })
 
 // 同步 data 到本地 photos
@@ -422,7 +458,7 @@ watch(data, (newData) => {
 }, { immediate: true })
 
 // 监听分页变化时清空选择
-watch([currentPage, pageSize, showDeleted], () => {
+watch([currentPage, pageSize, filterDeleted, filterAlbumId, filterSlideshow], () => {
   selectedIds.value = []
 })
 
@@ -475,6 +511,15 @@ const albums = ref<Album[]>([])
 const albumsLoading = ref(false)
 const selectedAlbumId = ref<number | undefined>(undefined)
 
+// 相册筛选选项（包含“所有相册”选项）
+const albumFilterOptions = computed(() => [
+  { label: '所有相册', value: undefined },
+  ...albums.value.map(album => ({
+    label: album.name,
+    value: album.id
+  }))
+])
+
 // 计算选中的相册名称
 const selectedAlbumName = computed(() => {
   if (!selectedAlbumId.value) return ''
@@ -508,6 +553,9 @@ const fetchAlbums = async () => {
     albumsLoading.value = false
   }
 }
+
+// 页面加载时获取相册列表用于筛选
+fetchAlbums()
 
 // 格式化日期
 const formatDate = (dateStr: string) => {

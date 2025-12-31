@@ -12,14 +12,31 @@ export default defineEventHandler(async (event) => {
   const page = Math.max(parseInt(query.page as string) || 1, 1)
   const limit = Math.min(Math.max(parseInt(query.limit as string) || 20, 1), 100)
   const offset = (page - 1) * limit
-  const showDeleted = query.showDeleted === 'true' || query.showDeleted === '1'
+  const albumId = query.albumId ? parseInt(query.albumId as string) : undefined
+  const isSlideshow = query.isSlideshow !== undefined ? (query.isSlideshow === 'true' || query.isSlideshow === '1') : undefined
+  const isDeleted = query.isDeleted !== undefined ? (query.isDeleted === 'true' || query.isDeleted === '1') : undefined
 
   try {
     // 构建查询条件
-    let whereClause = sql`1=1`
-    if (!showDeleted) {
-      whereClause = sql`${schema.photos.deletedAt} IS NULL`
+    const conditions = []
+    
+    if (isDeleted !== undefined) {
+      if (isDeleted) {
+        conditions.push(sql`${schema.photos.deletedAt} IS NOT NULL`)
+      } else {
+        conditions.push(sql`${schema.photos.deletedAt} IS NULL`)
+      }
     }
+    
+    if (albumId !== undefined) {
+      conditions.push(sql`${schema.photos.albumId} = ${albumId}`)
+    }
+    
+    if (isSlideshow !== undefined) {
+      conditions.push(sql`${schema.photos.isSlideshow} = ${isSlideshow ? 1 : 0}`)
+    }
+    
+    const whereClause = conditions.length > 0 ? sql.join(conditions, sql` AND `) : sql`1=1`
 
     // 查询总数
     const countResult = db
