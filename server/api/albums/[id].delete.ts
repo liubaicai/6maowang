@@ -1,9 +1,6 @@
 import { db, schema } from '../../database'
 import { eq } from 'drizzle-orm'
 import { requireAdmin } from '../../utils/auth'
-import { rmSync } from 'node:fs'
-import { join } from 'node:path'
-import { originalsDir, thumbsDir } from '../../utils/paths'
 import { logOperation } from '../../utils/operation-log'
 
 export default defineEventHandler(async (event) => {
@@ -32,24 +29,24 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  // 获取相册内所有照片
+  // 获取相册内所有照片数量
   const photos = db
-    .select()
+    .select({ id: schema.photos.id })
     .from(schema.photos)
     .where(eq(schema.photos.albumId, Number(id)))
     .all()
   
-  // 删除照片文件
-  for (const photo of photos) {
-    try {
-      rmSync(join(originalsDir, photo.storedFilename), { force: true })
-      rmSync(join(thumbsDir, photo.thumbnailFilename), { force: true })
-    } catch {
-      // 忽略文件删除错误
-    }
+  const now = new Date().toISOString()
+  
+  // 软删除相册内的所有照片（标记 deletedAt）
+  if (photos.length > 0) {
+    db.update(schema.photos)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(eq(schema.photos.albumId, Number(id)))
+      .run()
   }
   
-  // 删除相册（照片会级联删除）
+  // 删除相册记录
   db.delete(schema.albums)
     .where(eq(schema.albums.id, Number(id)))
     .run()
@@ -58,7 +55,8 @@ export default defineEventHandler(async (event) => {
   logOperation(user.id, 'delete_album', 'album', Number(id), {
     albumName: album.name,
     photoCount: photos.length,
+    softDeletePhotos: true,
   })
   
-  return { ok: true }
+  return { ok: true, message: `相册已删除，${photos.length} 张照片已标记为删除` }
 })
