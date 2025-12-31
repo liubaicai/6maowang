@@ -9,49 +9,86 @@
         <UIcon name="i-heroicons-arrow-left" class="w-4 h-4" />
         返回相册列表
       </NuxtLink>
-      <h2 class="text-lg font-semibold">{{ album?.name }} - 照片管理</h2>
+      <h2 class="text-lg font-semibold">{{ album?.name }} - 照片管理 ({{ photos?.length || 0 }})</h2>
     </div>
     
-    <!-- 上传区域 -->
-    <UCard class="mb-6">
-      <template #header>
-        <h3 class="font-semibold">上传照片</h3>
-      </template>
-      <PhotoUploader :album-id="Number(albumId)" @uploaded="refreshPhotos" />
-    </UCard>
+    <!-- 加载状态 -->
+    <div v-if="photosPending" class="flex justify-center py-16">
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400" />
+    </div>
     
-    <!-- 照片列表 -->
-    <UCard>
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h3 class="font-semibold">照片列表 ({{ photos?.length || 0 }})</h3>
+    <!-- 照片列表（包含上传区域） -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- 上传区域作为第一项 -->
+      <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <div class="w-24 h-24 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center">
+          <UIcon name="i-heroicons-cloud-arrow-up" class="w-10 h-10 text-gray-400" />
         </div>
-      </template>
-      
-      <div v-if="photosPending" class="flex justify-center py-8">
-        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-gray-400" />
+        <div class="flex-1 min-w-0">
+          <PhotoUploader :album-id="Number(albumId)" compact @uploaded="refreshPhotos" />
+        </div>
       </div>
       
-      <EmptyState
-        v-else-if="!photos || photos.length === 0"
-        icon="🖼️"
-        title="还没有照片"
-        description="使用上方的上传区域添加照片"
-      />
-      
-      <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <PhotoCard
-          v-for="photo in photos"
-          :key="photo.id"
-          :photo="photo"
-          show-actions
-          @view="viewPhoto(photo)"
-          @set-cover="setCover(photo)"
-          @rename="openRenameModal(photo)"
-          @delete="confirmDelete(photo)"
-        />
+      <!-- 照片列表项 -->
+      <div
+        v-for="photo in photos"
+        :key="photo.id"
+        class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      >
+        <!-- 缩略图 -->
+        <div 
+          class="w-24 h-24 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 cursor-pointer"
+          @click="viewPhoto(photo)"
+        >
+          <img
+            :src="photo.thumbnailUrl || `/api/uploads/thumbs/${photo.thumbnailFilename}`"
+            :alt="photo.displayName"
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          
+          <!-- 信息 -->
+          <div class="flex-1 min-w-0">
+            <h4 class="font-medium text-gray-900 dark:text-white truncate">
+              {{ photo.displayName }}
+            </h4>
+            <p 
+              v-if="photo.exifSummary" 
+              class="text-sm text-gray-500 dark:text-gray-400 truncate mt-1"
+            >
+              {{ photo.exifSummary }}
+            </p>
+            <!-- 操作 -->
+            <div class="flex items-center gap-1 mt-2">
+              <UButton 
+                size="xs" 
+                color="neutral" 
+                variant="soft"
+                @click="setCover(photo)"
+            >
+              设为封面
+            </UButton>
+            <UButton 
+              size="xs" 
+              color="neutral" 
+              variant="soft"
+              @click="openRenameModal(photo)"
+            >
+              重命名
+            </UButton>
+            <UButton 
+              size="xs" 
+              color="error" 
+              variant="soft"
+              @click="confirmDelete(photo)"
+            >
+              删除
+            </UButton>
+            </div>
+          </div>
+        </div>
       </div>
-    </UCard>
     
     <!-- 重命名对话框 -->
     <UModal v-model:open="renameModalOpen">
