@@ -19,6 +19,7 @@ import {
   HeadObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
+// @ts-ignore
 import OSS from 'ali-oss'
 import COS from 'cos-nodejs-sdk-v5'
 

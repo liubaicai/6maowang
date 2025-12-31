@@ -1,12 +1,16 @@
 <template>
-  <div class="fixed inset-0 z-50 bg-black">
+  <div class="fixed inset-0 z-50 bg-black" @mousemove="handleMouseMove">
     <!-- 控制栏 -->
-    <div class="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent p-4">
+    <div 
+      class="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent p-4 transition-opacity duration-300"
+      :class="showTopBar ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+      @mouseenter="showTopBar = true"
+    >
       <div class="flex items-center justify-between max-w-7xl mx-auto">
         <div class="flex items-center gap-4">
           <UButton
             icon="i-heroicons-x-mark"
-            color="white"
+            color="neutral"
             variant="ghost"
             size="lg"
             @click="exitSlideshow"
@@ -18,7 +22,7 @@
           <!-- 播放/暂停 -->
           <UButton
             :icon="isPlaying ? 'i-heroicons-pause' : 'i-heroicons-play'"
-            color="white"
+            color="neutral"
             variant="ghost"
             size="lg"
             @click="togglePlayPause"
@@ -26,24 +30,26 @@
           
           <!-- 间隔设置 -->
           <USelectMenu
-            v-model="interval"
-            :options="intervalOptions"
-            value-attribute="value"
-            option-attribute="label"
+            v-model="selectedInterval"
+            :items="intervalOptions"
+            value-key="value"
             class="w-32"
-          >
-            <template #label>
-              <span class="text-white">{{ interval / 1000 }}s</span>
-            </template>
-          </USelectMenu>
+          />
           
           <!-- 切换效果显示 -->
-          <span class="text-white/70 text-sm">
+          <!-- <span class="text-white/70 text-sm">
             效果: {{ currentTransition }}
-          </span>
+          </span> -->
         </div>
       </div>
     </div>
+    
+    <!-- 顶部悬停触发区域 -->
+    <div 
+      class="absolute top-0 left-0 right-0 h-16 z-20 pointer-events-none"
+      :class="{ 'pointer-events-auto': !showTopBar }"
+      @mouseenter="showTopBar = true"
+    />
 
     <!-- 图片容器 -->
     <div class="relative w-full h-full flex items-center justify-center">
@@ -76,7 +82,9 @@
       <!-- 底部信息栏 -->
       <div
         v-if="currentPhoto"
-        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6"
+        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 transition-opacity duration-300"
+        :class="showBottomBar ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+        @mouseenter="showBottomBar = true"
       >
         <div class="max-w-7xl mx-auto">
           <h2 class="text-white text-xl font-medium mb-2">
@@ -90,18 +98,27 @@
           </p>
         </div>
       </div>
+      
+      <!-- 底部悬停触发区域 -->
+      <div 
+        class="absolute bottom-0 left-0 right-0 h-16 z-20 pointer-events-none"
+        :class="{ 'pointer-events-auto': !showBottomBar }"
+        @mouseenter="showBottomBar = true"
+      />
     </div>
 
     <!-- 左右控制按钮 -->
     <button
-      class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-colors"
+      class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300"
+      :class="showControls ? 'opacity-100' : 'opacity-0'"
       @click="previousPhoto"
     >
       <UIcon name="i-heroicons-chevron-left" class="w-8 h-8 text-white" />
     </button>
     
     <button
-      class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-colors"
+      class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300"
+      :class="showControls ? 'opacity-100' : 'opacity-0'"
       @click="nextPhoto"
     >
       <UIcon name="i-heroicons-chevron-right" class="w-8 h-8 text-white" />
@@ -142,6 +159,45 @@ const isLoading = ref(true)
 const currentTransition = ref('淡入淡出')
 const currentTransitionClass = ref('fade')
 
+// 控制栏显示状态
+const showTopBar = ref(false)
+const showBottomBar = ref(false)
+const showControls = ref(false)
+let hideTimer: NodeJS.Timeout | null = null
+
+// 处理鼠标移动
+const handleMouseMove = (e: MouseEvent) => {
+  const { clientY, clientX } = e
+  const windowHeight = window.innerHeight
+  const windowWidth = window.innerWidth
+  
+  // 鼠标在顶部区域
+  if (clientY < 80) {
+    showTopBar.value = true
+  }
+  
+  // 鼠标在底部区域
+  if (clientY > windowHeight - 100) {
+    showBottomBar.value = true
+  }
+  
+  // 鼠标在左右边缘区域显示控制按钮
+  if (clientX < 100 || clientX > windowWidth - 100) {
+    showControls.value = true
+  }
+  
+  // 重置隐藏计时器
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+  }
+  
+  hideTimer = setTimeout(() => {
+    showTopBar.value = false
+    showBottomBar.value = false
+    showControls.value = false
+  }, 3000) // 3秒后隐藏
+}
+
 // 间隔选项
 const intervalOptions = [
   { label: '3 秒', value: 3000 },
@@ -149,7 +205,8 @@ const intervalOptions = [
   { label: '8 秒', value: 8000 },
   { label: '10 秒', value: 10000 },
 ]
-const interval = ref(5000)
+const selectedInterval = ref(5000)
+const interval = computed(() => selectedInterval.value ?? 5000)
 
 let timer: NodeJS.Timeout | null = null
 
@@ -179,8 +236,10 @@ const loadPhotos = async () => {
 const selectRandomTransition = () => {
   const randomIndex = Math.floor(Math.random() * transitions.length)
   const transition = transitions[randomIndex]
-  currentTransitionClass.value = transition.name
-  currentTransition.value = transition.label
+  if (transition) {
+    currentTransitionClass.value = transition.name
+    currentTransition.value = transition.label
+  }
 }
 
 // 下一张照片
@@ -243,7 +302,7 @@ const formatDate = (dateStr: string) => {
 }
 
 // 监听间隔变化
-watch(interval, () => {
+watch(selectedInterval, () => {
   if (isPlaying.value) {
     startTimer()
   }
@@ -281,6 +340,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
   stopTimer()
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+  }
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
