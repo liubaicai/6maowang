@@ -60,7 +60,7 @@
         <div
           v-if="currentPhoto"
           :key="currentPhoto.id"
-          class="absolute inset-0 flex items-center justify-center p-8"
+          class="absolute inset-0 flex items-center justify-center"
         >
           <img
             :src="currentPhoto.originalUrl"
