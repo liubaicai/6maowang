@@ -390,14 +390,54 @@ const exitFullscreen = async () => {
   }
 }
 
+// Screen Wake Lock - 防止系统锁屏或关闭显示器
+let wakeLock: WakeLockSentinel | null = null
+
+const requestWakeLock = async () => {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen')
+      console.log('Wake Lock 已激活')
+      
+      // 监听 Wake Lock 释放事件
+      wakeLock.addEventListener('release', () => {
+        console.log('Wake Lock 已释放')
+      })
+    }
+  } catch (error) {
+    console.warn('Wake Lock 请求失败:', error)
+  }
+}
+
+const releaseWakeLock = async () => {
+  if (wakeLock) {
+    try {
+      await wakeLock.release()
+      wakeLock = null
+    } catch (error) {
+      console.warn('Wake Lock 释放失败:', error)
+    }
+  }
+}
+
+// 页面可见性变化时重新请求 Wake Lock
+const handleVisibilityChange = async () => {
+  if (document.visibilityState === 'visible' && isPlaying.value) {
+    await requestWakeLock()
+  }
+}
+
 // 生命周期
 onMounted(async () => {
   await loadPhotos()
   if (photos.value.length > 0) {
     startTimer()
     window.addEventListener('keydown', handleKeydown)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     // 自动进入全屏
     await requestFullscreen()
+    // 请求 Wake Lock 防止锁屏
+    await requestWakeLock()
   }
 })
 
@@ -407,6 +447,9 @@ onUnmounted(() => {
     clearTimeout(hideTimer)
   }
   window.removeEventListener('keydown', handleKeydown)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  // 释放 Wake Lock
+  releaseWakeLock()
 })
 </script>
 
