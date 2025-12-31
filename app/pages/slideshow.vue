@@ -200,13 +200,13 @@ const handleMouseMove = (e: MouseEvent) => {
 
 // 间隔选项
 const intervalOptions = [
-  { label: '3 秒', value: 3000 },
-  { label: '5 秒', value: 5000 },
-  { label: '8 秒', value: 8000 },
   { label: '10 秒', value: 10000 },
+  { label: '20 秒', value: 20000 },
+  { label: '30 秒', value: 30000 },
+  { label: '60 秒', value: 60000 },
 ]
-const selectedInterval = ref(5000)
-const interval = computed(() => selectedInterval.value ?? 5000)
+const selectedInterval = ref(20000)
+const interval = computed(() => selectedInterval.value ?? 20000)
 
 let timer: NodeJS.Timeout | null = null
 
