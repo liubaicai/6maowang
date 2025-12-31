@@ -14,6 +14,7 @@
           v-model="pageSize"
           :items="pageSizeOptions"
           value-key="value"
+          label-key="label"
           class="w-28"
         />
         <UButton to="/admin/albums/new" color="primary">
