@@ -41,11 +41,16 @@
 
     <!-- 批量操作栏 -->
     <div 
-      v-if="selectedIds.length > 0" 
-      class="mb-4 p-3 bg-primary-50 dark:bg-primary-950 rounded-lg flex items-center justify-between"
+      class="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between"
+      :class="{ 'bg-primary-50 dark:bg-primary-950': selectedIds.length > 0 }"
     >
-      <span class="text-sm">
-        已选择 <strong>{{ selectedIds.length }}</strong> 张照片
+      <span class="text-sm text-gray-500">
+        <template v-if="selectedIds.length > 0">
+          已选择 <strong class="text-gray-900 dark:text-white">{{ selectedIds.length }}</strong> 张照片
+        </template>
+        <template v-else>
+          请勾选照片进行批量操作
+        </template>
       </span>
       <div class="flex items-center gap-2">
         <UButton
@@ -53,6 +58,7 @@
           size="sm"
           color="success"
           variant="soft"
+          :disabled="selectedIds.length === 0"
           @click="batchSetSlideshow(true)"
         >
           设为轮播
@@ -62,6 +68,7 @@
           size="sm"
           color="warning"
           variant="soft"
+          :disabled="selectedIds.length === 0"
           @click="batchSetSlideshow(false)"
         >
           取消轮播
@@ -71,6 +78,7 @@
           size="sm"
           color="primary"
           variant="soft"
+          :disabled="selectedIds.length === 0"
           @click="confirmBatchMove"
         >
           移动到相册
@@ -80,6 +88,7 @@
           size="sm"
           color="error"
           variant="soft"
+          :disabled="selectedIds.length === 0"
           @click="confirmBatchDelete"
         >
           批量删除
@@ -88,6 +97,7 @@
           size="sm"
           color="neutral"
           variant="ghost"
+          :disabled="selectedIds.length === 0"
           @click="clearSelection"
         >
           取消选择
@@ -109,9 +119,9 @@
     />
 
     <!-- 照片列表 -->
-    <div v-else class="space-y-2">
+    <div v-else>
       <!-- 全选 -->
-      <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <div class="flex items-center gap-2 px-3 py-2 mb-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <UCheckbox
           :model-value="isAllSelected"
           :indeterminate="isPartialSelected"
@@ -120,21 +130,27 @@
         <span class="text-sm text-gray-500">全选当前页</span>
       </div>
 
-      <!-- 列表项 -->
-      <div
-        v-for="photo in photos"
-        :key="photo.id"
-        class="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-sm transition-shadow"
-        :class="{ 'opacity-60 bg-red-50 dark:bg-red-950/20': photo.isDeleted }"
-      >
+      <!-- 网格布局 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- 照片列表项 -->
+        <div
+          v-for="photo in photos"
+          :key="photo.id"
+          class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          :class="{ 'opacity-60 ring-2 ring-red-300 dark:ring-red-700': photo.isDeleted }"
+        >
           <!-- 选择框 -->
           <UCheckbox
             :model-value="selectedIds.includes(photo.id)"
             @update:model-value="toggleSelect(photo.id)"
+            class="flex-shrink-0"
           />
 
           <!-- 缩略图 -->
-          <div class="w-10 h-10 rounded overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+          <div 
+            class="w-24 h-24 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0 cursor-pointer"
+            @click="viewPhoto(photo)"
+          >
             <img
               :src="photo.thumbnailUrl"
               :alt="photo.originalFilename"
@@ -142,13 +158,13 @@
               loading="lazy"
             />
           </div>
-
+          
           <!-- 信息 -->
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <h3 class="font-medium text-sm text-gray-900 dark:text-white truncate">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-medium text-gray-900 dark:text-white truncate">
                 {{ photo.originalFilename }}
-              </h3>
+              </h4>
               <!-- 状态标签 -->
               <UBadge v-if="photo.isSlideshow" color="success" variant="soft" size="xs">
                 轮播中
@@ -157,67 +173,63 @@
                 已删除
               </UBadge>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
               相册: {{ photo.albumName || '未知' }}
-              <span class="mx-1">•</span>
+            </p>
+            <p class="text-sm text-gray-400 dark:text-gray-500">
               {{ formatDate(photo.createdAt) }}
             </p>
+            <!-- 操作 -->
+            <div class="flex items-center gap-1 mt-2 flex-wrap">
+              <template v-if="!photo.isDeleted">
+                <UButton
+                  v-if="photo.isSlideshow"
+                  size="xs"
+                  color="warning"
+                  variant="soft"
+                  @click="toggleSlideshow(photo)"
+                >
+                  取消轮播
+                </UButton>
+                <UButton
+                  v-else
+                  size="xs"
+                  color="success"
+                  variant="soft"
+                  @click="toggleSlideshow(photo)"
+                >
+                  设为轮播
+                </UButton>
+                <UButton
+                  size="xs"
+                  color="primary"
+                  variant="soft"
+                  @click="confirmMove(photo)"
+                >
+                  移动
+                </UButton>
+                <UButton
+                  size="xs"
+                  color="error"
+                  variant="soft"
+                  @click="confirmDelete(photo)"
+                >
+                  删除
+                </UButton>
+              </template>
+              <template v-else>
+                <UButton
+                  size="xs"
+                  color="error"
+                  variant="solid"
+                  @click="confirmCleanup(photo)"
+                >
+                  清理
+                </UButton>
+              </template>
+            </div>
           </div>
-
-          <!-- 操作 -->
-          <div class="flex items-center gap-1 flex-shrink-0">
-            <template v-if="!photo.isDeleted">
-              <UButton
-                v-if="photo.isSlideshow"
-                icon="i-heroicons-pause"
-                color="warning"
-                variant="soft"
-                size="xs"
-                @click="toggleSlideshow(photo)"
-              >
-                取消轮播
-              </UButton>
-              <UButton
-                v-else
-                icon="i-heroicons-play"
-                color="success"
-                variant="soft"
-                size="xs"
-                @click="toggleSlideshow(photo)"
-              >
-                设为轮播
-              </UButton>
-              <UButton
-                icon="i-heroicons-folder-arrow-down"
-                color="primary"
-                variant="soft"
-                size="xs"
-                @click="confirmMove(photo)"
-              >
-                移动
-              </UButton>
-              <UButton
-                icon="i-heroicons-trash"
-                color="error"
-                variant="soft"
-                size="xs"
-                @click="confirmDelete(photo)"
-              >
-                删除
-              </UButton>
-            </template>
-            <template v-else>
-              <UButton
-                icon="i-heroicons-trash"
-                color="error"
-                variant="solid"
-                size="xs"
-                @click="confirmCleanup(photo)"
-              >
-                清理
-              </UButton>
-            </template>
-          </div>
+        </div>
       </div>
 
       <!-- 分页 -->
@@ -558,6 +570,12 @@ const fetchAlbums = async () => {
 
 // 页面加载时获取相册列表用于筛选
 fetchAlbums()
+
+// 查看原图
+const viewPhoto = (photo: AdminPhoto) => {
+  const url = photo.originalUrl || `/api/uploads/originals/${photo.storedFilename}`
+  window.open(url, '_blank')
+}
 
 // 格式化日期
 const formatDate = (dateStr: string) => {

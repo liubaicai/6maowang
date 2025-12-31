@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   }
   
   const body = await readBody(event)
-  const { nickname, password, role } = body
+  const { username, nickname, password, role } = body
   
   // 查找用户
   const user = db
@@ -41,6 +41,34 @@ export default defineEventHandler(async (event) => {
   
   // 构建更新对象
   const updates: any = {}
+  
+  // 更新用户名
+  if (username !== undefined && username !== user.username) {
+    const trimmedUsername = username.trim()
+    
+    if (trimmedUsername.length < 3 || trimmedUsername.length > 20) {
+      throw createError({
+        statusCode: 400,
+        message: '用户名长度必须在 3-20 个字符之间',
+      })
+    }
+    
+    // 检查用户名是否已存在
+    const existingUser = db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.username, trimmedUsername))
+      .get()
+    
+    if (existingUser) {
+      throw createError({
+        statusCode: 400,
+        message: '用户名已存在',
+      })
+    }
+    
+    updates.username = trimmedUsername
+  }
   
   if (nickname !== undefined) {
     updates.nickname = nickname?.trim() || null

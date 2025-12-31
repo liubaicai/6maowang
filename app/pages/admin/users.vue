@@ -62,6 +62,15 @@
                 >
                   编辑
                 </UButton>
+                <UButton
+                  icon="i-heroicons-trash"
+                  color="error"
+                  variant="ghost"
+                  size="sm"
+                  @click="confirmDeleteUser(user)"
+                >
+                  删除
+                </UButton>
               </td>
             </tr>
           </tbody>
@@ -82,7 +91,7 @@
           </template>
           
           <form @submit.prevent="handleSubmit" class="space-y-4">
-            <div v-if="!editingUser">
+            <div>
               <label class="block text-sm font-medium mb-1">用户名 <span class="text-red-500">*</span></label>
               <UInput
                 v-model="form.username"
@@ -144,6 +153,40 @@
         </UCard>
       </template>
     </UModal>
+    
+    <!-- 删除确认模态框 -->
+    <UModal v-model:open="showDeleteModal">
+      <template #content>
+        <UCard>
+          <template #header>
+            <h3 class="font-semibold text-red-600">确认删除</h3>
+          </template>
+          
+          <p class="text-gray-600 dark:text-gray-400">
+            确定要删除用户 <strong>{{ deletingUser?.username }}</strong> 吗？此操作不可撤销。
+          </p>
+          
+          <template #footer>
+            <div class="flex justify-end gap-2">
+              <UButton
+                color="neutral"
+                variant="soft"
+                @click="showDeleteModal = false"
+              >
+                取消
+              </UButton>
+              <UButton
+                color="error"
+                :loading="deleting"
+                @click="handleDelete"
+              >
+                删除
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -166,6 +209,11 @@ const { data: users, pending, refresh } = await useFetch('/api/admin/users')
 const showModal = ref(false)
 const editingUser = ref<any>(null)
 const submitting = ref(false)
+
+// 删除相关状态
+const showDeleteModal = ref(false)
+const deletingUser = ref<any>(null)
+const deleting = ref(false)
 
 // 表单数据
 const form = reactive({
@@ -198,8 +246,13 @@ const openEditModal = (user: any) => {
 // 提交表单
 const handleSubmit = async () => {
   // 验证
-  if (!editingUser.value && !form.username) {
+  if (!form.username) {
     toast.add({ title: '请输入用户名', color: 'error' })
+    return
+  }
+  
+  if (form.username.length < 3 || form.username.length > 20) {
+    toast.add({ title: '用户名长度必须在 3-20 个字符之间', color: 'error' })
     return
   }
   
@@ -221,6 +274,7 @@ const handleSubmit = async () => {
       await $fetch(`/api/admin/users/${editingUser.value.id}`, {
         method: 'PUT',
         body: {
+          username: form.username,
           nickname: form.nickname,
           password: form.password || undefined,
           role: form.role,
@@ -251,6 +305,36 @@ const handleSubmit = async () => {
     })
   } finally {
     submitting.value = false
+  }
+}
+
+// 确认删除用户
+const confirmDeleteUser = (user: any) => {
+  deletingUser.value = user
+  showDeleteModal.value = true
+}
+
+// 删除用户
+const handleDelete = async () => {
+  if (!deletingUser.value) return
+  
+  deleting.value = true
+  
+  try {
+    await $fetch(`/api/admin/users/${deletingUser.value.id}`, {
+      method: 'DELETE',
+    })
+    toast.add({ title: '用户删除成功', color: 'success' })
+    showDeleteModal.value = false
+    refresh()
+  } catch (err: any) {
+    toast.add({ 
+      title: '删除失败', 
+      description: err.data?.message || err.message,
+      color: 'error' 
+    })
+  } finally {
+    deleting.value = false
   }
 }
 
