@@ -245,7 +245,36 @@ const selectRandomTransition = () => {
 // 下一张照片
 const nextPhoto = () => {
   selectRandomTransition()
-  currentIndex.value = (currentIndex.value + 1) % photos.value.length
+  const nextIndex = (currentIndex.value + 1) % photos.value.length
+  
+  // 如果即将循环回第一张，加载新的照片
+  if (nextIndex === 0) {
+    loadNewPhotos()
+  } else {
+    currentIndex.value = nextIndex
+  }
+}
+
+// 加载新的一批照片
+const loadNewPhotos = async () => {
+  try {
+    isLoading.value = true
+    const data = await $fetch<RandomPhoto[]>('/api/photos/random', {
+      query: { count: 50 },
+    })
+    
+    if (data.length > 0) {
+      photos.value = data
+      currentIndex.value = 0
+    }
+    
+    isLoading.value = false
+  } catch (error) {
+    console.error('Failed to load new photos:', error)
+    // 加载失败时继续循环当前照片
+    currentIndex.value = 0
+    isLoading.value = false
+  }
 }
 
 // 上一张照片
@@ -281,8 +310,9 @@ const stopTimer = () => {
 }
 
 // 退出幻灯片
-const exitSlideshow = () => {
+const exitSlideshow = async () => {
   stopTimer()
+  await exitFullscreen()
   navigateTo('/')
 }
 
@@ -329,12 +359,45 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
+// 请求全屏
+const requestFullscreen = async () => {
+  try {
+    const elem = document.documentElement
+    if (elem.requestFullscreen) {
+      await elem.requestFullscreen()
+    } else if ((elem as any).webkitRequestFullscreen) {
+      await (elem as any).webkitRequestFullscreen()
+    } else if ((elem as any).msRequestFullscreen) {
+      await (elem as any).msRequestFullscreen()
+    }
+  } catch (error) {
+    console.warn('Fullscreen request failed:', error)
+  }
+}
+
+// 退出全屏
+const exitFullscreen = async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen()
+    } else if ((document as any).webkitFullscreenElement) {
+      await (document as any).webkitExitFullscreen()
+    } else if ((document as any).msFullscreenElement) {
+      await (document as any).msExitFullscreen()
+    }
+  } catch (error) {
+    console.warn('Exit fullscreen failed:', error)
+  }
+}
+
 // 生命周期
 onMounted(async () => {
   await loadPhotos()
   if (photos.value.length > 0) {
     startTimer()
     window.addEventListener('keydown', handleKeydown)
+    // 自动进入全屏
+    await requestFullscreen()
   }
 })
 

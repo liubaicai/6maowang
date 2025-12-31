@@ -14,7 +14,7 @@
     <!-- 错误状态 -->
     <div v-else-if="error" class="text-center py-16">
       <p class="text-red-500">加载失败: {{ error.message }}</p>
-      <UButton class="mt-4" @click="refresh">重试</UButton>
+      <UButton class="mt-4" @click="() => refresh()">重试</UButton>
     </div>
     
     <!-- 空状态 -->
@@ -37,7 +37,7 @@
       <AlbumCard
         v-for="album in albums"
         :key="album.id"
-        :album="album"
+        :album="album as any"
       />
     </div>
 
@@ -51,7 +51,7 @@
       @click="navigateTo('/slideshow')"
       aria-label="播放幻灯片"
     >
-      幻灯片
+      播放
     </UButton>
   </div>
 </template>
