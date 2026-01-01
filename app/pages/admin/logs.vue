@@ -115,7 +115,7 @@ const currentPage = ref(1)
 const { data: logs, pending, refresh } = await useFetch('/api/admin/logs', {
   query: {
     page: currentPage,
-    pageSize: 50,
+    pageSize: 10,
   },
 })
 

@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen flex bg-gray-50 dark:bg-gray-950">
+  <div class="h-screen flex bg-gray-50 dark:bg-gray-950 overflow-hidden">
     <!-- 侧边栏 -->
-    <aside class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-shrink-0">
+    <aside class="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-shrink-0 h-screen overflow-y-auto">
       <div class="h-full flex flex-col">
         <!-- Logo -->
-        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-800">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
           <NuxtLink to="/" class="flex items-center gap-2">
             <UIcon name="i-heroicons-camera" class="w-8 h-8 text-primary-500" />
             <span class="font-bold text-lg">遛猫网</span>
@@ -12,7 +12,7 @@
         </div>
         
         <!-- 导航菜单 -->
-        <nav class="flex-1 p-4 space-y-1">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
           <NuxtLink
             v-for="item in menuItems"
             :key="item.to"
@@ -26,7 +26,7 @@
         </nav>
         
         <!-- 底部操作 -->
-        <div class="p-4 border-t border-gray-200 dark:border-gray-800">
+        <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0">
           <div class="flex items-center justify-between mb-3">
             <div class="flex flex-col min-w-0">
               <span class="text-sm font-medium truncate">{{ session?.user?.nickname || session?.user?.username }}</span>
@@ -57,14 +57,14 @@
     </aside>
     
     <!-- 主内容区 -->
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
       <!-- 顶栏 -->
-      <header class="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 flex items-center">
+      <header class="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 flex items-center flex-shrink-0">
         <h1 class="text-xl font-semibold">{{ pageTitle }}</h1>
       </header>
       
       <!-- 内容 -->
-      <main class="flex-1 p-6 overflow-auto">
+      <main class="flex-1 p-6 overflow-y-auto">
         <slot />
       </main>
     </div>
