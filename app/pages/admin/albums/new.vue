@@ -22,7 +22,7 @@
             v-model="form.description"
             placeholder="请输入相册描述（可选）"
             class="w-full"
-            rows="3"
+            :rows="3"
           />
         </div>
         

@@ -41,18 +41,18 @@
                 </td>
                 <td class="py-3 px-4">
                   <div class="text-sm text-gray-600 dark:text-gray-400">
-                    <span v-if="log.details">
+                    <span v-if="(log as any).details">
                       <template v-if="log.action === 'create_album' || log.action === 'delete_album'">
-                        相册: {{ log.details.albumName }}
+                        相册: {{ (log as any).details.albumName }}
                       </template>
                       <template v-else-if="log.action === 'upload_photos'">
-                        上传 {{ log.details.photoCount }} 张照片到 {{ log.details.albumName }}
+                        上传 {{ (log as any).details.photoCount }} 张照片到 {{ (log as any).details.albumName }}
                       </template>
                       <template v-else-if="log.action === 'delete_photo'">
-                        文件: {{ log.details.filename }}
+                        文件: {{ (log as any).details.filename }}
                       </template>
                       <template v-else-if="log.action === 'create_user' || log.action === 'update_user'">
-                        用户: {{ log.details.username }}
+                        用户: {{ (log as any).details.username }}
                       </template>
                       <template v-else>
                         {{ log.resourceType }} #{{ log.resourceId }}
@@ -109,6 +109,19 @@ useSeoMeta({
   title: '操作日志 - 管理后台',
 })
 
+interface LogItem {
+  id: number
+  userId: number
+  username: string
+  nickname: string | null
+  action: string
+  resourceType: string
+  resourceId: number | null
+  details: any
+  createdAt: string
+  displayName: string
+}
+
 const currentPage = ref(1)
 
 // 获取日志列表
@@ -146,9 +159,9 @@ const getActionLabel = (action: string) => {
 
 // 获取操作类型颜色
 const getActionColor = (action: string) => {
-  if (action.startsWith('create')) return 'green'
-  if (action.startsWith('delete')) return 'red'
-  if (action.startsWith('update') || action.startsWith('upload')) return 'blue'
+  if (action.startsWith('create')) return 'success'
+  if (action.startsWith('delete')) return 'error'
+  if (action.startsWith('update') || action.startsWith('upload')) return 'primary'
   return 'neutral'
 }
 </script>

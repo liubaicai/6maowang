@@ -174,7 +174,7 @@ const pageSizeOptions = [
 
 // 获取当前用户信息
 const { data: session } = await useFetch('/api/auth/session')
-const isAdmin = computed(() => session.value?.user?.role === 'admin')
+const isAdmin = computed(() => (session.value?.user as any)?.role === 'admin')
 
 // 本地数据（用于响应式更新）
 const albums = ref<Album[]>([])

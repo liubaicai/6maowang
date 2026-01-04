@@ -225,7 +225,7 @@ const { data: systemInfoData } = await useFetch('/api/system', {
 })
 
 // 创建响应式的系统信息对象用于实时更新
-const systemInfo = ref<typeof systemInfoData.value>(null)
+const systemInfo = ref<typeof systemInfoData.value>(undefined)
 
 // 初始化系统信息
 watch(systemInfoData, (val) => {

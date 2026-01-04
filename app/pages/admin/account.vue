@@ -10,7 +10,7 @@
         <div>
           <label class="block text-sm font-medium mb-1">用户名</label>
           <UInput
-            :value="session?.user?.username"
+            :value="(session?.user as any)?.username"
             disabled
             class="w-full"
           />
@@ -102,7 +102,7 @@ const { data: session, refresh: refreshSession } = await useFetch('/api/auth/ses
 // 昵称表单
 const nicknameLoading = ref(false)
 const nicknameForm = reactive({
-  nickname: session.value?.user?.nickname || '',
+  nickname: (session.value?.user as any)?.nickname || '',
 })
 
 // 密码表单
