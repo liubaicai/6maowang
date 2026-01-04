@@ -41,17 +41,24 @@
 
     <!-- 批量操作栏 -->
     <div 
-      class="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between"
-      :class="{ 'bg-primary-50 dark:bg-primary-950': selectedIds.length > 0 }"
+      class="mb-4 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between"
+      :class="{ 'bg-primary-50 dark:bg-primary-950 border-primary-200 dark:border-primary-900': selectedIds.length > 0 }"
     >
-      <span class="text-sm text-gray-500">
-        <template v-if="selectedIds.length > 0">
-          已选择 <strong class="text-gray-900 dark:text-white">{{ selectedIds.length }}</strong> 张照片
-        </template>
-        <template v-else>
-          请勾选照片进行批量操作
-        </template>
-      </span>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <UCheckbox
+            :model-value="isAllSelected"
+            :indeterminate="isPartialSelected"
+            @update:model-value="(val: any) => toggleSelectAll(val)"
+          />
+          <span class="text-sm text-gray-500">全选当前页</span>
+        </div>
+        <span class="text-sm text-gray-500">
+          <template v-if="selectedIds.length > 0">
+            已选择 <strong class="text-gray-900 dark:text-white">{{ selectedIds.length }}</strong> 张照片
+          </template>
+        </span>
+      </div>
       <div class="flex items-center gap-2">
         <UButton
           icon="i-heroicons-play"
@@ -120,23 +127,13 @@
 
     <!-- 照片列表 -->
     <div v-else>
-      <!-- 全选 -->
-      <div class="flex items-center gap-2 px-3 py-2 mb-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <UCheckbox
-          :model-value="isAllSelected"
-          :indeterminate="isPartialSelected"
-          @update:model-value="(val: any) => toggleSelectAll(val)"
-        />
-        <span class="text-sm text-gray-500">全选当前页</span>
-      </div>
-
       <!-- 网格布局 -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <!-- 照片列表项 -->
         <div
           v-for="photo in photos"
           :key="photo.id"
-          class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          class="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all"
           :class="{ 'opacity-60 ring-2 ring-red-300 dark:ring-red-700': photo.isDeleted }"
         >
           <!-- 选择框 -->

@@ -187,129 +187,105 @@
       </form>
     </UCard>
     
-    <!-- S3 存储统计 -->
+    <!-- 同步和存储切换 -->
     <UCard v-if="config?.enabled">
       <template #header>
         <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-chart-pie" class="w-5 h-5 text-blue-500" />
-          <h3 class="font-semibold">S3 存储统计</h3>
+          <UIcon name="i-heroicons-arrow-path-rounded-square" class="w-5 h-5 text-green-500" />
+          <h3 class="font-semibold">数据同步与切换</h3>
         </div>
       </template>
       
-      <div v-if="statsLoading" class="flex items-center justify-center py-8 text-gray-400">
-        <UIcon name="i-heroicons-arrow-path" class="w-5 h-5 animate-spin mr-2" />
-        加载中...
-      </div>
-      
-      <div v-else class="grid grid-cols-2 gap-6">
-        <div>
-          <p class="text-sm text-gray-500 dark:text-gray-400">存储占用</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-white">
-            {{ s3Stats?.totalSizeFormatted || '0 B' }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-500 dark:text-gray-400">对象数量</p>
-          <p class="text-2xl font-bold text-gray-900 dark:text-white">
-            {{ s3Stats?.objectCount || 0 }}
-          </p>
-        </div>
-      </div>
-    </UCard>
-    
-    <!-- 同步本地照片到 S3 -->
-    <UCard v-if="config?.enabled">
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-cloud-arrow-up" class="w-5 h-5 text-green-500" />
-          <h3 class="font-semibold">同步照片到 S3</h3>
-        </div>
-      </template>
-      
-      <div class="space-y-4">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          检查所有本地照片并同步到 S3 存储。会自动检测 S3 上是否已存在文件，避免重复上传。
-        </p>
-        
-        <!-- 同步进度 -->
-        <div v-if="syncing && syncProgress" class="space-y-3">
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-600 dark:text-gray-400">
-              正在处理: {{ syncProgress.current }} / {{ syncProgress.total }}
-            </span>
-            <span class="font-medium text-primary-600 dark:text-primary-400">
-              {{ syncProgress.percent }}%
-            </span>
+      <div class="space-y-6">
+        <!-- 同步照片到 S3 -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-cloud-arrow-up" class="w-5 h-5 text-green-500" />
+            <h4 class="font-medium">同步照片到 S3</h4>
           </div>
-          <UProgress :value="syncProgress.percent" size="md" />
-          <p class="text-xs text-gray-500 truncate" :title="syncProgress.filename">
-            📄 {{ syncProgress.filename }}
+          
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            检查所有本地照片并同步到 S3 存储。会自动检测 S3 上是否已存在文件，避免重复上传。
           </p>
-        </div>
-        
-        <!-- 同步结果 -->
-        <div v-if="syncResult && !syncing" 
-          class="p-4 rounded-lg"
-          :class="syncResult.failed > 0 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-green-50 dark:bg-green-900/20'"
-        >
-          <p class="text-sm font-medium">
-            {{ syncResult.message }}
-          </p>
-          <div class="mt-2 text-xs text-gray-500 space-y-1">
-            <p v-if="syncResult.synced > 0">✅ 新上传：{{ syncResult.synced }} 张</p>
-            <p v-if="syncResult.skipped > 0">⏭️ 已存在：{{ syncResult.skipped }} 张</p>
-            <p v-if="syncResult.failed > 0" class="text-red-500">
-              ❌ 失败：{{ syncResult.failed }} 张
-              <span v-if="syncResult.errors?.length"> - {{ syncResult.errors.slice(0, 3).join('、') }}</span>
-              <span v-if="(syncResult.errors?.length || 0) > 3">等...</span>
+          
+          <!-- 同步进度 -->
+          <div v-if="syncing && syncProgress" class="space-y-3">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 dark:text-gray-400">
+                正在处理: {{ syncProgress.current }} / {{ syncProgress.total }}
+              </span>
+              <span class="font-medium text-primary-600 dark:text-primary-400">
+                {{ syncProgress.percent }}%
+              </span>
+            </div>
+            <UProgress :value="syncProgress.percent" size="md" />
+            <p class="text-xs text-gray-500 truncate" :title="syncProgress.filename">
+              📄 {{ syncProgress.filename }}
             </p>
           </div>
+          
+          <!-- 同步结果 -->
+          <div v-if="syncResult && !syncing" 
+            class="p-4 rounded-lg"
+            :class="syncResult.failed > 0 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-green-50 dark:bg-green-900/20'"
+          >
+            <p class="text-sm font-medium">
+              {{ syncResult.message }}
+            </p>
+            <div class="mt-2 text-xs text-gray-500 space-y-1">
+              <p v-if="syncResult.synced > 0">✅ 新上传：{{ syncResult.synced }} 张</p>
+              <p v-if="syncResult.skipped > 0">⏭️ 已存在：{{ syncResult.skipped }} 张</p>
+              <p v-if="syncResult.failed > 0" class="text-red-500">
+                ❌ 失败：{{ syncResult.failed }} 张
+                <span v-if="syncResult.errors?.length"> - {{ syncResult.errors.slice(0, 3).join('、') }}</span>
+                <span v-if="(syncResult.errors?.length || 0) > 3">等...</span>
+              </p>
+            </div>
+          </div>
+          
+          <UButton
+            color="primary"
+            variant="soft"
+            :loading="syncing"
+            :disabled="syncing"
+            @click="handleSync"
+          >
+            <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 mr-1" />
+            {{ syncing ? '同步中...' : '开始同步' }}
+          </UButton>
         </div>
-        
-        <UButton
-          color="primary"
-          variant="soft"
-          :loading="syncing"
-          :disabled="syncing"
-          @click="handleSync"
-        >
-          <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 mr-1" />
-          {{ syncing ? '同步中...' : '开始同步' }}
-        </UButton>
-      </div>
-    </UCard>
-    
-    <!-- 切换为本地存储 -->
-    <UCard v-if="config?.enabled">
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-heroicons-server" class="w-5 h-5 text-orange-500" />
-          <h3 class="font-semibold">切换为本地存储</h3>
+
+        <UDivider />
+
+        <!-- 切换为本地存储 -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-server" class="w-5 h-5 text-orange-500" />
+            <h4 class="font-medium">切换为本地存储</h4>
+          </div>
+          
+          <div class="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+            <p class="text-sm text-orange-800 dark:text-orange-200">
+              <strong>⚠️ 注意：</strong>此操作将清除数据库中所有照片的 S3 关联信息，使照片恢复使用本地文件路径访问。
+            </p>
+            <ul class="mt-2 text-xs text-orange-700 dark:text-orange-300 space-y-1 list-disc list-inside">
+              <li>不会删除 S3 上的实际文件</li>
+              <li>不会删除本地的照片文件</li>
+              <li>之后可随时重新同步到 S3</li>
+            </ul>
+          </div>
+          
+          <UButton
+            color="warning"
+            variant="soft"
+            :loading="resetting"
+            :disabled="resetting"
+            @click="handleResetS3"
+          >
+            <UIcon name="i-heroicons-arrow-uturn-left" class="w-4 h-4 mr-1" />
+            {{ resetting ? '重置中...' : '切换为本地存储' }}
+          </UButton>
         </div>
-      </template>
-      
-      <div class="space-y-4">
-        <div class="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-          <p class="text-sm text-orange-800 dark:text-orange-200">
-            <strong>⚠️ 注意：</strong>此操作将清除数据库中所有照片的 S3 关联信息，使照片恢复使用本地文件路径访问。
-          </p>
-          <ul class="mt-2 text-xs text-orange-700 dark:text-orange-300 space-y-1 list-disc list-inside">
-            <li>不会删除 S3 上的实际文件</li>
-            <li>不会删除本地的照片文件</li>
-            <li>之后可随时重新同步到 S3</li>
-          </ul>
-        </div>
-        
-        <UButton
-          color="warning"
-          variant="soft"
-          :loading="resetting"
-          :disabled="resetting"
-          @click="handleResetS3"
-        >
-          <UIcon name="i-heroicons-arrow-uturn-left" class="w-4 h-4 mr-1" />
-          {{ resetting ? '重置中...' : '切换为本地存储' }}
-        </UButton>
       </div>
     </UCard>
   </div>

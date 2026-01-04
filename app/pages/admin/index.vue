@@ -54,6 +54,9 @@
             <p class="text-2xl font-bold text-gray-900 dark:text-white">
               <template v-if="s3Stats?.enabled">
                 {{ s3Stats?.totalSizeFormatted || '0 B' }}
+                <span class="text-xs font-normal text-gray-400 dark:text-gray-500 ml-2">
+                  {{ s3Stats?.objectCount || 0 }} 个对象
+                </span>
               </template>
               <template v-else>
                 <span class="text-sm font-normal text-gray-400">未启用</span>
