@@ -173,8 +173,21 @@
                 已删除
               </UBadge>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              相册: {{ photo.albumName || '未知' }}
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1 flex-wrap">
+              <span>相册: {{ photo.albumName || '未知' }}</span>
+              <template v-if="photo.width && photo.height">
+                <span>· {{ photo.width }}×{{ photo.height }}</span>
+                <span 
+                  :class="[
+                    'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
+                    photo.width >= photo.height 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-green-600 text-white'
+                  ]"
+                >
+                  {{ photo.width >= photo.height ? '横向' : '竖向' }}
+                </span>
+              </template>
             </p>
             <p class="text-sm text-gray-400 dark:text-gray-500">
               {{ formatDate(photo.createdAt) }}
@@ -389,6 +402,8 @@ interface AdminPhoto {
   thumbnailFilename: string
   thumbnailUrl: string
   originalUrl: string
+  width: number | null
+  height: number | null
   isSlideshow: number
   isDeleted: boolean
   deletedAt: string | null
