@@ -7,8 +7,8 @@ import { db, schema } from '../database'
 import { eq, and, gt } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 
-// Token 有效期（7 天）
-const TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60 * 1000
+// Token 有效期（10 年）
+const TOKEN_EXPIRES_IN = 10 * 365 * 24 * 60 * 60 * 1000
 
 /**
  * 从请求头获取 Bearer Token
