@@ -1,5 +1,5 @@
 import { db, schema } from '../../database'
-import { eq, desc, count, sql, and } from 'drizzle-orm'
+import { eq, desc, count, sql } from 'drizzle-orm'
 import { getOptionalAuth } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
