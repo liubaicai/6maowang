@@ -8,6 +8,7 @@
  * 请求体:
  * - name: 相册名称（必填）
  * - description: 相册描述（可选）
+ * - isPublic: 是否公开（可选）
  */
 import { db, schema } from '../../../database'
 import { eq } from 'drizzle-orm'
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
     }
     
     const body = await readBody(event)
-    const { name, description } = body
+    const { name, description, isPublic } = body
     
     // 验证相册名称
     const validation = validateAlbumName(name)
@@ -46,20 +47,25 @@ export default defineEventHandler(async (event) => {
     
     const now = new Date().toISOString()
     
+    const updateData: any = {
+      name: name.trim(),
+      description: description?.trim() || '',
+      updatedAt: now,
+    }
+    
+    // 如果提供了 isPublic 参数，更新它
+    if (isPublic !== undefined) {
+      updateData.isPublic = isPublic ? 1 : 0
+    }
+    
     db.update(schema.albums)
-      .set({
-        name: name.trim(),
-        description: description?.trim() || '',
-        updatedAt: now,
-      })
+      .set(updateData)
       .where(eq(schema.albums.id, Number(id)))
       .run()
     
     return successResponse({
       id: Number(id),
-      name: name.trim(),
-      description: description?.trim() || '',
-      updatedAt: now,
+      ...updateData,
     }, '更新成功')
   } catch (error: any) {
     if (error.statusCode === 401) {

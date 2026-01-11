@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const user = await requireAuth(event)
   
   const body = await readBody(event)
-  const { name, description } = body
+  const { name, description, isPublic } = body
   
   // 验证相册名称
   const validation = validateAlbumName(name)
@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
   const result = db.insert(schema.albums).values({
     name: name.trim(),
     description: description?.trim() || '',
+    isPublic: isPublic !== undefined ? (isPublic ? 1 : 0) : 1, // 默认公开
     createdBy: user.id,
     createdAt: now,
     updatedAt: now,

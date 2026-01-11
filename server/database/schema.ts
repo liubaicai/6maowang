@@ -16,6 +16,7 @@ export const albums = sqliteTable('albums', {
   name: text('name').notNull(),
   description: text('description').default(''),
   coverPhotoId: integer('cover_photo_id'),
+  isPublic: integer('is_public').notNull().default(1), // 是否公开（1=公开，0=私有，默认公开）
   createdBy: integer('created_by'), // 创建者用户ID（可选，保持向后兼容）
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
