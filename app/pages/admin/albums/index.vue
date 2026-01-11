@@ -117,6 +117,10 @@
               <UBadge color="neutral" variant="soft" size="xs">
                 {{ album.photoCount }} 张
               </UBadge>
+              <UBadge v-if="!album.isPublic" color="warning" variant="soft" size="xs">
+                <UIcon name="i-heroicons-lock-closed" class="w-3 h-3 mr-0.5" />
+                私有
+              </UBadge>
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
               {{ album.description || '暂无描述' }}
@@ -226,6 +230,7 @@ interface Album {
   name: string
   description: string | null
   coverPhotoId: number | null
+  isPublic: number
   coverThumb: string | null
   photoCount: number
   createdAt: string

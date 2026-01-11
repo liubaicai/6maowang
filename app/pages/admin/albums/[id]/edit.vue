@@ -29,6 +29,19 @@
           />
         </div>
         
+        <div>
+          <label class="block text-sm font-medium mb-1">可见性</label>
+          <USelectMenu
+            v-model="form.isPublic"
+            :items="visibilityOptions"
+            value-key="value"
+            class="w-full"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            私有相册只有登录用户才能查看
+          </p>
+        </div>
+        
         <div class="flex gap-3">
           <UButton
             type="submit"
@@ -67,12 +80,18 @@ useSeoMeta({
 const toast = useToast()
 const loading = ref(false)
 
+const visibilityOptions = [
+  { label: '公开 - 所有人可见', value: true },
+  { label: '私有 - 仅登录用户可见', value: false },
+]
+
 // 获取相册信息
 const { data: album, pending: albumPending } = await useFetch(`/api/albums/${albumId}`)
 
 const form = reactive({
   name: '',
   description: '',
+  isPublic: true,
 })
 
 // 初始化表单
@@ -80,6 +99,7 @@ watch(album, (val) => {
   if (val) {
     form.name = val.name || ''
     form.description = val.description || ''
+    form.isPublic = val.isPublic === 1
   }
 }, { immediate: true })
 
