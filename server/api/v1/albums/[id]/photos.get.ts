@@ -6,13 +6,14 @@
  * - page: 页码（默认 1）
  * - pageSize: 每页数量（默认 20）
  * 
- * 公开接口，无需认证
+ * 公开接口，无需认证（私有相册需要登录）
  */
 import { db, schema } from '../../../../database'
 import { eq, desc, count, isNull, and } from 'drizzle-orm'
 import { formatExifSummary } from '../../../../utils/image'
 import { paginatedResponse, errorResponse } from '../../../../utils/api-response'
 import { getS3PublicUrl } from '../../../../utils/s3'
+import { getOptionalAuth } from '../../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -31,6 +32,14 @@ export default defineEventHandler(async (event) => {
     
     if (!album) {
       return errorResponse('相册不存在', 2002)
+    }
+    
+    // 私有相册需要登录才能访问
+    if (album.isPublic === 0) {
+      const user = await getOptionalAuth(event)
+      if (!user) {
+        return errorResponse('相册不存在', 2002)
+      }
     }
     
     const query = getQuery(event)
