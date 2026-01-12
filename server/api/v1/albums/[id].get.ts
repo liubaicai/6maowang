@@ -2,11 +2,12 @@
  * 获取相册详情接口
  * GET /api/v1/albums/:id
  * 
- * 公开接口，无需认证
+ * 公开接口，无需认证（私有相册需要登录）
  */
 import { db, schema } from '../../../database'
 import { eq, count } from 'drizzle-orm'
 import { successResponse, errorResponse } from '../../../utils/api-response'
+import { getOptionalAuth } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -24,6 +25,14 @@ export default defineEventHandler(async (event) => {
     
     if (!album) {
       return errorResponse('相册不存在', 2002)
+    }
+    
+    // 私有相册需要登录才能访问
+    if (album.isPublic === 0) {
+      const user = await getOptionalAuth(event)
+      if (!user) {
+        return errorResponse('相册不存在', 2002)
+      }
     }
     
     // 获取照片数量

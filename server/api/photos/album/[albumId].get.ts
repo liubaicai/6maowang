@@ -2,6 +2,7 @@ import { db, schema } from '../../../database'
 import { eq, desc, isNull, and } from 'drizzle-orm'
 import { formatExifSummary } from '../../../utils/image'
 import { getS3PublicUrl } from '../../../utils/s3'
+import { getOptionalAuth } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   const albumId = getRouterParam(event, 'albumId')
@@ -11,6 +12,31 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       message: '相册 ID 不能为空',
     })
+  }
+  
+  // 检查相册是否存在及访问权限
+  const album = db
+    .select({ isPublic: schema.albums.isPublic })
+    .from(schema.albums)
+    .where(eq(schema.albums.id, Number(albumId)))
+    .get()
+  
+  if (!album) {
+    throw createError({
+      statusCode: 404,
+      message: '相册不存在',
+    })
+  }
+  
+  // 私有相册需要登录才能访问
+  if (album.isPublic === 0) {
+    const user = await getOptionalAuth(event)
+    if (!user) {
+      throw createError({
+        statusCode: 404,
+        message: '相册不存在',
+      })
+    }
   }
   
   // 获取照片列表（排除软删除的照片）
