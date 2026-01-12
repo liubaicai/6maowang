@@ -88,7 +88,7 @@
     <td align="center"><b>数据库</b></td>
     <td>
       <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
-      <img src="https://img.shields.io/badge/Drizzle_ORM-0.45-C5F74F?style=flat-square&logo=drizzle&logoColor=black" alt="Drizzle ORM">
+      <img src="https://img.shields.io/badge/Drizzle_ORM-0.45.x-C5F74F?style=flat-square&logo=drizzle&logoColor=black" alt="Drizzle ORM">
     </td>
   </tr>
   <tr>
@@ -102,7 +102,7 @@
     <td align="center"><b>运行环境</b></td>
     <td>
       <img src="https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
-      <img src="https://img.shields.io/badge/pnpm-10+-F69220?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm">
+      <img src="https://img.shields.io/badge/pnpm-10.x-F69220?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm">
     </td>
   </tr>
 </table>
