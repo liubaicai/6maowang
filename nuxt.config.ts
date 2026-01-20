@@ -17,6 +17,15 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
   ],
 
+  // 字体配置：禁用 Google 和 Fontshare 以解决连接问题
+  fonts: {
+    providers: {
+      google: false,
+      googleicons: false,
+      fontshare: false,
+    },
+  },
+
   // CSS
   css: ['~/assets/css/main.css'],
 

@@ -1,8 +1,84 @@
 <template>
   <div class="fixed inset-0 z-50 bg-black" @mousemove="handleMouseMove">
+    <!-- 图片容器 -->
+    <div class="relative w-full h-full flex items-center justify-center overflow-hidden">
+      <!-- 背景模糊层 -->
+      <Transition
+        :name="currentTransitionClass"
+        mode="out-in"
+      >
+        <div
+          v-if="currentPhoto"
+          :key="currentPhoto.id"
+          class="absolute inset-0 z-0"
+        >
+          <img
+            :src="currentPhoto.originalUrl"
+            class="w-full h-full object-cover blur-sm opacity-60 scale-105"
+            aria-hidden="true"
+          />
+          <div class="absolute inset-0 bg-black/30" />
+        </div>
+      </Transition>
+
+      <!-- 前景图片层 -->
+      <Transition
+        :name="currentTransitionClass"
+        mode="out-in"
+      >
+        <div
+          v-if="currentPhoto"
+          :key="currentPhoto.id"
+          class="absolute inset-0 flex items-center justify-center z-10"
+        >
+          <img
+            :src="currentPhoto.originalUrl"
+            :alt="currentPhoto.originalFilename"
+            class="max-w-full max-h-full object-contain shadow-2xl"
+            @load="onImageLoad"
+          />
+        </div>
+      </Transition>
+
+      <!-- 加载指示器 -->
+      <div
+        v-if="isLoading"
+        class="absolute inset-0 flex items-center justify-center bg-black/50"
+      >
+        <UIcon name="i-heroicons-arrow-path" class="w-12 h-12 animate-spin text-white" />
+      </div>
+
+      <!-- 底部信息栏 -->
+      <div
+        v-if="currentPhoto"
+        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 transition-opacity duration-300 z-30"
+        :class="showBottomBar ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+        @mouseenter="showBottomBar = true"
+      >
+        <div class="max-w-7xl mx-auto">
+          <h2 class="text-white text-xl font-medium mb-2">
+            {{ currentPhoto.originalFilename.replace(/\.[^.]+$/, '') }}
+          </h2>
+          <p class="text-white/70 text-sm">
+            {{ currentIndex + 1 }} / {{ photos.length }}
+            <span v-if="currentPhoto.shotAt" class="ml-4">
+              📅 {{ formatDate(currentPhoto.shotAt) }}
+            </span>
+          </p>
+        </div>
+      </div>
+      
+      <!-- 底部悬停触发区域 -->
+      <div 
+        class="absolute bottom-0 left-0 right-0 h-16 z-40 pointer-events-none"
+        :class="{ 'pointer-events-auto': !showBottomBar }"
+        @mouseenter="showBottomBar = true"
+      />
+    </div>
+
     <!-- 控制栏 -->
     <div 
-      class="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent p-4 transition-opacity duration-300"
+      class="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/60 to-transparent p-4 transition-opacity duration-300"
       :class="showTopBar ? 'opacity-100' : 'opacity-0 pointer-events-none'"
       @mouseenter="showTopBar = true"
     >
@@ -46,70 +122,14 @@
     
     <!-- 顶部悬停触发区域 -->
     <div 
-      class="absolute top-0 left-0 right-0 h-16 z-20 pointer-events-none"
+      class="absolute top-0 left-0 right-0 h-16 z-50 pointer-events-none"
       :class="{ 'pointer-events-auto': !showTopBar }"
       @mouseenter="showTopBar = true"
     />
 
-    <!-- 图片容器 -->
-    <div class="relative w-full h-full flex items-center justify-center">
-      <Transition
-        :name="currentTransitionClass"
-        mode="out-in"
-      >
-        <div
-          v-if="currentPhoto"
-          :key="currentPhoto.id"
-          class="absolute inset-0 flex items-center justify-center"
-        >
-          <img
-            :src="currentPhoto.originalUrl"
-            :alt="currentPhoto.originalFilename"
-            class="max-w-full max-h-full object-contain"
-            @load="onImageLoad"
-          />
-        </div>
-      </Transition>
-
-      <!-- 加载指示器 -->
-      <div
-        v-if="isLoading"
-        class="absolute inset-0 flex items-center justify-center bg-black/50"
-      >
-        <UIcon name="i-heroicons-arrow-path" class="w-12 h-12 animate-spin text-white" />
-      </div>
-
-      <!-- 底部信息栏 -->
-      <div
-        v-if="currentPhoto"
-        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 transition-opacity duration-300"
-        :class="showBottomBar ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-        @mouseenter="showBottomBar = true"
-      >
-        <div class="max-w-7xl mx-auto">
-          <h2 class="text-white text-xl font-medium mb-2">
-            {{ currentPhoto.originalFilename.replace(/\.[^.]+$/, '') }}
-          </h2>
-          <p class="text-white/70 text-sm">
-            {{ currentIndex + 1 }} / {{ photos.length }}
-            <span v-if="currentPhoto.shotAt" class="ml-4">
-              📅 {{ formatDate(currentPhoto.shotAt) }}
-            </span>
-          </p>
-        </div>
-      </div>
-      
-      <!-- 底部悬停触发区域 -->
-      <div 
-        class="absolute bottom-0 left-0 right-0 h-16 z-20 pointer-events-none"
-        :class="{ 'pointer-events-auto': !showBottomBar }"
-        @mouseenter="showBottomBar = true"
-      />
-    </div>
-
     <!-- 左右控制按钮 -->
     <button
-      class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300"
+      class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300 z-40"
       :class="showControls ? 'opacity-100' : 'opacity-0'"
       @click="previousPhoto"
     >
@@ -117,7 +137,7 @@
     </button>
     
     <button
-      class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300"
+      class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 hover:bg-black/50 transition-all duration-300 z-40"
       :class="showControls ? 'opacity-100' : 'opacity-0'"
       @click="nextPhoto"
     >
