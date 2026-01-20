@@ -14,10 +14,10 @@
         >
           <img
             :src="currentPhoto.originalUrl"
-            class="w-full h-full object-cover blur-sm opacity-60 scale-105"
+            class="w-full h-full object-cover blur-md scale-105"
             aria-hidden="true"
           />
-          <div class="absolute inset-0 bg-black/30" />
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.6)_100%)]" />
         </div>
       </Transition>
 
@@ -34,7 +34,7 @@
           <img
             :src="currentPhoto.originalUrl"
             :alt="currentPhoto.originalFilename"
-            class="max-w-full max-h-full object-contain shadow-2xl"
+            class="max-w-full max-h-full object-contain shadow-[0_0_100px_rgba(0,0,0,0.5)]"
             @load="onImageLoad"
           />
         </div>
